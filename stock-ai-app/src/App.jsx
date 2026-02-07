@@ -12,7 +12,10 @@ import {
   Info,
   X,
   BookOpen,
-  FileText
+  FileText,
+  Briefcase,
+  Trash2,
+  PieChart
 } from 'lucide-react';
 import {
   AreaChart,
@@ -119,6 +122,7 @@ const InterpretationGuide = ({ onClose }) => (
 );
 
 const App = () => {
+  const [activeTab, setActiveTab] = useState('one-ticker'); // 'one-ticker' or 'portfolio'
   const [ticker, setTicker] = useState('NVDA');
   const [data, setData] = useState([]);
   const [price, setPrice] = useState(0);
@@ -133,6 +137,11 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState(null);
   const [showGuide, setShowGuide] = useState(false);
+
+  // Portfolio States
+  const [portfolioTickers, setPortfolioTickers] = useState(['AAPL', 'MSFT', 'BTC-USD']);
+  const [portfolioData, setPortfolioData] = useState(null);
+  const [portfolioLoading, setPortfolioLoading] = useState(false);
 
   const fetchData = async (symbol) => {
     setLoading(true);
@@ -182,17 +191,53 @@ const App = () => {
     }
   };
 
+  const fetchPortfolio = async () => {
+    if (portfolioTickers.length === 0) return;
+    setPortfolioLoading(true);
+    setErrorMsg(null);
+    try {
+      const resp = await fetch(`${API_URL}/api/portfolio`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(portfolioTickers)
+      });
+      if (!resp.ok) {
+        const errData = await resp.json().catch(() => ({}));
+        throw new Error(errData.detail || "Error al analizar la cartera.");
+      }
+      const result = await resp.json();
+      setPortfolioData(result);
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setPortfolioLoading(false);
+    }
+  };
+
   useEffect(() => {
-    fetchData('NVDA');
-  }, []);
+    if (activeTab === 'one-ticker') {
+      fetchData(ticker);
+    }
+  }, [activeTab, ticker]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     const symbol = e.target[0].value.trim().toUpperCase();
     if (symbol) {
-      setTicker(symbol);
-      fetchData(symbol);
+      if (activeTab === 'one-ticker') {
+        setTicker(symbol);
+        fetchData(symbol);
+      } else {
+        if (!portfolioTickers.includes(symbol)) {
+          setPortfolioTickers(prev => [...prev, symbol]);
+        }
+        e.target[0].value = '';
+      }
     }
+  };
+
+  const removeTicker = (t) => {
+    setPortfolioTickers(prev => prev.filter(x => x !== t));
   };
 
   const regRet = getRegime(currentRegime);
@@ -203,16 +248,33 @@ const App = () => {
       {showGuide && <InterpretationGuide onClose={() => setShowGuide(false)} />}
 
       {/* Header */}
-      <nav style={{ padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(2, 6, 23, 0.8)', sticky: 'top', zIndex: 50, backdropFilter: 'blur(10px)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <BrainCircuit style={{ width: '32px', height: '32px', color: '#38bdf8' }} />
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>StockAI Pulse</h1>
+      <nav style={{ padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(2, 6, 23, 0.8)', sticky: 'top', zIndex: 100, backdropFilter: 'blur(10px)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <BrainCircuit style={{ width: '32px', height: '32px', color: '#38bdf8' }} />
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>StockAI Pulse</h1>
+          </div>
+
+          <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '12px' }}>
+            <button
+              onClick={() => setActiveTab('one-ticker')}
+              style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'one-ticker' ? '#38bdf8' : 'transparent', color: activeTab === 'one-ticker' ? '#020617' : '#94a3b8', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
+            >
+              Análisis Ticker
+            </button>
+            <button
+              onClick={() => setActiveTab('portfolio')}
+              style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'portfolio' ? '#38bdf8' : 'transparent', color: activeTab === 'portfolio' ? '#020617' : '#94a3b8', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
+            >
+              Análisis Cartera
+            </button>
+          </div>
         </div>
 
         <form onSubmit={handleSearch} style={{ position: 'relative', width: '300px' }}>
           <input
             type="text"
-            placeholder="Buscar Ticker..."
+            placeholder={activeTab === 'one-ticker' ? "Buscar Ticker..." : "Añadir a Cartera..."}
             style={{ width: '100%', padding: '12px 20px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
           />
         </form>
@@ -229,120 +291,229 @@ const App = () => {
       </nav>
 
       {/* Main Content */}
-      <main style={{ maxWidth: '1600px', margin: '0 auto', padding: '32px', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
+      <main style={{ maxWidth: '1600px', margin: '0 auto', padding: '32px' }}>
 
         {/* Error Message */}
         {errorMsg && (
-          <div style={{ gridColumn: 'span 12', padding: '16px', borderRadius: '12px', border: '1px solid #ef4444', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', textAlign: 'center' }}>
+          <div style={{ padding: '16px', borderRadius: '12px', border: '1px solid #ef4444', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', textAlign: 'center', marginBottom: '24px' }}>
             {errorMsg}
           </div>
         )}
 
-        {/* Market Status Overview */}
-        <div style={{ gridColumn: 'span 8', padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-            <div>
-              <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '4px' }}>Precio en vivo ({ticker})</p>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-                <h2 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0 }}>${price ? price.toFixed(2) : '0.00'}</h2>
-                <span style={{ color: (changePct || 0) >= 0 ? '#10b981' : '#ef4444', fontWeight: 600 }}>
-                  {(changePct || 0) >= 0 ? '+' : ''}{(changePct || 0).toFixed(2)}%
-                </span>
+        {activeTab === 'one-ticker' ? (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
+            {/* Market Status Overview */}
+            <div style={{ gridColumn: 'span 8', padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <div>
+                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '4px' }}>Precio en vivo ({ticker})</p>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0 }}>${price ? price.toFixed(2) : '0.00'}</h2>
+                    <span style={{ color: (changePct || 0) >= 0 ? '#10b981' : '#ef4444', fontWeight: 600 }}>
+                      {(changePct || 0) >= 0 ? '+' : ''}{(changePct || 0).toFixed(2)}%
+                    </span>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: `${regRet.color}20`, color: regRet.color, border: `1px solid ${regRet.color}40` }}>
+                    HMM Rep: {regRet.label}
+                  </span>
+                  <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: `${regDiff.color}20`, color: regDiff.color, border: `1px solid ${regDiff.color}40` }}>
+                    HMM Diff: {regDiff.label}
+                  </span>
+                </div>
+              </div>
+
+              {/* AI Recommendation Banner */}
+              {recommendation && !loading && (
+                <div style={{ marginBottom: '24px', padding: '16px 20px', borderRadius: '16px', background: `${recommendation.color}15`, border: `1px solid ${recommendation.color}40`, display: 'flex', alignItems: 'center', gap: '20px' }}>
+                  <div style={{ background: recommendation.color, color: '#fff', padding: '8px 16px', borderRadius: '8px', fontWeight: 800, fontSize: '0.8rem' }}>
+                    {recommendation.verdict}
+                  </div>
+                  <p style={{ fontSize: '0.95rem', margin: 0 }}>{recommendation.reason}</p>
+                </div>
+              )}
+
+              <div style={{ height: '400px', width: '100%', position: 'relative' }}>
+                {loading && (
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(2, 6, 23, 0.6)', borderRadius: '12px', zIndex: 10 }}>
+                    <div style={{ width: '40px', height: '40px', border: '4px solid #38bdf8', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
+                  </div>
+                )}
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                    <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={10} />
+                    <YAxis hide={true} domain={['auto', 'auto']} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Area type="monotone" dataKey="historyPrice" stroke="#38bdf8" strokeWidth={3} fillOpacity={0.1} fill="#38bdf8" />
+                    <Area type="monotone" dataKey="forecastPrice" stroke="#818cf8" strokeWidth={3} strokeDasharray="5 5" fillOpacity={0.1} fill="#818cf8" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: `${regRet.color}20`, color: regRet.color, border: `1px solid ${regRet.color}40` }}>
-                HMM Rep: {regRet.label}
-              </span>
-              <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: `${regDiff.color}20`, color: regDiff.color, border: `1px solid ${regDiff.color}40` }}>
-                HMM Diff: {regDiff.label}
-              </span>
+
+            {/* Side Panels */}
+            <div style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <Zap style={{ color: '#f59e0b' }} /> IA Insight (Rendimientos)
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {[0, 1, 2].map(id => {
+                    const item = REGIME_INFO[id];
+                    const stats = stateStatsRet.find(s => s.regime === id) || { mean: 0, std: 0 };
+                    const prob = ((probsRet[id] || 0) * 100).toFixed(1);
+                    const isCurrent = currentRegime === id;
+                    return (
+                      <div key={id} style={{ padding: '12px', borderRadius: '12px', background: isCurrent ? `${item.color}15` : 'transparent', border: isCurrent ? `1px solid ${item.color}40` : '1px solid transparent' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: item.color }}>{item.label} ({prob}%)</span>
+                          {isCurrent && <span style={{ fontSize: '10px', background: item.color, padding: '2px 6px', borderRadius: '4px' }}>ACTUAL</span>}
+                        </div>
+                        <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: '#94a3b8' }}>
+                          <span>μ: {(stats.mean || 0).toFixed(3)}%</span>
+                          <span>σ: {(stats.std || 0).toFixed(3)}%</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div style={{ padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <BarChart3 style={{ color: '#818cf8' }} /> IA Insight (Diferencias)
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {[0, 1, 2].map(id => {
+                    const item = REGIME_INFO[id];
+                    const stats = stateStatsDiff.find(s => s.regime === id) || { mean: 0, std: 0 };
+                    const prob = ((probsDiff[id] || 0) * 100).toFixed(1);
+                    const isCurrent = currentRegimeDiff === id;
+                    return (
+                      <div key={id} style={{ padding: '12px', borderRadius: '12px', background: isCurrent ? `${item.color}15` : 'transparent', border: isCurrent ? `1px solid ${item.color}40` : '1px solid transparent' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                          <span style={{ fontSize: '14px', fontWeight: 600, color: item.color }}>{item.label} ({prob}%)</span>
+                          {isCurrent && <span style={{ fontSize: '10px', background: item.color, padding: '2px 6px', borderRadius: '4px' }}>ACTUAL</span>}
+                        </div>
+                        <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: '#94a3b8' }}>
+                          <span>μ: {(stats.mean || 0).toFixed(3)}%</span>
+                          <span>σ: {(stats.std || 0).toFixed(3)}%</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
+        ) : (
+          /* Portfolio Section */
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
+            <div style={{ gridColumn: 'span 4' }}>
+              <div style={{ padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)', height: 'fit-content' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                  <Briefcase style={{ color: '#38bdf8' }} />
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 600, margin: 0 }}>Constituir Cartera</h3>
+                </div>
 
-          {/* AI Recommendation Banner */}
-          {recommendation && !loading && (
-            <div style={{ marginBottom: '24px', padding: '16px 20px', borderRadius: '16px', background: `${recommendation.color}15`, border: `1px solid ${recommendation.color}40`, display: 'flex', alignItems: 'center', gap: '20px' }}>
-              <div style={{ background: recommendation.color, color: '#fff', padding: '8px 16px', borderRadius: '8px', fontWeight: 800, fontSize: '0.8rem' }}>
-                {recommendation.verdict}
-              </div>
-              <p style={{ fontSize: '0.95rem', margin: 0 }}>{recommendation.reason}</p>
-            </div>
-          )}
+                <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '16px' }}>Gestione los activos de su cartera individualmente.</p>
 
-          <div style={{ height: '400px', width: '100%', position: 'relative' }}>
-            {loading && (
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(2, 6, 23, 0.6)', borderRadius: '12px', zIndex: 10 }}>
-                <div style={{ width: '40px', height: '40px', border: '4px solid #38bdf8', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-              </div>
-            )}
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={10} />
-                <YAxis hide={true} domain={['auto', 'auto']} />
-                <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="historyPrice" stroke="#38bdf8" strokeWidth={3} fillOpacity={0.1} fill="#38bdf8" />
-                <Area type="monotone" dataKey="forecastPrice" stroke="#818cf8" strokeWidth={3} strokeDasharray="5 5" fillOpacity={0.1} fill="#818cf8" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        {/* Side Panels */}
-        <div style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Zap style={{ color: '#f59e0b' }} /> IA Insight (Rendimientos)
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {[0, 1, 2].map(id => {
-                const item = REGIME_INFO[id];
-                const stats = stateStatsRet.find(s => s.regime === id) || { mean: 0, std: 0 };
-                const prob = ((probsRet[id] || 0) * 100).toFixed(1);
-                const isCurrent = currentRegime === id;
-                return (
-                  <div key={id} style={{ padding: '12px', borderRadius: '12px', background: isCurrent ? `${item.color}15` : 'transparent', border: isCurrent ? `1px solid ${item.color}40` : '1px solid transparent' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '14px', fontWeight: 600, color: item.color }}>{item.label} ({prob}%)</span>
-                      {isCurrent && <span style={{ fontSize: '10px', background: item.color, padding: '2px 6px', borderRadius: '4px' }}>ACTUAL</span>}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+                  {portfolioTickers.map(t => (
+                    <div key={t} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                      <span style={{ fontWeight: 700 }}>{t}</span>
+                      <button onClick={() => removeTicker(t)} style={{ background: 'none', border: 'none', color: '#ef4444', cursor: 'pointer' }}>
+                        <Trash2 style={{ width: '18px' }} />
+                      </button>
                     </div>
-                    <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: '#94a3b8' }}>
-                      <span>μ: {(stats.mean || 0).toFixed(3)}%</span>
-                      <span>σ: {(stats.std || 0).toFixed(3)}%</span>
+                  ))}
+                  {portfolioTickers.length === 0 && (
+                    <div style={{ textAlign: 'center', padding: '20px', color: '#64748b', fontSize: '0.9rem', border: '1px dashed #334155', borderRadius: '12px' }}>
+                      No hay activos registrados. Use el buscador superior para añadir.
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  onClick={fetchPortfolio}
+                  disabled={portfolioLoading || portfolioTickers.length === 0}
+                  style={{ width: '100%', padding: '16px', borderRadius: '14px', background: '#38bdf8', color: '#020617', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}
+                >
+                  {portfolioLoading ? <div style={{ width: '20px', height: '20px', border: '2px solid #000', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div> : <Activity style={{ width: '20px' }} />}
+                  ANÁLISIS DE LA CARTERA
+                </button>
+              </div>
+            </div>
+
+            <div style={{ gridColumn: 'span 8' }}>
+              <div style={{ padding: '32px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.4)', border: '1px solid rgba(255,255,255,0.05)', minHeight: '500px' }}>
+                {!portfolioData && !portfolioLoading && (
+                  <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', opacity: 0.6 }}>
+                    <PieChart style={{ width: '80px', height: '80px', marginBottom: '24px', color: '#64748b' }} />
+                    <h4 style={{ fontSize: '1.4rem', fontWeight: 600, margin: '0 0 12px' }}>Esperando Ejecución</h4>
+                    <p style={{ maxWidth: '400px', lineHeight: 1.6 }}>Configure sus activos a la izquierda y pulse el botón para iniciar el análisis multidimensional de su cartera.</p>
+                  </div>
+                )}
+
+                {portfolioLoading && (
+                  <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                    <div style={{ width: '64px', height: '64px', border: '4px solid #38bdf8', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite', marginBottom: '24px' }}></div>
+                    <h4 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Sincronizando Modelos HMM...</h4>
+                    <p style={{ color: '#94a3b8' }}>Este proceso puede tardar unos segundos dependiendo del número de activos.</p>
+                  </div>
+                )}
+
+                {portfolioData && !portfolioLoading && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                      <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>Veredicto Agregado IA</h3>
+                      <div style={{ padding: '8px 20px', borderRadius: '20px', background: portfolioData.summary.risk_level === 'Alto' ? '#ef444420' : '#10b98120', border: '1px solid ' + (portfolioData.summary.risk_level === 'Alto' ? '#ef444440' : '#10b98140'), color: portfolioData.summary.risk_level === 'Alto' ? '#ef4444' : '#10b981', fontWeight: 800, fontSize: '0.8rem' }}>
+                        RIESGO: {portfolioData.summary.risk_level.toUpperCase()}
+                      </div>
+                    </div>
+
+                    <div style={{ padding: '24px', borderRadius: '20px', background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(15, 23, 42, 1) 100%)', border: '1px solid rgba(56, 189, 248, 0.2)', marginBottom: '32px' }}>
+                      <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
+                        <BrainCircuit style={{ width: '28px', color: '#38bdf8', marginTop: '4px' }} />
+                        <p style={{ margin: 0, fontSize: '1.1rem', lineHeight: 1.6, fontWeight: 500 }}>{portfolioData.summary.advice}</p>
+                      </div>
+                    </div>
+
+                    <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '20px', color: '#94a3b8' }}>DESGLOSE TÉCNICO POR ACTIVO</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
+                      {portfolioData.assets.map(asset => (
+                        <div key={asset.ticker} style={{ padding: '20px', borderRadius: '18px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                            <div>
+                              <div style={{ fontWeight: 900, fontSize: '1.2rem' }}>{asset.ticker}</div>
+                              <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>${asset.current_price.toFixed(2)}</div>
+                            </div>
+                            <div style={{ padding: '4px 10px', borderRadius: '6px', background: asset.recommendation.color + '20', color: asset.recommendation.color, fontSize: '0.7rem', fontWeight: 800 }}>
+                              {asset.recommendation.verdict}
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                            <span style={{ fontSize: '0.7rem', padding: '4px 8px', borderRadius: '6px', background: getRegime(asset.current_regime_ret).color + '20', color: getRegime(asset.current_regime_ret).color, fontWeight: 700 }}>
+                              HMM: {getRegime(asset.current_regime_ret).label}
+                            </span>
+                            <span style={{ fontSize: '0.7rem', padding: '4px 8px', borderRadius: '6px', background: 'rgba(255,255,255,0.1)', color: '#cbd5e1', fontWeight: 700 }}>
+                              IMP: {getRegime(asset.current_regime_diff).label}
+                            </span>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.4, height: '3.6em', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+                            {asset.recommendation.reason}
+                          </p>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                );
-              })}
+                )}
+              </div>
             </div>
           </div>
-
-          <div style={{ padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
-            <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <BarChart3 style={{ color: '#818cf8' }} /> IA Insight (Diferencias)
-            </h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {[0, 1, 2].map(id => {
-                const item = REGIME_INFO[id];
-                const stats = stateStatsDiff.find(s => s.regime === id) || { mean: 0, std: 0 };
-                const prob = ((probsDiff[id] || 0) * 100).toFixed(1);
-                const isCurrent = currentRegimeDiff === id;
-                return (
-                  <div key={id} style={{ padding: '12px', borderRadius: '12px', background: isCurrent ? `${item.color}15` : 'transparent', border: isCurrent ? `1px solid ${item.color}40` : '1px solid transparent' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <span style={{ fontSize: '14px', fontWeight: 600, color: item.color }}>{item.label} ({prob}%)</span>
-                      {isCurrent && <span style={{ fontSize: '10px', background: item.color, padding: '2px 6px', borderRadius: '4px' }}>ACTUAL</span>}
-                    </div>
-                    <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: '#94a3b8' }}>
-                      <span>μ: {(stats.mean || 0).toFixed(3)}%</span>
-                      <span>σ: {(stats.std || 0).toFixed(3)}%</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+        )}
 
       </main>
 

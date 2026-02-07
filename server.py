@@ -456,6 +456,130 @@ async def analyze_stock(ticker: str, request: Request):
         logger.error(f"Error inesperado procesando {ticker}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Error interno del servidor. Por favor contacte al administrador.")
 
+@app.post("/api/portfolio")
+async def analyze_portfolio(tickers: list[str], request: Request):
+    """Analyze multiple tickers and provide portfolio-level insights"""
+    if not tickers:
+        raise HTTPException(status_code=400, detail="Se requiere al menos un ticker")
+    
+    # Limit number of tickers for performance in this demo
+    limit = 10
+    if len(tickers) > limit:
+        tickers = tickers[:limit]
+        logger.warning(f"Portfolio limitado a {limit} activos para optimizar rendimiento.")
+
+    results = []
+    # We use the raw analyze_stock logic (internally) to avoid redundant HTTP overhead
+    # In a real app we'd refactor the core logic into a separate shared function
+    for ticker in tickers:
+        try:
+            # We call the existing analyze_stock endpoint logic
+            res = await analyze_stock(ticker, request)
+            results.append(res)
+        except Exception as e:
+            logger.error(f"Error analizando {ticker} en portfolio: {e}")
+            continue
+
+    if not results:
+        raise HTTPException(status_code=400, detail="No se pudo analizar ningún activo del portfolio")
+
+    # Aggregate stats for rebalancing
+    # 1. Regime distribution
+    reg_list = [r['current_regime_ret'] for r in results]
+    bullish_count = reg_list.count(1)
+    stable_count = reg_list.count(0)
+    volatile_count = reg_list.count(2)
+    
+    # 2. Reasoning & Advice logic
+    total = len(results)
+    bullish_ratio = (bullish_count / total) * 100
+    risk_ratio = (volatile_count / total) * 100
+    
+    # --- 3. ADVANCED REASONING ENGINE ---
+    
+    # Categorize assets
+    buckets = {
+        "STRONG_BUY": [], "COMPRA": [], "MANTENER": [], "VENTA": [], "VENTA_FUERTE": []
+    }
+    
+    for r in results:
+        v = r['recommendation']['verdict'].replace(" ", "_") # Normalize VENTA FUERTE -> VENTA_FUERTE
+        if v in buckets:
+            buckets[v].append(r['ticker'])
+        elif v == "COMPRA_FUERTE": # Handle mapping
+            buckets["STRONG_BUY"].append(r['ticker'])
+            
+    # Calculate weighted metrics
+    avg_bullishness = np.mean([1 if r['current_regime_ret'] == 1 else 0 for r in results]) * 100
+    
+    # Identify Leaders (Convergent Bullish)
+    leaders = [r['ticker'] for r in results if r['current_regime_ret'] == 1 and r['current_regime_diff'] == 1]
+    
+    # Identify Warnings (Divergent: Price up but Impulse down)
+    warnings = []
+    for r in results:
+        if r['change_pct'] > 0 and r['current_regime_diff'] == 2:
+            warnings.append(r['ticker'])
+            
+    # Construction of the Narrative
+    advice_parts = []
+    
+    # A. Contexto General
+    if risk_ratio > 40:
+        advice_parts.append(f"⚠️ ALERTA: Cartera en zona de turbulencia ({risk_ratio:.0f}% volatilidad).")
+        risk_level = "Alto"
+    elif bullish_ratio > 60:
+        advice_parts.append(f"✅ SÓLIDA: Estructura técnica dominante alcista ({bullish_ratio:.0f}%).")
+        risk_level = "Bajo"
+    else:
+        advice_parts.append(f"⚖️ MIXTA: Equilibrio entre activos estables y en desarrollo.")
+        risk_level = "Medio"
+        
+    # B. Acción Específica (Ventas/Limpieza)
+    to_sell = buckets["VENTA"] + buckets["VENTA_FUERTE"]
+    if to_sell:
+        advice_parts.append(f"ACCIÓN PRIORITARIA: Se detecta debilidad crítica en {', '.join(to_sell)}. Considerar rotación inmediata para proteger capital.")
+    else:
+        # Si NO hay ventas, dar consejo de optimización
+        if buckets["MANTENER"]:
+            advice_parts.append(f"OPTIMIZACIÓN: {', '.join(buckets['MANTENER'])} están en fase lateral; vigilar para acumular si rompen al alza.")
+        else:
+            advice_parts.append("MANTENIMIENTO: Todos los activos contribuyen positivamente. No se requieren ventas.")
+
+    # C. Oportunidades (Compras)
+    strong_opportunities = buckets["STRONG_BUY"]
+    if strong_opportunities:
+        advice_parts.append(f"LÍDERES: {', '.join(strong_opportunities)} muestran el mejor momentum para sobre-ponderar.")
+        
+    # D. Notas Técnicas (Divergencias)
+    if warnings:
+        advice_parts.append(f"OJO AVIZOR: {', '.join(warnings)} suben de precio pero con calidad interna (impulso) deteriorada.")
+
+    full_advice = " ".join(advice_parts)
+    
+    # Map back to old variable names for return compatibility
+    alerts = warnings
+    to_remove = to_sell
+
+    return {
+        "assets": results,
+        "summary": {
+            "total_assets": total,
+            "regime_distribution": {
+                "bullish": bullish_count,
+                "stable": stable_count,
+                "volatile": volatile_count
+            },
+            "risk_level": risk_level,
+            "advice": full_advice,
+            "bullish_ratio": bullish_ratio,
+            "risk_ratio": risk_ratio,
+            "leaders": leaders,
+            "alerts": alerts,
+            "to_remove": to_remove
+        }
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
