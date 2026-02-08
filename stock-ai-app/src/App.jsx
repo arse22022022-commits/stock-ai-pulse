@@ -142,9 +142,17 @@ const App = () => {
   const [showGuide, setShowGuide] = useState(false);
 
   // Portfolio States
-  const [portfolioTickers, setPortfolioTickers] = useState(['AAPL', 'MSFT', 'BTC-USD']);
+  const [portfolioTickers, setPortfolioTickers] = useState(() => {
+    const saved = localStorage.getItem('portfolio_tickers');
+    return saved ? JSON.parse(saved) : ['AAPL', 'MSFT', 'BTC-USD'];
+  });
   const [portfolioData, setPortfolioData] = useState(null);
   const [portfolioLoading, setPortfolioLoading] = useState(false);
+
+  // Persistence Effect
+  useEffect(() => {
+    localStorage.setItem('portfolio_tickers', JSON.stringify(portfolioTickers));
+  }, [portfolioTickers]);
 
   const fetchData = async (symbol) => {
     setLoading(true);
@@ -251,14 +259,14 @@ const App = () => {
       {showGuide && <InterpretationGuide onClose={() => setShowGuide(false)} />}
 
       {/* Header */}
-      <nav style={{ padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(2, 6, 23, 0.8)', sticky: 'top', zIndex: 100, backdropFilter: 'blur(10px)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+      <nav className="nav-container" style={{ padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(2, 6, 23, 0.8)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }} className="nav-left">
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <BrainCircuit style={{ width: '32px', height: '32px', color: '#38bdf8' }} />
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>StockAI Pulse</h1>
+            <h1 className="logo-text" style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>StockAI Pulse</h1>
           </div>
 
-          <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '12px' }}>
+          <div style={{ display: 'flex', gap: '4px', background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '12px' }} className="nav-tabs">
             <button
               onClick={() => setActiveTab('one-ticker')}
               style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'one-ticker' ? '#38bdf8' : 'transparent', color: activeTab === 'one-ticker' ? '#020617' : '#94a3b8', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
@@ -274,7 +282,7 @@ const App = () => {
           </div>
         </div>
 
-        <form onSubmit={handleSearch} style={{ position: 'relative', width: '300px' }}>
+        <form onSubmit={handleSearch} className="nav-search" style={{ position: 'relative', width: '300px' }}>
           <input
             type="text"
             placeholder={activeTab === 'one-ticker' ? "Buscar Ticker..." : "Añadir a Cartera..."}
@@ -282,12 +290,13 @@ const App = () => {
           />
         </form>
 
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }} className="nav-right">
           <button
             onClick={() => setShowGuide(true)}
+            className="guide-btn"
             style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '12px', fontSize: '0.9rem', color: '#38bdf8' }}
           >
-            <BookOpen style={{ width: '18px' }} /> Guía de Interpretación
+            <BookOpen style={{ width: '18px' }} /> <span className="guide-text">Guía de Interpretación</span>
           </button>
           <Settings style={{ width: '20px', color: '#94a3b8' }} />
         </div>
@@ -304,9 +313,9 @@ const App = () => {
         )}
 
         {activeTab === 'one-ticker' ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
+          <div className="main-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
             {/* Market Status Overview */}
-            <div style={{ gridColumn: 'span 8', padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="chart-panel" style={{ gridColumn: 'span 8', padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <div>
                   <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '4px' }}>Precio en vivo ({ticker})</p>
@@ -357,7 +366,7 @@ const App = () => {
             </div>
 
             {/* Side Panels */}
-            <div style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div className="side-panels" style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div style={{ padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <Zap style={{ color: '#f59e0b' }} /> IA Insight (Rendimientos)
@@ -413,8 +422,8 @@ const App = () => {
           </div>
         ) : (
           /* Portfolio Section */
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
-            <div style={{ gridColumn: 'span 4' }}>
+          <div className="main-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
+            <div className="portfolio-sidebar" style={{ gridColumn: 'span 4' }}>
               <div style={{ padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)', height: 'fit-content' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
                   <Briefcase style={{ color: '#38bdf8' }} />
@@ -450,7 +459,7 @@ const App = () => {
               </div>
             </div>
 
-            <div style={{ gridColumn: 'span 8' }}>
+            <div className="portfolio-content" style={{ gridColumn: 'span 8' }}>
               <div style={{ padding: '32px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.4)', border: '1px solid rgba(255,255,255,0.05)', minHeight: '500px' }}>
                 {!portfolioData && !portfolioLoading && (
                   <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', opacity: 0.6 }}>
@@ -505,7 +514,7 @@ const App = () => {
                               IMP: {getRegime(asset.current_regime_diff).label}
                             </span>
                           </div>
-                          <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.4, height: '3.6em', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical' }}>
+                          <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.5, minHeight: '4.5em', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                             {asset.recommendation.reason}
                           </p>
                         </div>
@@ -527,6 +536,24 @@ const App = () => {
 
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        
+        /* Mobile Responsive adjustments */
+        @media (max-width: 1024px) {
+          .nav-container { padding: 16px 20px !important; flex-wrap: wrap; gap: 16px; justify-content: center !important; }
+          .nav-left { gap: 16px !important; width: 100%; justify-content: center; }
+          .nav-search { width: 100% !important; order: 3; }
+          .nav-right { order: 2; width: auto; }
+          .main-grid { grid-template-columns: 1fr !important; }
+          .chart-panel, .side-panels, .portfolio-sidebar, .portfolio-content { grid-column: span 12 !important; }
+        }
+
+        @media (max-width: 640px) {
+          .nav-left { flex-direction: column; gap: 12px !important; }
+          .logo-text { font-size: 1.25rem !important; }
+          .guide-text { display: none; }
+          .main-content { padding: 16px !important; }
+        }
+
         @media print {
           body * { visibility: hidden; }
           .guide-modal, .guide-modal * { visibility: visible; }

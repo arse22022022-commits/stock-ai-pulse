@@ -25,7 +25,7 @@ def analyze_stock_regimes(ticker="NVDA", start_date="2020-01-01", end_date="2025
     X = data[['Returns', 'Range']].values
     
     print("Entrenando Modelo Oculto de Markov (HMM)...")
-    model = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=1000)
+    model = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=1000, random_state=42)
     model.fit(X)
     
     # Predecir los estados (regímenes)
