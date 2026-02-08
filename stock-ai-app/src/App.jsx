@@ -35,7 +35,10 @@ const REGIME_INFO = {
 
 const getRegime = (id) => REGIME_INFO[id] || { label: 'Desconocido', color: '#94a3b8' };
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+// Use relative URL for production (Cloud Run) or localhost for dev
+const API_URL = import.meta.env.PROD
+  ? ''  // In production, requests go to same origin
+  : (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000');
 
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {

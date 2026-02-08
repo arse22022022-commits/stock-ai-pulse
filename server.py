@@ -35,9 +35,17 @@ try:
 except Exception as e:
     logger.warning(f"El modelo LLM (Chronos) no está disponible: {e}. Usando modo estadística simple")
 
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
+import os
+
+# ... (rest of imports)
+
 app = FastAPI()
 
-# CORS configuration - permissive for development
+# CORS configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -45,6 +53,30 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Servir archivos estáticos (Frontend React compilado)
+# Se asume que la carpeta 'static' existe en el mismo directorio (copiada por Docker)
+if os.path.exists("static"):
+    app.mount("/assets", StaticFiles(directory="static/assets"), name="assets")
+
+@app.get("/", response_class=HTMLResponse)
+async def read_root():
+    if os.path.exists("static/index.html"):
+        with open("static/index.html", "r", encoding="utf-8") as f:
+            return f.read()
+    return "Frontend no encontrado (Ejecute build y asegúrese de tener la carpeta static)"
+
+# Catch-all para React Router (cualquier ruta no API redirige a index.html)
+@app.exception_handler(404)
+async def not_found_handler(request: Request, exc):
+    if request.url.path.startswith("/api"):
+        return {"detail": "API endpoint not found"}
+    if os.path.exists("static/index.html"):
+        with open("static/index.html", "r", encoding="utf-8") as f:
+            return HTMLResponse(content=f.read())
+    return {"detail": "Not found"}
+
+# ... (rest of the code)
 
 # Input validation
 def validate_ticker(ticker: str) -> bool:
@@ -106,7 +138,7 @@ def save_to_cache(cache_key: str, data: dict):
 def train_hmm_returns(data: pd.DataFrame):
     """Train HMM on Returns data"""
     returns_data = data[['Returns']].values
-    model_ret = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=100)
+    model_ret = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=1000, random_state=42)
     model_ret.fit(returns_data)
     raw_regimes_ret = model_ret.predict(returns_data)
     raw_probs_ret = model_ret.predict_proba(returns_data)
@@ -142,7 +174,7 @@ def train_hmm_returns(data: pd.DataFrame):
 def train_hmm_diff(data: pd.DataFrame):
     """Train HMM on Diff_Returns data"""
     diff_data = data[['Diff_Returns']].values
-    model_diff = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=100)
+    model_diff = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=1000, random_state=42)
     model_diff.fit(diff_data)
     raw_regimes_diff = model_diff.predict(diff_data)
     raw_probs_diff = model_diff.predict_proba(diff_data)
