@@ -309,13 +309,30 @@ async def analyze_stock(ticker: str, request: Request):
                 logger.debug("Predicción Chronos completada con éxito (con bandas de confianza)")
             except Exception as e:
                 logger.warning(f"Error en predicción Chronos: {e}. Usando fallback estadístico")
-                lp, ar = float(data[price_col].iloc[-1]), data['Returns'].mean()
+                lp, ar, vol = float(data[price_col].iloc[-1]), data['Returns'].mean(), data['Returns'].std()
                 for i in range(prediction_length):
-                    forecast_result.append({"date": (last_date + timedelta(days=i+1)).strftime("%Y-%m-%d"), "price": float(lp * np.exp(ar * (i+1))), "type": "forecast"})
+                    # Simple geometric brownian motion fallback with 1.96 * std for 95% band
+                    drift = np.exp((ar - 0.5 * vol**2) * (i+1))
+                    uncertainty = 1.96 * vol * np.sqrt(i+1)
+                    forecast_result.append({
+                        "date": (last_date + timedelta(days=i+1)).strftime("%Y-%m-%d"), 
+                        "price": float(lp * drift),
+                        "price_low": float(lp * drift * np.exp(-uncertainty)),
+                        "price_high": float(lp * drift * np.exp(uncertainty)),
+                        "type": "forecast"
+                    })
         else:
-            lp, ar = float(data[price_col].iloc[-1]), data['Returns'].mean()
+            lp, ar, vol = float(data[price_col].iloc[-1]), data['Returns'].mean(), data['Returns'].std()
             for i in range(prediction_length):
-                forecast_result.append({"date": (last_date + timedelta(days=i+1)).strftime("%Y-%m-%d"), "price": float(lp * np.exp(ar * (i+1))), "type": "forecast"})
+                drift = np.exp((ar - 0.5 * vol**2) * (i+1))
+                uncertainty = 1.96 * vol * np.sqrt(i+1)
+                forecast_result.append({
+                    "date": (last_date + timedelta(days=i+1)).strftime("%Y-%m-%d"), 
+                    "price": float(lp * drift),
+                    "price_low": float(lp * drift * np.exp(-uncertainty)),
+                    "price_high": float(lp * drift * np.exp(uncertainty)),
+                    "type": "forecast"
+                })
 
         # Preparar historial (usamos los regímenes de Rendimientos para el gráfico principal)
         result = []

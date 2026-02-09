@@ -63,6 +63,11 @@ const CustomTooltip = ({ active, payload, currencySymbol }) => {
           {currencySymbol}{data.price ? data.price.toFixed(2) : '0.00'}
           {isForecast && <span style={{ fontSize: '10px', marginLeft: '6px', opacity: 0.8 }}>(Forecast)</span>}
         </p>
+        {isForecast && data.price_low && data.price_high && (
+          <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#94a3b8' }}>
+            Rango: {currencySymbol}{data.price_low.toFixed(2)} - {currencySymbol}{data.price_high.toFixed(2)}
+          </p>
+        )}
         {data.regime !== undefined && (
           <p style={{ margin: '4px 0 0', fontSize: '11px', color: regime.color }}>
             Estado: {regime.label}
@@ -178,22 +183,34 @@ const App = () => {
 
       const result = await response.json();
 
-      const formattedHistory = (result.history || []).map(item => ({
-        ...item,
-        date: new Date(item.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
-        historyPrice: item.price,
-        forecastPrice: null
-      }));
+      const formattedHistory = (result.history || [])
+        .slice(-65) // Show last ~3 months for clarity (65 trading days)
+        .map(item => ({
+          ...item,
+          date: new Date(item.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
+          historyPrice: item.price,
+          forecastPrice: null,
+          range: null,
+          price_low: null,
+          price_high: null
+        }));
 
       const formattedForecast = (result.forecast || []).map(item => ({
         ...item,
         date: new Date(item.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
         historyPrice: null,
-        forecastPrice: item.price
+        forecastPrice: item.price,
+        range: [item.price_low, item.price_high],
+        price_low: item.price_low,
+        price_high: item.price_high
       }));
 
       if (formattedHistory.length > 0 && formattedForecast.length > 0) {
-        formattedHistory[formattedHistory.length - 1].forecastPrice = formattedHistory[formattedHistory.length - 1].historyPrice;
+        const lastPrice = formattedHistory[formattedHistory.length - 1].historyPrice;
+        formattedHistory[formattedHistory.length - 1].forecastPrice = lastPrice;
+        formattedHistory[formattedHistory.length - 1].range = [lastPrice, lastPrice];
+        formattedHistory[formattedHistory.length - 1].price_low = lastPrice;
+        formattedHistory[formattedHistory.length - 1].price_high = lastPrice;
       }
 
       setData([...formattedHistory, ...formattedForecast]);
@@ -373,6 +390,8 @@ const App = () => {
                     <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={10} />
                     <YAxis hide={true} domain={['auto', 'auto']} />
                     <Tooltip content={<CustomTooltip currencySymbol={getCurrencySymbol(currency)} />} />
+                    {/* Shadow band for forecast range */}
+                    <Area type="monotone" dataKey="range" stroke="none" fill="#818cf8" fillOpacity={0.3} connectNulls={true} />
                     <Area type="monotone" dataKey="historyPrice" stroke="#38bdf8" strokeWidth={3} fillOpacity={0.1} fill="#38bdf8" />
                     <Area type="monotone" dataKey="forecastPrice" stroke="#818cf8" strokeWidth={3} strokeDasharray="5 5" fillOpacity={0.1} fill="#818cf8" />
                   </AreaChart>
