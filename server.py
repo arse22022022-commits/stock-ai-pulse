@@ -246,7 +246,9 @@ async def analyze_stock(ticker: str, request: Request):
         
         # Obtener datos
         logger.debug(f"Descargando datos para {ticker} desde {start_date.date()} hasta {end_date.date()}")
-        data = yf.download(ticker, start=start_date, end=end_date, auto_adjust=True)
+        ticker_obj = yf.Ticker(ticker)
+        data = ticker_obj.history(start=start_date, end=end_date, auto_adjust=True)
+        currency = ticker_obj.info.get('currency', 'USD')
         
         if data.empty:
             logger.error(f"No se encontraron datos para el ticker: {ticker}")
@@ -434,7 +436,7 @@ async def analyze_stock(ticker: str, request: Request):
         
         # Calculate total processing time
         total_time = time.time() - start_time
-        logger.info(f"Análisis completado exitosamente para {ticker} en {total_time:.2f}s (Precio: ${current_price:.2f}, Cambio: {change_pct:+.2f}%)")
+        logger.info(f"Análisis completado exitosamente para {ticker} en {total_time:.2f}s (Precio: {currency} {current_price:.2f}, Cambio: {change_pct:+.2f}%)")
         # Helper function to sanitize NaN/Infinity for JSON
         def sanitize_for_json(obj):
             """Replace NaN and Infinity with None for JSON compliance"""
@@ -451,6 +453,7 @@ async def analyze_stock(ticker: str, request: Request):
         # Combinar histórico y forecast
         response_data = {
             "ticker": ticker,
+            "currency": currency,
             "current_price": current_price,
             "change_pct": change_pct,
             "history": result,

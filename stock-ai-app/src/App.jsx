@@ -35,12 +35,23 @@ const REGIME_INFO = {
 
 const getRegime = (id) => REGIME_INFO[id] || { label: 'Desconocido', color: '#94a3b8' };
 
-// Use relative URL for production (Cloud Run) or localhost for dev
 const API_URL = import.meta.env.PROD
   ? ''  // In production, requests go to same origin
   : (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000');
+const CURRENCY_SYMBOLS = {
+  'USD': '$',
+  'EUR': '€',
+  'GBP': '£',
+  'JPY': '¥',
+  'CAD': 'C$',
+  'AUD': 'A$',
+  'CHF': 'CHF',
+  'CNY': '¥'
+};
 
-const CustomTooltip = ({ active, payload }) => {
+const getCurrencySymbol = (code) => CURRENCY_SYMBOLS[code] || code;
+
+const CustomTooltip = ({ active, payload, currencySymbol }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
     const isForecast = data.type === 'forecast';
@@ -49,7 +60,7 @@ const CustomTooltip = ({ active, payload }) => {
       <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.4)' }}>
         <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>{data.date}</p>
         <p style={{ margin: '4px 0 0', fontSize: '16px', fontWeight: 700, color: isForecast ? '#818cf8' : '#38bdf8' }}>
-          ${data.price ? data.price.toFixed(2) : '0.00'}
+          {currencySymbol}{data.price ? data.price.toFixed(2) : '0.00'}
           {isForecast && <span style={{ fontSize: '10px', marginLeft: '6px', opacity: 0.8 }}>(Forecast)</span>}
         </p>
         {data.regime !== undefined && (
@@ -127,6 +138,7 @@ const InterpretationGuide = ({ onClose }) => (
 const App = () => {
   const [activeTab, setActiveTab] = useState('one-ticker'); // 'one-ticker' or 'portfolio'
   const [ticker, setTicker] = useState('NVDA');
+  const [currency, setCurrency] = useState('USD');
   const [data, setData] = useState([]);
   const [price, setPrice] = useState(0);
   const [changePct, setChangePct] = useState(0);
@@ -186,6 +198,7 @@ const App = () => {
 
       setData([...formattedHistory, ...formattedForecast]);
       setPrice(result.current_price || 0);
+      setCurrency(result.currency || 'USD');
       setChangePct(result.change_pct || 0);
       setRecommendation(result.recommendation);
       setCurrentRegime(result.current_regime_ret ?? 0);
@@ -320,7 +333,9 @@ const App = () => {
                 <div>
                   <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '4px' }}>Precio en vivo ({ticker})</p>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0 }}>${price ? price.toFixed(2) : '0.00'}</h2>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0 }}>
+                      {getCurrencySymbol(currency)}{price ? price.toFixed(2) : '0.00'}
+                    </h2>
                     <span style={{ color: (changePct || 0) >= 0 ? '#10b981' : '#ef4444', fontWeight: 600 }}>
                       {(changePct || 0) >= 0 ? '+' : ''}{(changePct || 0).toFixed(2)}%
                     </span>
@@ -357,7 +372,7 @@ const App = () => {
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
                     <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={10} />
                     <YAxis hide={true} domain={['auto', 'auto']} />
-                    <Tooltip content={<CustomTooltip />} />
+                    <Tooltip content={<CustomTooltip currencySymbol={getCurrencySymbol(currency)} />} />
                     <Area type="monotone" dataKey="historyPrice" stroke="#38bdf8" strokeWidth={3} fillOpacity={0.1} fill="#38bdf8" />
                     <Area type="monotone" dataKey="forecastPrice" stroke="#818cf8" strokeWidth={3} strokeDasharray="5 5" fillOpacity={0.1} fill="#818cf8" />
                   </AreaChart>
@@ -500,7 +515,7 @@ const App = () => {
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                             <div>
                               <div style={{ fontWeight: 900, fontSize: '1.2rem' }}>{asset.ticker}</div>
-                              <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>${asset.current_price.toFixed(2)}</div>
+                              <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{getCurrencySymbol(asset.currency)}{asset.current_price.toFixed(2)}</div>
                             </div>
                             <div style={{ padding: '4px 10px', borderRadius: '6px', background: asset.recommendation.color + '20', color: asset.recommendation.color, fontSize: '0.7rem', fontWeight: 800 }}>
                               {asset.recommendation.verdict}
