@@ -154,6 +154,7 @@ const App = () => {
   const [probsDiff, setProbsDiff] = useState([0, 0, 0]);
   const [stateStatsRet, setStateStatsRet] = useState([]);
   const [stateStatsDiff, setStateStatsDiff] = useState([]);
+  const [riskRewardRatio, setRiskRewardRatio] = useState(null);
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState(null);
   const [showGuide, setShowGuide] = useState(false);
@@ -224,6 +225,7 @@ const App = () => {
       setProbsDiff(result.regime_probs_diff || [0, 0, 0]);
       setStateStatsRet(result.state_stats_ret || []);
       setStateStatsDiff(result.state_stats_diff || []);
+      setRiskRewardRatio(result.risk_reward_ratio);
     } catch (err) {
       console.error("Fetch Error:", err);
       setErrorMsg(err.message || "Error al conectar con la API.");
@@ -365,6 +367,11 @@ const App = () => {
                   <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: `${regDiff.color}20`, color: regDiff.color, border: `1px solid ${regDiff.color}40` }}>
                     HMM Diff: {regDiff.label}
                   </span>
+                  {riskRewardRatio !== null && (
+                    <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.4)' }}>
+                      Ratio R/R: {riskRewardRatio.toFixed(2)}
+                    </span>
+                  )}
                 </div>
               </div>
 

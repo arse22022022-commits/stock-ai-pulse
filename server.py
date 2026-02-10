@@ -451,6 +451,11 @@ async def analyze_stock(ticker: str, request: Request):
         
         ai_rec = generate_ai_recommendation(data, regimes_ret, regimes_diff, probs_ret, probs_diff, forecast_result, final_ret_stats, final_diff_stats)
         
+        # Calcular Ratio Rentabilidad/Riesgo del ticker (periodo anual)
+        mean_ret = data['Returns'].mean()
+        std_ret = data['Returns'].std()
+        risk_reward_ratio = float(mean_ret / std_ret) if std_ret != 0 else 0.0
+
         # Calculate total processing time
         total_time = time.time() - start_time
         logger.info(f"Análisis completado exitosamente para {ticker} en {total_time:.2f}s (Precio: {currency} {current_price:.2f}, Cambio: {change_pct:+.2f}%)")
@@ -473,6 +478,7 @@ async def analyze_stock(ticker: str, request: Request):
             "currency": currency,
             "current_price": current_price,
             "change_pct": change_pct,
+            "risk_reward_ratio": risk_reward_ratio,
             "history": result,
             "forecast": forecast_result,
             "recommendation": ai_rec,
@@ -482,8 +488,6 @@ async def analyze_stock(ticker: str, request: Request):
             "regime_probs_diff": probs_diff[-1].tolist(),
             "state_stats_ret": final_ret_stats,
             "state_stats_diff": final_diff_stats,
-            "history": result,
-            "forecast": forecast_result,
             "processing_time": round(total_time, 2)
         }
         
