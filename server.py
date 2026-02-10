@@ -165,9 +165,12 @@ def train_hmm_returns(data: pd.DataFrame):
     for i in range(3):
         r = data.iloc[regimes_ret == i]['Returns']
         if not r.empty:
-            final_ret_stats.append({"regime": i, "mean": float(r.mean() * 100), "std": float(r.std() * 100)})
+            m = float(r.mean() * 100)
+            s = float(r.std() * 100)
+            ratio = m / s if s != 0 else 0.0
+            final_ret_stats.append({"regime": i, "mean": m, "std": s, "ratio_rr": ratio})
         else:
-            final_ret_stats.append({"regime": i, "mean": 0.0, "std": 0.0})
+            final_ret_stats.append({"regime": i, "mean": 0.0, "std": 0.0, "ratio_rr": 0.0})
     
     return regimes_ret, probs_ret, final_ret_stats
 
@@ -201,7 +204,9 @@ def train_hmm_diff(data: pd.DataFrame):
     for i in range(3):
         r = data.iloc[regimes_diff == i]['Diff_Returns']
         if not r.empty:
-            final_diff_stats.append({"regime": i, "mean": float(r.mean() * 100), "std": float(r.std() * 100)})
+            m = float(r.mean() * 100)
+            s = float(r.std() * 100)
+            final_diff_stats.append({"regime": i, "mean": m, "std": s})
         else:
             final_diff_stats.append({"regime": i, "mean": 0.0, "std": 0.0})
     
@@ -347,107 +352,77 @@ async def analyze_stock(ticker: str, request: Request):
         previous_price = float(data[price_col].iloc[-2])
         change_pct = ((current_price - previous_price) / previous_price) * 100
         
-        # Generar Recomendación de la IA
+        # --- TRIPLE-PILLAR RECOMMENDATION ENGINE ---
         def generate_ai_recommendation(data, reg_ret, reg_diff, probs_ret, probs_diff, forecast, ret_stats, diff_stats):
             last_reg_ret = int(reg_ret[-1])
             last_reg_diff = int(reg_diff[-1])
             
-            # --- 0. PRE-ANÁLISIS DE ESTADÍSTICAS (Avisos de Deriva) ---
-            advisory_notes = []
+            # PILLAR 1: Structural Efficiency (40%)
+            # Based on the R/R Ratio of the current state of Returns
+            current_ret_stats = next((s for s in ret_stats if s['regime'] == last_reg_ret), {"ratio_rr": 0})
+            rr_ratio = current_ret_stats.get("ratio_rr", 0)
             
-            # Buscar el rendimiento medio del estado actual de Retornos
-            current_ret_mean = next((s['mean'] for s in ret_stats if s['regime'] == last_reg_ret), 0)
-            if last_reg_ret == 0 and (current_ret_mean or 0) < 0:
-                advisory_notes.append("Deriva negativa en fase estable")
-                
-            # Buscar el rendimiento medio del estado actual de Diferencias (Impulso)
-            current_diff_mean = next((s['mean'] for s in diff_stats if s['regime'] == last_reg_diff), 0)
-            if last_reg_diff == 0 and (current_diff_mean or 0) < 0:
-                advisory_notes.append("Impulso con sesgo bajista moderado")
+            structure_score = 0
+            if rr_ratio > 0.15: structure_score = 100
+            elif rr_ratio > 0.05: structure_score = 70
+            elif rr_ratio >= 0: structure_score = 40
+            else: structure_score = 10 # Penalize negative R/R
             
-            # --- 1. CAPA DE IMPULSO (Salud del Movimiento) ---
-            impulse_score = 0
-            impulse_reasons = []
+            # PILLAR 2: Dynamic Momentum (30%)
+            # Based on the mean of the current state of Differences (Impulse)
+            current_diff_stats = next((s for s in diff_stats if s['regime'] == last_reg_diff), {"mean": 0})
+            impulse_mean = current_diff_stats.get("mean", 0)
             
-            # Chequeo de Inercia (¿Lleva tiempo en este estado?)
-            inertia_days = 0
-            for r in reversed(reg_diff[-5:]):
-                if int(r) == last_reg_diff: inertia_days += 1
-                else: break
+            momentum_score = 50 # Neutral base
+            if impulse_mean > 0.5: momentum_score = 100 # High acceleration
+            elif impulse_mean > 0: momentum_score = 75  # Moderate acceleration
+            elif impulse_mean > -0.5: momentum_score = 30 # Slowing down
+            else: momentum_score = 0 # Strong deceleration
             
-            if last_reg_diff == 1: # Alcista
-                impulse_score += 2
-                if inertia_days >= 3: impulse_score += 1; impulse_reasons.append("Impulso alcista consolidado")
-                else: impulse_reasons.append("Impulso alcista incipiente (posible ruido)")
-            elif last_reg_diff == 2: # Volátil
-                impulse_score -= 1
-                impulse_reasons.append("Alta volatilidad detectada en el impulso")
+            # PILLAR 3: Predictive Projection (30%)
+            # Based on the 10-day forecast slope
+            forecast_start = forecast[0]['price']
+            forecast_end = forecast[-1]['price']
+            forecast_trend = (forecast_end / forecast_start) - 1
             
-            # Chequeo de Convergencia/Divergencia
-            # Si el precio sube pero el impulso (aceleración) es bajista o volátil -> Divergencia
-            recent_price_trend = (data[price_col].iloc[-1] / data[price_col].iloc[-5]) - 1
-            if recent_price_trend > 0 and last_reg_diff != 1:
-                impulse_score -= 1
-                impulse_reasons.append("Divergencia: El precio sube pero la aceleración se agota")
+            projection_score = 50
+            if forecast_trend > 0.03: projection_score = 100
+            elif forecast_trend > 0: projection_score = 70
+            elif forecast_trend < -0.03: projection_score = 0
+            else: projection_score = 20
             
-            # Chequeo de Agotamiento (Deceleración)
-            # Miramos si la probabilidad del régimen actual está cayendo
-            if len(probs_diff) >= 2:
-                prob_trend = probs_diff[-1][last_reg_diff] - probs_diff[-2][last_reg_diff]
-                if prob_trend < -0.05: # La probabilidad cae > 5%
-                    impulse_score -= 1
-                    impulse_reasons.append("Señales de agotamiento en el régimen actual")
-
-            # --- 2. CAPA ESTRUCTURAL (Tendencia) ---
-            trend_score = 0
-            if last_reg_ret == 1: trend_score += 2
-            elif last_reg_ret == 0: trend_score += 1
+            # FINAL CONSENSUS SCORE
+            final_score = (structure_score * 0.4) + (momentum_score * 0.3) + (projection_score * 0.3)
             
-            # Chequeo de Extensión (Sobrecompra/Sobreventa)
-            # Distancia a la Media Móvil de 20 días
-            ma20 = data[price_col].rolling(window=20).mean().iloc[-1]
-            dist_ma20 = (data[price_col].iloc[-1] / ma20) - 1
-            if dist_ma20 > 0.08: # >8% sobre la media
-                trend_score -= 1
-                impulse_reasons.append("Riesgo de sobre-extensión técnica")
-
-            # --- 3. CAPA PREDICTIVA (Forecast) ---
-            forecast_score = 0
-            forecast_trend = (forecast[-1]['price'] / forecast[0]['price']) - 1
-            if forecast_trend > 0.02: forecast_score += 2
-            elif forecast_trend > 0: forecast_score += 1
-            elif forecast_trend < -0.02: forecast_score -= 2
-            else: forecast_score -= 1
-            
-            # --- VEREDICTO FINAL ---
-            total_score = impulse_score + trend_score + forecast_score
-            
-            if total_score >= 5:
+            # VERDICT LOGIC
+            if final_score >= 80:
                 verdict = "COMPRA FUERTE"
-                main_reason = "Consenso alcista total con impulso saludable y tendencia confirmada."
-            elif total_score >= 2:
+                main_reason = "Eficiencia estructural óptima con fuerte inercia alcista confirmada."
+            elif final_score >= 60:
                 verdict = "COMPRA"
-                main_reason = "Escenario favorable. El mercado muestra estructura positiva."
-            elif total_score >= 0:
+                main_reason = "Estructura positiva. El mercado muestra calidad y potencial de crecimiento."
+            elif final_score >= 40:
                 verdict = "MANTENER"
-                main_reason = "Zona neutral. Esperando confirmación de inercia o dirección."
-            elif total_score >= -2:
+                main_reason = "Zona de equilibrio. Los pilares muestran señales mixtas o estables."
+            elif final_score >= 20:
                 verdict = "VENTA"
-                main_reason = "Debilidad técnica. Los modelos detectan fatiga y riesgo elevado."
+                main_reason = "Pérdida de eficiencia. Se detecta ruido o sesgo bajista en el impulso."
             else:
                 verdict = "VENTA FUERTE"
-                main_reason = "Alerta de riesgo severo. El impulso y la tendencia coinciden a la baja."
+                main_reason = "Deterioro crítico. Colapso de eficiencia y aceleración negativa."
+
+            # Additional notes for context
+            notes = []
+            if rr_ratio < 0: notes.append("Riesgo elevado (R/R negativo)")
+            if impulse_mean < 0: notes.append("Deceleración detectada")
+            if forecast_trend < 0: notes.append("Proyección bajista")
             
-            # Combinar razones específicas si existen
-            reason = main_reason
-            all_notes = impulse_reasons + advisory_notes
-            if all_notes:
-                reason += " (Nota: " + ", ".join(all_notes) + ")"
+            if notes:
+                main_reason += " (Alertas: " + ", ".join(notes) + ")"
                 
-            # Determinar color según veredicto
             colors = {"COMPRA FUERTE": "#10b981", "COMPRA": "#34d399", "MANTENER": "#fbbf24", "VENTA": "#f87171", "VENTA FUERTE": "#ef4444"}
             
-            return {"verdict": verdict, "reason": reason, "color": colors.get(verdict, "#94a3b8"), "score": total_score}
+            return {"verdict": verdict, "reason": main_reason, "color": colors.get(verdict, "#94a3b8"), "score": round(final_score, 1)}
         
         ai_rec = generate_ai_recommendation(data, regimes_ret, regimes_diff, probs_ret, probs_diff, forecast_result, final_ret_stats, final_diff_stats)
         

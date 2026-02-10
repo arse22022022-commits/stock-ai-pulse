@@ -92,33 +92,43 @@ const InterpretationGuide = ({ onClose }) => (
       </div>
 
       <section style={{ marginBottom: '32px' }}>
-        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>1. El Sistema de Consenso</h3>
-        <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>La IA no adivina; vota basándose en tres capas analíticas:</p>
+        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>1. El Sistema de Consenso (Triple Pilar)</h3>
+        <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>La recomendación final se basa en un scoring ponderado entre tres dimensiones independientes:</p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '16px' }}>
           <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>Estructural</h4>
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>Define el "clima" general del mercado (Alcista, Estable o Volátil).</p>
+            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>Estructura (40%)</h4>
+            <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>Analiza la <strong>Eficiencia (Ratio R/R)</strong> del estado actual. Evalúa si el rendimiento compensa el riesgo del régimen actual.</p>
           </div>
           <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>Impulso</h4>
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>Analiza la aceleración y "salud técnica" del movimiento actual.</p>
+            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>Impulso (30%)</h4>
+            <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>Mide la <strong>Aceleración</strong>. Detecta si el activo está ganando inercia o si el movimiento muestra señales de fatiga técnica.</p>
           </div>
           <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>Predictiva</h4>
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>Proyecciones a 10 días mediante redes neuronales (Deep Learning).</p>
+            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>Proyección (30%)</h4>
+            <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>Basado en el Forecast de 10 días mediante Redes Neuronales Profundas para anticipar la dirección probable.</p>
           </div>
         </div>
       </section>
 
       <section style={{ marginBottom: '32px' }}>
-        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>2. Diccionario de Alertas 🔍</h3>
+        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>2. Ratio R/R por Estado 📊</h3>
+        <p style={{ color: '#94a3b8', lineHeight: 1.6, fontSize: '0.9rem' }}>
+          A diferencia de un ratio global, calculamos el <strong>Ratio de Rentabilidad/Riesgo</strong> para cada régimen detectado.
+        </p>
+        <ul style={{ color: '#94a3b8', fontSize: '0.85rem', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <li><strong style={{ color: '#34d399' }}>R/R &gt; 0.15</strong>: Estado de alta eficiencia. El precio sube de forma limpia y constante.</li>
+          <li><strong style={{ color: '#fbbf24' }}>R/R entre 0 y 0.10</strong>: Estado de ruido. Hay crecimiento pero acompañado de mucha volatilidad.</li>
+          <li><strong style={{ color: '#f87171' }}>R/R Negativo</strong>: Estado destructivo. El riesgo actual es mayor al rendimiento esperado.</li>
+        </ul>
+      </section>
+
+      <section style={{ marginBottom: '32px' }}>
+        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>3. Glosario de Alertas Rápidas 🔍</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {[
-            { tag: 'Impulso incipiente', desc: 'El movimiento positivo es muy joven (< 3 días). Puede ser ruido pasajero.', action: 'Esperar confirmación de 24-48h.' },
-            { tag: 'Señales de agotamiento', desc: 'La confianza del modelo matemático está cayendo a pesar de la subida.', action: 'Vigilancia estrecha o recogida de beneficios.' },
-            { tag: 'Riesgo de sobre-extensión', desc: 'El precio se ha alejado demasiado (>8%) de su media de 20 días.', action: 'Evitar comprar ahora; esperar corrección.' },
-            { tag: 'Divergencia detectada', desc: 'El precio sube pero el impulso (aceleración) cae o es inestable.', action: 'Alerta máxima; suele preceder a caídas.' },
-            { tag: 'Deriva negativa', desc: 'Fase estable sin volatilidad, pero con tendencia a gotear a la baja.', action: 'Falta de interés comprador.' }
+            { tag: 'Riesgo Elevado', desc: 'El estado actual tiene un Ratio R/R negativo o muy pobre.', action: 'Evitar nuevas entradas.' },
+            { tag: 'Deceleración detectada', desc: 'El impulso (media de diferencias) es negativo, indicando pérdida de fuerza.', action: 'Vigilancia estrecha en largos.' },
+            { tag: 'Proyección bajista', desc: 'El modelo de Deep Learning detecta una tendencia negativa en los próximos 10 días.', action: 'Precaución o hedging.' }
           ].map((item, i) => (
             <div key={i} style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
@@ -367,9 +377,9 @@ const App = () => {
                   <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: `${regDiff.color}20`, color: regDiff.color, border: `1px solid ${regDiff.color}40` }}>
                     HMM Diff: {regDiff.label}
                   </span>
-                  {riskRewardRatio !== null && (
+                  {stateStatsRet.length > 0 && (
                     <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.4)' }}>
-                      Ratio R/R: {riskRewardRatio.toFixed(2)}
+                      R/R Actual: {(stateStatsRet.find(s => s.regime === currentRegime)?.ratio_rr || 0).toFixed(2)}
                     </span>
                   )}
                 </div>
@@ -424,9 +434,10 @@ const App = () => {
                           <span style={{ fontSize: '14px', fontWeight: 600, color: item.color }}>{item.label} ({prob}%)</span>
                           {isCurrent && <span style={{ fontSize: '10px', background: item.color, padding: '2px 6px', borderRadius: '4px' }}>ACTUAL</span>}
                         </div>
-                        <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: '#94a3b8' }}>
+                        <div style={{ display: 'flex', gap: '12px', fontSize: '11px', color: '#94a3b8' }}>
                           <span>μ: {(stats.mean || 0).toFixed(3)}%</span>
                           <span>σ: {(stats.std || 0).toFixed(3)}%</span>
+                          <span style={{ color: (stats.ratio_rr > 0) ? '#34d399' : '#f87171' }}>R/R: {(stats.ratio_rr || 0).toFixed(2)}</span>
                         </div>
                       </div>
                     );
@@ -450,9 +461,8 @@ const App = () => {
                           <span style={{ fontSize: '14px', fontWeight: 600, color: item.color }}>{item.label} ({prob}%)</span>
                           {isCurrent && <span style={{ fontSize: '10px', background: item.color, padding: '2px 6px', borderRadius: '4px' }}>ACTUAL</span>}
                         </div>
-                        <div style={{ display: 'flex', gap: '12px', fontSize: '12px', color: '#94a3b8' }}>
-                          <span>μ: {(stats.mean || 0).toFixed(3)}%</span>
-                          <span>σ: {(stats.std || 0).toFixed(3)}%</span>
+                        <div style={{ display: 'flex', gap: '12px', fontSize: '11px', color: '#94a3b8' }}>
+                          <span style={{ color: (stats.mean > 0) ? '#38bdf8' : '#f87171' }}>Impulso (μ): {(stats.mean || 0).toFixed(3)}%</span>
                         </div>
                       </div>
                     );
