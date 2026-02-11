@@ -1,0 +1,10 @@
+.git
+.gitignore
+node_modules
+dist
+stock-ai-app/node_modules
+stock-ai-app/dist
+__pycache__
+*.pyc
+venv
+.env

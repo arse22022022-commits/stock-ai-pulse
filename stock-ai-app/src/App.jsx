@@ -92,53 +92,154 @@ const InterpretationGuide = ({ onClose }) => (
       </div>
 
       <section style={{ marginBottom: '32px' }}>
-        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>1. El Sistema de Consenso (Triple Pilar)</h3>
-        <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>La recomendación final se basa en un scoring ponderado entre tres dimensiones independientes:</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '16px' }}>
+        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>1. El Sistema de Consenso (Triple Pilar) 🏛️</h3>
+        <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>La recomendación final ("COMPRA", "VENTA", etc.) es el resultado de una suma ponderada de tres modelos independientes. La puntuación va de 0 a 100.</p>
+
+        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '16px', fontSize: '0.85rem', color: '#cbd5e1' }}>
+          <thead>
+            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+              <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Pilar</th>
+              <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Peso</th>
+              <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Qué Analiza</th>
+              <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Métrica Clave</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <td style={{ padding: '8px' }}><strong>1. Estructura</strong></td>
+              <td style={{ padding: '8px' }}><strong>40%</strong></td>
+              <td style={{ padding: '8px' }}>Eficiencia del mercado actual</td>
+              <td style={{ padding: '8px' }}><strong>Ratio R/R</strong> (Rentabilidad/Riesgo) del Régimen HMM actual</td>
+            </tr>
+            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <td style={{ padding: '8px' }}><strong>2. Impulso</strong></td>
+              <td style={{ padding: '8px' }}><strong>30%</strong></td>
+              <td style={{ padding: '8px' }}>Aceleración del precio</td>
+              <td style={{ padding: '8px' }}><strong>Media</strong> del Régimen HMM de Diferencias</td>
+            </tr>
+            <tr>
+              <td style={{ padding: '8px' }}><strong>3. Proyección</strong></td>
+              <td style={{ padding: '8px' }}><strong>30%</strong></td>
+              <td style={{ padding: '8px' }}>Futuro probable (10 días)</td>
+              <td style={{ padding: '8px' }}><strong>Pendiente</strong> de la predicción del modelo Chronos (LLM)</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '24px' }}>
           <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>Estructura (40%)</h4>
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>Analiza la <strong>Eficiencia (Ratio R/R)</strong> del estado actual. Evalúa si el rendimiento compensa el riesgo del régimen actual.</p>
+            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>A. Pilar Estructural (Max 40 pts)</h4>
+            <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>Se basa en la calidad del estado actual de rendimientos:</p>
+            <ul style={{ fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '16px', marginTop: '8px' }}>
+              <li><strong>100 pts</strong>: Ratio R/R &gt; 0.15 (Tendencia muy limpia)</li>
+              <li><strong>70 pts</strong>: Ratio R/R &gt; 0.05 (Tendencia positiva estándar)</li>
+              <li><strong>40 pts</strong>: Ratio R/R &gt;= 0 (Mercado lateral/ruido)</li>
+              <li><strong>10 pts</strong>: Ratio R/R &lt; 0 (Ineficiente/Riesgoso)</li>
+            </ul>
           </div>
           <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>Impulso (30%)</h4>
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>Mide la <strong>Aceleración</strong>. Detecta si el activo está ganando inercia o si el movimiento muestra señales de fatiga técnica.</p>
+            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>B. Pilar de Impulso (Max 30 pts)</h4>
+            <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>Mide la "fuerza G" del movimiento:</p>
+            <ul style={{ fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '16px', marginTop: '8px' }}>
+              <li><strong>100 pts</strong>: Media &gt; 0.5 (Fuerte aceleración)</li>
+              <li><strong>75 pts</strong>: Media &gt; 0 (Aceleración moderada)</li>
+              <li><strong>30 pts</strong>: Media &gt; -0.5 (Desaceleración/Frenada)</li>
+              <li><strong>0 pts</strong>: Media &lt;= -0.5 (Caída libre)</li>
+            </ul>
           </div>
           <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>Proyección (30%)</h4>
-            <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>Basado en el Forecast de 10 días mediante Redes Neuronales Profundas para anticipar la dirección probable.</p>
+            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>C. Pilar de Proyección (Max 30 pts)</h4>
+            <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>Mira hacia el futuro con IA Generativa:</p>
+            <ul style={{ fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '16px', marginTop: '8px' }}>
+              <li><strong>100 pts</strong>: Tendencia &gt; +3% en 10 días</li>
+              <li><strong>70 pts</strong>: Tendencia &gt; 0%</li>
+              <li><strong>20 pts</strong>: Tendencia plana o ligeramente bajista</li>
+              <li><strong>0 pts</strong>: Tendencia &lt; -3% (Proyección de caída fuerte)</li>
+            </ul>
           </div>
         </div>
       </section>
 
       <section style={{ marginBottom: '32px' }}>
-        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>2. Ratio R/R por Estado 📊</h3>
-        <p style={{ color: '#94a3b8', lineHeight: 1.6, fontSize: '0.9rem' }}>
-          A diferencia de un ratio global, calculamos el <strong>Ratio de Rentabilidad/Riesgo</strong> para cada régimen detectado.
-        </p>
-        <ul style={{ color: '#94a3b8', fontSize: '0.85rem', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <li><strong style={{ color: '#34d399' }}>R/R &gt; 0.15</strong>: Estado de alta eficiencia. El precio sube de forma limpia y constante.</li>
-          <li><strong style={{ color: '#fbbf24' }}>R/R entre 0 y 0.10</strong>: Estado de ruido. Hay crecimiento pero acompañado de mucha volatilidad.</li>
-          <li><strong style={{ color: '#f87171' }}>R/R Negativo</strong>: Estado destructivo. El riesgo actual es mayor al rendimiento esperado.</li>
-        </ul>
+        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>2. Veredictos y Criterios 🎯</h3>
+        <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>La suma de los puntos anteriores genera el veredicto final:</p>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '16px', fontSize: '0.85rem', color: '#cbd5e1' }}>
+            <thead>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Puntuación Total</th>
+                <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Veredicto</th>
+                <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Significado</th>
+                <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Estrategia Sugerida</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(16, 185, 129, 0.05)' }}>
+                <td style={{ padding: '8px' }}><strong>&gt;= 80</strong></td>
+                <td style={{ padding: '8px', color: '#34d399' }}><strong>🟢 COMPRA FUERTE</strong></td>
+                <td style={{ padding: '8px' }}>Estructura perfecta + Inercia + Futuro alcista.</td>
+                <td style={{ padding: '8px' }}><strong>Entrada agresiva</strong>. Ideal para aumentar posición.</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(250, 204, 21, 0.05)' }}>
+                <td style={{ padding: '8px' }}><strong>60 - 79</strong></td>
+                <td style={{ padding: '8px', color: '#facc15' }}><strong>🟡 COMPRA</strong></td>
+                <td style={{ padding: '8px' }}>Estructura positiva, pero falla algún pilar.</td>
+                <td style={{ padding: '8px' }}><strong>Entrada escalonada</strong>. Buscar confirmación.</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(248, 250, 252, 0.05)' }}>
+                <td style={{ padding: '8px' }}><strong>40 - 59</strong></td>
+                <td style={{ padding: '8px', color: '#cbd5e1' }}><strong>⚪ MANTENER</strong></td>
+                <td style={{ padding: '8px' }}>Zona de equilibrio. Fuerzas empatadas.</td>
+                <td style={{ padding: '8px' }}><strong>No operar</strong>. Mantener con Stop Loss.</td>
+              </tr>
+              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(251, 146, 60, 0.05)' }}>
+                <td style={{ padding: '8px' }}><strong>20 - 39</strong></td>
+                <td style={{ padding: '8px', color: '#fb923c' }}><strong>🟠 VENTA</strong></td>
+                <td style={{ padding: '8px' }}>Pérdida de eficiencia. Riesgo &gt; Beneficio.</td>
+                <td style={{ padding: '8px' }}><strong>Reducir riesgo</strong>. Cerrar parciales.</td>
+              </tr>
+              <tr style={{ background: 'rgba(239, 68, 68, 0.05)' }}>
+                <td style={{ padding: '8px' }}><strong>&lt; 20</strong></td>
+                <td style={{ padding: '8px', color: '#f87171' }}><strong>🔴 VENTA FUERTE</strong></td>
+                <td style={{ padding: '8px' }}>Colapso estructural y aceleración negativa.</td>
+                <td style={{ padding: '8px' }}><strong>Salida inmediata</strong>. No buscar suelo.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       <section style={{ marginBottom: '32px' }}>
-        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>3. Glosario de Alertas Rápidas 🔍</h3>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>3. Diccionario de Alertas de la IA 🔍</h3>
+        <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>Cuando el sistema detecta una anomalía, añade una nota entre paréntesis. Aquí explicamos qué significan y qué acción tomar:</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
           {[
-            { tag: 'Riesgo Elevado', desc: 'El estado actual tiene un Ratio R/R negativo o muy pobre.', action: 'Evitar nuevas entradas.' },
-            { tag: 'Deceleración detectada', desc: 'El impulso (media de diferencias) es negativo, indicando pérdida de fuerza.', action: 'Vigilancia estrecha en largos.' },
-            { tag: 'Proyección bajista', desc: 'El modelo de Deep Learning detecta una tendencia negativa en los próximos 10 días.', action: 'Precaución o hedging.' }
+            { tag: 'Riesgo Elevado (R/R neg)', desc: 'Estado destructivo. Volatilidad > Retorno.', action: 'Evitar nuevas entradas hasta que cambie el régimen.' },
+            { tag: 'Deceleración detectada', desc: 'Sube el precio pero baja la aceleración (Impulso). Signo de agotamiento.', action: 'Vigilar. No perseguir el precio. Riesgo de techo.' },
+            { tag: 'Proyección bajista', desc: 'La IA anticipa caída en 10 días pese a la subida actual.', action: 'Cautela. El modelo detecta patrones de distribución no visibles.' }
           ].map((item, i) => (
             <div key={i} style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                 <span style={{ color: '#fbbf24', fontWeight: 700, fontSize: '0.9rem' }}>{item.tag}</span>
-                <span style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: 600 }}>Acción: {item.action}</span>
+                <span style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: 600 }}>{item.action}</span>
               </div>
               <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>{item.desc}</p>
             </div>
           ))}
         </div>
+      </section>
+
+      <section style={{ marginBottom: '32px' }}>
+        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>4. Consejos de Uso Práctico</h3>
+        <ul style={{ color: '#94a3b8', fontSize: '0.9rem', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <li><strong>Confirma la Inercia:</strong> Un "Impulso consolidado" (Estado HMM estable) es mucho más fiable que uno que cambia cada día.</li>
+          <li><strong>Mira las Probabilidades:</strong> Si el estado actual tiene una probabilidad cercana al <strong>90-100%</strong>, la señal es muy robusta. Si está cerca del 50-60%, el mercado está indeciso.</li>
+          <li><strong>Usa los dos HMM:</strong><br />
+            - <strong>HMM Rep (Retornos)</strong> te dice "Dónde estamos" (Alcista, Bajista, Lateral).<br />
+            - <strong>HMM Diff (Impulso)</strong> te dice "A qué velocidad vamos".<br />
+            <em>Ejemplo: Si HMM Rep es "Alcista" pero HMM Diff es "Volátil/Bajista", movimiento perdiendo gasolina.</em>
+          </li>
+        </ul>
       </section>
 
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>

@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import HTMLResponse
 import os
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 import yfinance as yf
@@ -35,15 +37,11 @@ try:
 except Exception as e:
     logger.warning(f"El modelo LLM (Chronos) no está disponible: {e}. Usando modo estadística simple")
 
-from fastapi import FastAPI, HTTPException, Request
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
-import os
-
 # ... (rest of imports)
+VERSION = "v1.2.0-triple-pillar"
 
 app = FastAPI()
+logger.info(f"Starting StockAI Pulse Backend - {VERSION}")
 
 # CORS configuration
 app.add_middleware(
@@ -246,8 +244,9 @@ async def analyze_stock(ticker: str, request: Request):
     start_time = time.time()
     
     try:
-        end_date = datetime.now()
-        start_date = end_date - timedelta(days=365)
+        # Extender end_date un día para asegurar que yfinance incluya datos intradía de hoy si el mercado está abierto
+        end_date = datetime.now() + timedelta(days=1)
+        start_date = datetime.now() - timedelta(days=365)
         
         # Obtener datos
         logger.debug(f"Descargando datos para {ticker} desde {start_date.date()} hasta {end_date.date()}")

@@ -4,59 +4,75 @@ Esta guía explica la lógica técnica detrás de las recomendaciones generadas 
 
 ---
 
-## 1. El Sistema de Consenso (Las 3 Capas)
-La IA no "adivina" el precio; calcula probabilidades mediante el consenso de tres capas analíticas:
+## 1. El Sistema de Consenso (Triple Pilar) 🏛️
 
-### A. Capa Estructural (HMM Retornos)
-Analiza el comportamiento histórico del precio para clasificarlo en tres estados:
-- **Estado 1 (Alcista)**: Rendimiento positivo con volatilidad controlada.
-- **Estado 0 (Estable)**: Movimiento lateral, fase de acumulación o descanso.
-- **Estado 2 (Volátil)**: Alta incertidumbre, riesgo de caídas bruscas o giros violentos.
+La recomendación final ("COMPRA", "VENTA", etc.) es el resultado de una suma ponderada de tres modelos independientes. La puntuación va de 0 a 100.
 
-### B. Capa de Impulso (HMM Diferencias)
-Es el "corazón" de la salud técnica. Analiza la **aceleración** del precio:
-- Evalúa si el movimiento tiene **Inercia** (fuerza continuada).
-- Detecta si hay **Convergencia** (el precio y la fuerza van de la mano).
+| Pilar | Peso | Qué Analiza | Métrica Clave |
+| :--- | :--- | :--- | :--- |
+| **1. Estructura** | **40%** | Eficiencia del mercado actual | **Ratio R/R** (Rentabilidad/Riesgo) del Régimen HMM actual |
+| **2. Impulso** | **30%** | Aceleración del precio | **Media** del Régimen HMM de Diferencias |
+| **3. Proyección** | **30%** | Futuro probable (10 días) | **Pendiente** de la predicción del modelo Chronos (LLM) |
 
-### C. Capa Predictiva (Neural Forecast)
-Utiliza un modelo neuronal (LLM) que proyecta los próximos 10 días de cotización. Esta capa aporta la visión de futuro, filtrando si la inercia actual es sostenible matemáticamente.
+### Desglose de Puntuación
+
+#### A. Pilar Estructural (Max 40 pts)
+Se basa en la calidad del estado actual de rendimientos:
+-   **100 pts**: Ratio R/R > 0.15 (Tendencia muy limpia)
+-   **70 pts**: Ratio R/R > 0.05 (Tendencia positiva estándar)
+-   **40 pts**: Ratio R/R >= 0 (Mercado lateral/ruido)
+-   **10 pts**: Ratio R/R < 0 (Ineficiente/Riesgoso)
+
+#### B. Pilar de Impulso (Max 30 pts)
+Mide la "fuerza G" del movimiento:
+-   **100 pts**: Media > 0.5 (Fuerte aceleración)
+-   **75 pts**: Media > 0 (Aceleración moderada)
+-   **30 pts**: Media > -0.5 (Desaceleración/Frenada)
+-   **0 pts**: Media <= -0.5 (Caída libre)
+
+#### C. Pilar de Proyección (Max 30 pts)
+Mira hacia el futuro con IA Generativa:
+-   **100 pts**: Tendencia > +3% en 10 días
+-   **70 pts**: Tendencia > 0%
+-   **20 pts**: Tendencia plana o ligeramente bajista
+-   **0 pts**: Tendencia < -3% (Proyección de caída fuerte)
 
 ---
 
-## 2. Diccionario de Alertas de la IA 🔍
+## 2. Veredictos y Criterios 🎯
+
+La suma de los puntos anteriores genera el veredicto final:
+
+| Puntuación Total | Veredicto | Significado | Estrategia Sugerida |
+| :--- | :--- | :--- | :--- |
+| **>= 80** | **🟢 COMPRA FUERTE** | Estructura perfecta + Inercia + Futuro alcista. | **Entrada agresiva**. Ideal para aumentar posición. |
+| **60 - 79** | **🟡 COMPRA** | Estructura positiva, pero falla algún pilar (ej. poco impulso). | **Entrada escalonada**. Buscar confirmación de precio. |
+| **40 - 59** | **⚪ MANTENER** | Zona de equilibrio. Fuerzas alcistas y bajistas empatadas. | **No operar**. Si tienes posición, mantenla con Stop Loss ajustado. |
+| **20 - 39** | **🟠 VENTA** | Pérdida de eficiencia. El riesgo empieza a superar al beneficio. | **Reducir riesgo**. Cerrar parciales o ajustar stops muy ceñidos. |
+| **< 20** | **🔴 VENTA FUERTE** | Colapso estructural y aceleración negativa. | **Salida inmediata**. No intentar "cazar el suelo". |
+
+---
+
+## 3. Diccionario de Alertas de la IA 🔍
 
 Cuando el sistema detecta una anomalía, añade una nota entre paréntesis. Aquí explicamos qué significan y qué acción tomar:
 
 | Alerta | Significado Técnico | Acción Recomendada |
 | :--- | :--- | :--- |
-| **Impulso alcista incipiente** | El movimiento positivo lleva menos de 3 días activo. Podría ser un rebote falso o "ruido". | **Esperar**. Confirmar 24h más de permanencia en este estado antes de entrar. |
-| **Señales de agotamiento** | La probabilidad matemática del modelo está cayendo, aunque el precio siga subiendo. | **Vigilar**. No abrir nuevas posiciones. Ajustar órdenes de venta (Stop Loss). |
-| **Riesgo de sobre-extensión** | El precio está un 8% o más alejado de su media móvil de 20 días. | **Cautela**. El riesgo de una "toma de beneficios" (caída técnica) es muy alto. |
-| **Divergencia detectada** | El precio sube, pero el modelo de impulso (aceleración) está bajando o es inestable. | **Alerta Roja**. Es un síntoma clásico de fin de tendencia. Riesgo de trampa. |
-| **Deriva negativa en fase estable** | El mercado está en calma (poca volatilidad), pero el precio "gotea" hacia abajo. | **Evitar**. El activo no tiene interés comprador en este momento. |
+| **Riesgo elevado (R/R negativo)** | El estado actual es destructivo; la volatilidad es mayor que el retorno promedio. | **Evitar nuevas entradas** hasta que cambie el régimen. |
+| **Deceleración detectada** | El precio sube, pero el impulso (segunda derivada) está bajando. Signo de agotamiento. | **Vigilar**. No perseguir el precio. Riesgo de techo de mercado. |
+| **Proyección bajista** | El modelo neuronal anticipa una caída en los próximos 10 días, contradiciendo quizás la subida actual. | **Cautela**. El modelo detecta patrones de distribución no visibles a simple vista. |
 
 ---
 
-## 3. Interpretación de los Veredictos
+## 4. Consejos de Uso Práctico
 
-### 🟢 COMPRA FUERTE (Puntuación > 5)
-Consenso total. La estructura es alcista, el impulso es firme (con inercia > 3 días) y el forecast es positivo. Es el escenario de mayor probabilidad de éxito.
-
-### 🟡 COMPRA (Puntuación 2 a 4)
-Contexto positivo, pero con matices. Puede haber una alerta de "sobre-extensión" o un impulso "incipiente". Sugiere una entrada escalonada o con stop amplio.
-
-### ⚪ MANTENER (Puntuación 0 a 1)
-Zona neutral o de conflicto. Un modelo dice "sube" y otro dice "baja". El sistema recomienda esperar a que los modelos se alineen.
-
-### 🔴 VENTA / VENTA FUERTE (Puntuación negativa)
-El impulso se ha quebrado o la volatilidad es demasiado alta. El sistema prioriza la **preservación del capital** sobre la búsqueda de beneficios.
-
----
-
-## 4. Consejos de Uso
-1. **Confirma la Inercia**: Un "Impulso consolidado" es mucho más fiable que uno "incipiente".
-2. **Mira las Probabilidades**: En el panel lateral, si el estado actual tiene una probabilidad cercana al 90-100%, la señal es muy robusta. Si está cerca del 50-60%, hay dudas en el modelo.
-3. **Usa el Forecast como filtro**: Si el veredicto es compra pero el forecast (línea punteada) va hacia abajo, la IA está dándote un aviso de que la subida podría ser corta.
+1.  **Confirma la Inercia**: Un "Impulso consolidado" (Estado HMM estable) es mucho más fiable que uno que cambia cada día.
+2.  **Mira las Probabilidades**: En el panel lateral, si el estado actual tiene una probabilidad cercana al **90-100%**, la señal es muy robusta. Si está cerca del 50-60%, el mercado está indeciso.
+3.  **Usa los dos HMM**:
+    *   **HMM Rep (Retornos)** te dice "Dónde estamos" (Alcista, Bajista, Lateral).
+    *   **HMM Diff (Impulso)** te dice "A qué velocidad vamos".
+    *   *Ejemplo*: Si HMM Rep es "Alcista" pero HMM Diff es "Volátil/Bajista", el movimiento está perdiendo gasolina.
 
 ---
 *Nota: Esta herramienta es un asistente analítico basado en matemáticas avanzadas. No constituye asesoramiento financiero directo.*
