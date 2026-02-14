@@ -1,378 +1,47 @@
-import React, { useState, useEffect } from 'react';
-import {
-  TrendingUp,
-  TrendingDown,
-  Activity,
-  Search,
-  Settings,
-  Zap,
-  BarChart3,
-  BrainCircuit,
-  ShieldCheck,
-  Info,
-  X,
-  BookOpen,
-  FileText,
-  Briefcase,
-  Trash2,
-  PieChart
-} from 'lucide-react';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer
-} from 'recharts';
+import React, { useState } from 'react';
+import { ShieldCheck } from 'lucide-react';
 
-const REGIME_INFO = {
-  0: { label: 'Estable', color: '#38bdf8', desc: 'Baja volatilidad y retornos neutrales.' },
-  1: { label: 'Alcista', color: '#10b981', desc: 'Tendencia positiva con volatilidad controlada.' },
-  2: { label: 'Volátil', color: '#ef4444', desc: 'Alta incertidumbre y posibles correcciones.' }
-};
+// Components
+import { Navbar } from './components/Layout/Navbar';
+import { InterpretationGuide } from './components/Modals/InterpretationGuide';
+import { StockDashboard } from './components/Dashboard/StockDashboard';
+import { AssetCard } from './components/Portfolio/AssetCard';
 
-const getRegime = (id) => REGIME_INFO[id] || { label: 'Desconocido', color: '#94a3b8' };
+// Hooks
+import { useStockData } from './hooks/useStockData';
+import { usePortfolio } from './hooks/usePortfolio';
+import { useIndices } from './hooks/useIndices';
 
-const API_URL = import.meta.env.PROD
-  ? ''  // In production, requests go to same origin
-  : (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000');
-const CURRENCY_SYMBOLS = {
-  'USD': '$',
-  'EUR': '€',
-  'GBP': '£',
-  'JPY': '¥',
-  'CAD': 'C$',
-  'AUD': 'A$',
-  'CHF': 'CHF',
-  'CNY': '¥'
-};
+// Data
+import { INDICES_CONSTITUENTS } from './data/indices';
 
-const getCurrencySymbol = (code) => CURRENCY_SYMBOLS[code] || code;
-
-const CustomTooltip = ({ active, payload, currencySymbol }) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    const isForecast = data.type === 'forecast';
-    const regime = getRegime(data.regime);
-    return (
-      <div style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', padding: '12px', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.4)' }}>
-        <p style={{ margin: 0, fontSize: '12px', color: '#94a3b8' }}>{data.date}</p>
-        <p style={{ margin: '4px 0 0', fontSize: '16px', fontWeight: 700, color: isForecast ? '#818cf8' : '#38bdf8' }}>
-          {currencySymbol}{data.price ? data.price.toFixed(2) : '0.00'}
-          {isForecast && <span style={{ fontSize: '10px', marginLeft: '6px', opacity: 0.8 }}>(Forecast)</span>}
-        </p>
-        {isForecast && data.price_low && data.price_high && (
-          <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#94a3b8' }}>
-            Rango: {currencySymbol}{data.price_low.toFixed(2)} - {currencySymbol}{data.price_high.toFixed(2)}
-          </p>
-        )}
-        {data.regime !== undefined && (
-          <p style={{ margin: '4px 0 0', fontSize: '11px', color: regime.color }}>
-            Estado: {regime.label}
-          </p>
-        )}
-      </div>
-    );
-  }
-  return null;
-};
-
-const InterpretationGuide = ({ onClose }) => (
-  <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(2, 6, 23, 0.85)', backdropFilter: 'blur(8px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
-    <div className="guide-modal" style={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', width: '100%', maxWidth: '800px', maxHeight: '90vh', overflowY: 'auto', padding: '40px', position: 'relative' }}>
-      <button onClick={onClose} style={{ position: 'absolute', right: '24px', top: '24px', background: 'rgba(255,255,255,0.05)', padding: '8px', borderRadius: '50%', border: '1px solid rgba(255,255,255,0.1)', color: '#94a3b8' }}>
-        <X style={{ width: '24px', height: '24px' }} />
-      </button>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-        <BookOpen style={{ width: '32px', height: '32px', color: '#38bdf8' }} />
-        <h2 style={{ fontSize: '2rem', fontWeight: 700, margin: 0 }}>Guía de Interpretación</h2>
-      </div>
-
-      <section style={{ marginBottom: '32px' }}>
-        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>1. El Sistema de Consenso (Triple Pilar) 🏛️</h3>
-        <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>La recomendación final ("COMPRA", "VENTA", etc.) es el resultado de una suma ponderada de tres modelos independientes. La puntuación va de 0 a 100.</p>
-
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '16px', fontSize: '0.85rem', color: '#cbd5e1' }}>
-          <thead>
-            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-              <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Pilar</th>
-              <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Peso</th>
-              <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Qué Analiza</th>
-              <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Métrica Clave</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <td style={{ padding: '8px' }}><strong>1. Estructura</strong></td>
-              <td style={{ padding: '8px' }}><strong>40%</strong></td>
-              <td style={{ padding: '8px' }}>Eficiencia del mercado actual</td>
-              <td style={{ padding: '8px' }}><strong>Ratio R/R</strong> (Rentabilidad/Riesgo) del Régimen HMM actual</td>
-            </tr>
-            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-              <td style={{ padding: '8px' }}><strong>2. Impulso</strong></td>
-              <td style={{ padding: '8px' }}><strong>30%</strong></td>
-              <td style={{ padding: '8px' }}>Aceleración del precio</td>
-              <td style={{ padding: '8px' }}><strong>Media</strong> del Régimen HMM de Diferencias</td>
-            </tr>
-            <tr>
-              <td style={{ padding: '8px' }}><strong>3. Proyección</strong></td>
-              <td style={{ padding: '8px' }}><strong>30%</strong></td>
-              <td style={{ padding: '8px' }}>Futuro probable (10 días)</td>
-              <td style={{ padding: '8px' }}><strong>Pendiente</strong> de la predicción del modelo Chronos (LLM)</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '24px' }}>
-          <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>A. Pilar Estructural (Max 40 pts)</h4>
-            <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>Se basa en la calidad del estado actual de rendimientos:</p>
-            <ul style={{ fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '16px', marginTop: '8px' }}>
-              <li><strong>100 pts</strong>: Ratio R/R &gt; 0.15 (Tendencia muy limpia)</li>
-              <li><strong>70 pts</strong>: Ratio R/R &gt; 0.05 (Tendencia positiva estándar)</li>
-              <li><strong>40 pts</strong>: Ratio R/R &gt;= 0 (Mercado lateral/ruido)</li>
-              <li><strong>10 pts</strong>: Ratio R/R &lt; 0 (Ineficiente/Riesgoso)</li>
-            </ul>
-          </div>
-          <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>B. Pilar de Impulso (Max 30 pts)</h4>
-            <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>Mide la "fuerza G" del movimiento:</p>
-            <ul style={{ fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '16px', marginTop: '8px' }}>
-              <li><strong>100 pts</strong>: Media &gt; 0.5 (Fuerte aceleración)</li>
-              <li><strong>75 pts</strong>: Media &gt; 0 (Aceleración moderada)</li>
-              <li><strong>30 pts</strong>: Media &gt; -0.5 (Desaceleración/Frenada)</li>
-              <li><strong>0 pts</strong>: Media &lt;= -0.5 (Caída libre)</li>
-            </ul>
-          </div>
-          <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>C. Pilar de Proyección (Max 30 pts)</h4>
-            <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>Mira hacia el futuro con IA Generativa:</p>
-            <ul style={{ fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '16px', marginTop: '8px' }}>
-              <li><strong>100 pts</strong>: Tendencia &gt; +3% en 10 días</li>
-              <li><strong>70 pts</strong>: Tendencia &gt; 0%</li>
-              <li><strong>20 pts</strong>: Tendencia plana o ligeramente bajista</li>
-              <li><strong>0 pts</strong>: Tendencia &lt; -3% (Proyección de caída fuerte)</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      <section style={{ marginBottom: '32px' }}>
-        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>2. Veredictos y Criterios 🎯</h3>
-        <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>La suma de los puntos anteriores genera el veredicto final:</p>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '16px', fontSize: '0.85rem', color: '#cbd5e1' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Puntuación Total</th>
-                <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Veredicto</th>
-                <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Significado</th>
-                <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Estrategia Sugerida</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(16, 185, 129, 0.05)' }}>
-                <td style={{ padding: '8px' }}><strong>&gt;= 80</strong></td>
-                <td style={{ padding: '8px', color: '#34d399' }}><strong>🟢 COMPRA FUERTE</strong></td>
-                <td style={{ padding: '8px' }}>Estructura perfecta + Inercia + Futuro alcista.</td>
-                <td style={{ padding: '8px' }}><strong>Entrada agresiva</strong>. Ideal para aumentar posición.</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(250, 204, 21, 0.05)' }}>
-                <td style={{ padding: '8px' }}><strong>60 - 79</strong></td>
-                <td style={{ padding: '8px', color: '#facc15' }}><strong>🟡 COMPRA</strong></td>
-                <td style={{ padding: '8px' }}>Estructura positiva, pero falla algún pilar.</td>
-                <td style={{ padding: '8px' }}><strong>Entrada escalonada</strong>. Buscar confirmación.</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(248, 250, 252, 0.05)' }}>
-                <td style={{ padding: '8px' }}><strong>40 - 59</strong></td>
-                <td style={{ padding: '8px', color: '#cbd5e1' }}><strong>⚪ MANTENER</strong></td>
-                <td style={{ padding: '8px' }}>Zona de equilibrio. Fuerzas empatadas.</td>
-                <td style={{ padding: '8px' }}><strong>No operar</strong>. Mantener con Stop Loss.</td>
-              </tr>
-              <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(251, 146, 60, 0.05)' }}>
-                <td style={{ padding: '8px' }}><strong>20 - 39</strong></td>
-                <td style={{ padding: '8px', color: '#fb923c' }}><strong>🟠 VENTA</strong></td>
-                <td style={{ padding: '8px' }}>Pérdida de eficiencia. Riesgo &gt; Beneficio.</td>
-                <td style={{ padding: '8px' }}><strong>Reducir riesgo</strong>. Cerrar parciales.</td>
-              </tr>
-              <tr style={{ background: 'rgba(239, 68, 68, 0.05)' }}>
-                <td style={{ padding: '8px' }}><strong>&lt; 20</strong></td>
-                <td style={{ padding: '8px', color: '#f87171' }}><strong>🔴 VENTA FUERTE</strong></td>
-                <td style={{ padding: '8px' }}>Colapso estructural y aceleración negativa.</td>
-                <td style={{ padding: '8px' }}><strong>Salida inmediata</strong>. No buscar suelo.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section style={{ marginBottom: '32px' }}>
-        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>3. Diccionario de Alertas de la IA 🔍</h3>
-        <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>Cuando el sistema detecta una anomalía, añade una nota entre paréntesis. Aquí explicamos qué significan y qué acción tomar:</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
-          {[
-            { tag: 'Riesgo Elevado (R/R neg)', desc: 'Estado destructivo. Volatilidad > Retorno.', action: 'Evitar nuevas entradas hasta que cambie el régimen.' },
-            { tag: 'Deceleración detectada', desc: 'Sube el precio pero baja la aceleración (Impulso). Signo de agotamiento.', action: 'Vigilar. No perseguir el precio. Riesgo de techo.' },
-            { tag: 'Proyección bajista', desc: 'La IA anticipa caída en 10 días pese a la subida actual.', action: 'Cautela. El modelo detecta patrones de distribución no visibles.' }
-          ].map((item, i) => (
-            <div key={i} style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                <span style={{ color: '#fbbf24', fontWeight: 700, fontSize: '0.9rem' }}>{item.tag}</span>
-                <span style={{ color: '#10b981', fontSize: '0.75rem', fontWeight: 600 }}>{item.action}</span>
-              </div>
-              <p style={{ fontSize: '0.85rem', color: '#94a3b8', margin: 0 }}>{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section style={{ marginBottom: '32px' }}>
-        <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>4. Consejos de Uso Práctico</h3>
-        <ul style={{ color: '#94a3b8', fontSize: '0.9rem', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <li><strong>Confirma la Inercia:</strong> Un "Impulso consolidado" (Estado HMM estable) es mucho más fiable que uno que cambia cada día.</li>
-          <li><strong>Mira las Probabilidades:</strong> Si el estado actual tiene una probabilidad cercana al <strong>90-100%</strong>, la señal es muy robusta. Si está cerca del 50-60%, el mercado está indeciso.</li>
-          <li><strong>Usa los dos HMM:</strong><br />
-            - <strong>HMM Rep (Retornos)</strong> te dice "Dónde estamos" (Alcista, Bajista, Lateral).<br />
-            - <strong>HMM Diff (Impulso)</strong> te dice "A qué velocidad vamos".<br />
-            <em>Ejemplo: Si HMM Rep es "Alcista" pero HMM Diff es "Volátil/Bajista", movimiento perdiendo gasolina.</em>
-          </li>
-        </ul>
-      </section>
-
-      <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
-        <button onClick={() => window.print()} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', padding: '12px 24px', borderRadius: '12px', border: '1px solid rgba(56, 189, 248, 0.3)' }}>
-          <FileText style={{ width: '18px' }} /> Descargar / Imprimir Guía (PDF)
-        </button>
-      </div>
-    </div>
-  </div>
-);
+// Icons
+import { Activity, Briefcase, Trash2, PieChart, BrainCircuit, Globe, ChevronRight } from 'lucide-react';
 
 const App = () => {
-  const [activeTab, setActiveTab] = useState('one-ticker'); // 'one-ticker' or 'portfolio'
+  const [activeTab, setActiveTab] = useState('one-ticker'); // 'one-ticker', 'portfolio', 'indices'
   const [ticker, setTicker] = useState('NVDA');
-  const [currency, setCurrency] = useState('USD');
-  const [data, setData] = useState([]);
-  const [price, setPrice] = useState(0);
-  const [changePct, setChangePct] = useState(0);
-  const [recommendation, setRecommendation] = useState(null);
-  const [currentRegime, setCurrentRegime] = useState(0);
-  const [currentRegimeDiff, setCurrentRegimeDiff] = useState(0);
-  const [probsRet, setProbsRet] = useState([0, 0, 0]);
-  const [probsDiff, setProbsDiff] = useState([0, 0, 0]);
-  const [stateStatsRet, setStateStatsRet] = useState([]);
-  const [stateStatsDiff, setStateStatsDiff] = useState([]);
-  const [riskRewardRatio, setRiskRewardRatio] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState(null);
   const [showGuide, setShowGuide] = useState(false);
 
-  // Portfolio States
-  const [portfolioTickers, setPortfolioTickers] = useState(() => {
-    const saved = localStorage.getItem('portfolio_tickers');
-    return saved ? JSON.parse(saved) : ['AAPL', 'MSFT', 'BTC-USD'];
-  });
-  const [portfolioData, setPortfolioData] = useState(null);
-  const [portfolioLoading, setPortfolioLoading] = useState(false);
+  // Hooks
+  const { data, metrics, loading, error: singleError } = useStockData(ticker);
+  const {
+    portfolioTickers,
+    portfolioData,
+    loading: portfolioLoading,
+    error: portfolioError,
+    addTicker,
+    removeTicker,
+    analyzePortfolio
+  } = usePortfolio();
 
-  // Persistence Effect
-  useEffect(() => {
-    localStorage.setItem('portfolio_tickers', JSON.stringify(portfolioTickers));
-  }, [portfolioTickers]);
-
-  const fetchData = async (symbol) => {
-    setLoading(true);
-    setErrorMsg(null);
-    try {
-      const response = await fetch(`${API_URL}/api/analyze/${symbol}`);
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.detail || `Error ${response.status}`);
-      }
-
-      const result = await response.json();
-
-      const formattedHistory = (result.history || [])
-        .slice(-65) // Show last ~3 months for clarity (65 trading days)
-        .map(item => ({
-          ...item,
-          date: new Date(item.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
-          historyPrice: item.price,
-          forecastPrice: null,
-          range: null,
-          price_low: null,
-          price_high: null
-        }));
-
-      const formattedForecast = (result.forecast || []).map(item => ({
-        ...item,
-        date: new Date(item.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
-        historyPrice: null,
-        forecastPrice: item.price,
-        range: [item.price_low, item.price_high],
-        price_low: item.price_low,
-        price_high: item.price_high
-      }));
-
-      if (formattedHistory.length > 0 && formattedForecast.length > 0) {
-        const lastPrice = formattedHistory[formattedHistory.length - 1].historyPrice;
-        formattedHistory[formattedHistory.length - 1].forecastPrice = lastPrice;
-        formattedHistory[formattedHistory.length - 1].range = [lastPrice, lastPrice];
-        formattedHistory[formattedHistory.length - 1].price_low = lastPrice;
-        formattedHistory[formattedHistory.length - 1].price_high = lastPrice;
-      }
-
-      setData([...formattedHistory, ...formattedForecast]);
-      setPrice(result.current_price || 0);
-      setCurrency(result.currency || 'USD');
-      setChangePct(result.change_pct || 0);
-      setRecommendation(result.recommendation);
-      setCurrentRegime(result.current_regime_ret ?? 0);
-      setCurrentRegimeDiff(result.current_regime_diff ?? 0);
-      setProbsRet(result.regime_probs_ret || [0, 0, 0]);
-      setProbsDiff(result.regime_probs_diff || [0, 0, 0]);
-      setStateStatsRet(result.state_stats_ret || []);
-      setStateStatsDiff(result.state_stats_diff || []);
-      setRiskRewardRatio(result.risk_reward_ratio);
-    } catch (err) {
-      console.error("Fetch Error:", err);
-      setErrorMsg(err.message || "Error al conectar con la API.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchPortfolio = async () => {
-    if (portfolioTickers.length === 0) return;
-    setPortfolioLoading(true);
-    setErrorMsg(null);
-    try {
-      const resp = await fetch(`${API_URL}/api/portfolio`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(portfolioTickers)
-      });
-      if (!resp.ok) {
-        const errData = await resp.json().catch(() => ({}));
-        throw new Error(errData.detail || "Error al analizar la cartera.");
-      }
-      const result = await resp.json();
-      setPortfolioData(result);
-    } catch (err) {
-      setErrorMsg(err.message);
-    } finally {
-      setPortfolioLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (activeTab === 'one-ticker') {
-      fetchData(ticker);
-    }
-  }, [activeTab, ticker]);
+  const {
+    indicesData,
+    loading: indicesLoading,
+    error: indicesError,
+    analyzeIndices,
+    currentIndex
+  } = useIndices();
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -380,70 +49,30 @@ const App = () => {
     if (symbol) {
       if (activeTab === 'one-ticker') {
         setTicker(symbol);
-        fetchData(symbol);
       } else {
-        if (!portfolioTickers.includes(symbol)) {
-          setPortfolioTickers(prev => [...prev, symbol]);
-        }
+        addTicker(symbol);
         e.target[0].value = '';
       }
     }
   };
 
-  const removeTicker = (t) => {
-    setPortfolioTickers(prev => prev.filter(x => x !== t));
+  const handleIndexSelect = (indexName) => {
+    const tickers = INDICES_CONSTITUENTS[indexName];
+    analyzeIndices(tickers, indexName);
   };
 
-  const regRet = getRegime(currentRegime);
-  const regDiff = getRegime(currentRegimeDiff);
+  const errorMsg = singleError || portfolioError || indicesError;
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#020617', color: '#f8fafc', padding: '0px' }}>
       {showGuide && <InterpretationGuide onClose={() => setShowGuide(false)} />}
 
-      {/* Header */}
-      <nav className="nav-container" style={{ padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.05)', backgroundColor: 'rgba(2, 6, 23, 0.8)', position: 'sticky', top: 0, zIndex: 100, backdropFilter: 'blur(10px)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }} className="nav-left">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <BrainCircuit style={{ width: '32px', height: '32px', color: '#38bdf8' }} />
-            <h1 className="logo-text" style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0 }}>StockAI Pulse</h1>
-          </div>
-
-          <div style={{ display: 'flex', gap: '4px', background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '12px' }} className="nav-tabs">
-            <button
-              onClick={() => setActiveTab('one-ticker')}
-              style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'one-ticker' ? '#38bdf8' : 'transparent', color: activeTab === 'one-ticker' ? '#020617' : '#94a3b8', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
-            >
-              Análisis Ticker
-            </button>
-            <button
-              onClick={() => setActiveTab('portfolio')}
-              style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: activeTab === 'portfolio' ? '#38bdf8' : 'transparent', color: activeTab === 'portfolio' ? '#020617' : '#94a3b8', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }}
-            >
-              Análisis Cartera
-            </button>
-          </div>
-        </div>
-
-        <form onSubmit={handleSearch} className="nav-search" style={{ position: 'relative', width: '300px' }}>
-          <input
-            type="text"
-            placeholder={activeTab === 'one-ticker' ? "Buscar Ticker..." : "Añadir a Cartera..."}
-            style={{ width: '100%', padding: '12px 20px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
-          />
-        </form>
-
-        <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }} className="nav-right">
-          <button
-            onClick={() => setShowGuide(true)}
-            className="guide-btn"
-            style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', padding: '8px 16px', borderRadius: '12px', fontSize: '0.9rem', color: '#38bdf8' }}
-          >
-            <BookOpen style={{ width: '18px' }} /> <span className="guide-text">Guía de Interpretación</span>
-          </button>
-          <Settings style={{ width: '20px', color: '#94a3b8' }} />
-        </div>
-      </nav>
+      <Navbar
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        handleSearch={handleSearch}
+        setShowGuide={setShowGuide}
+      />
 
       {/* Main Content */}
       <main style={{ maxWidth: '1600px', margin: '0 auto', padding: '32px' }}>
@@ -456,126 +85,16 @@ const App = () => {
         )}
 
         {activeTab === 'one-ticker' ? (
-          <div className="main-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
-            {/* Market Status Overview */}
-            <div className="chart-panel" style={{ gridColumn: 'span 8', padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                <div>
-                  <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '4px' }}>Precio en vivo ({ticker})</p>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-                    <h2 style={{ fontSize: '2.5rem', fontWeight: 700, margin: 0 }}>
-                      {getCurrencySymbol(currency)}{price ? price.toFixed(2) : '0.00'}
-                    </h2>
-                    <span style={{ color: (changePct || 0) >= 0 ? '#10b981' : '#ef4444', fontWeight: 600 }}>
-                      {(changePct || 0) >= 0 ? '+' : ''}{(changePct || 0).toFixed(2)}%
-                    </span>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: `${regRet.color}20`, color: regRet.color, border: `1px solid ${regRet.color}40` }}>
-                    HMM Rep: {regRet.label}
-                  </span>
-                  <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: `${regDiff.color}20`, color: regDiff.color, border: `1px solid ${regDiff.color}40` }}>
-                    HMM Diff: {regDiff.label}
-                  </span>
-                  {stateStatsRet.length > 0 && (
-                    <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.4)' }}>
-                      R/R Actual: {(stateStatsRet.find(s => s.regime === currentRegime)?.ratio_rr || 0).toFixed(2)}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* AI Recommendation Banner */}
-              {recommendation && !loading && (
-                <div style={{ marginBottom: '24px', padding: '16px 20px', borderRadius: '16px', background: `${recommendation.color}15`, border: `1px solid ${recommendation.color}40`, display: 'flex', alignItems: 'center', gap: '20px' }}>
-                  <div style={{ background: recommendation.color, color: '#fff', padding: '8px 16px', borderRadius: '8px', fontWeight: 800, fontSize: '0.8rem' }}>
-                    {recommendation.verdict}
-                  </div>
-                  <p style={{ fontSize: '0.95rem', margin: 0 }}>{recommendation.reason}</p>
-                </div>
-              )}
-
-              <div style={{ height: '400px', width: '100%', position: 'relative' }}>
-                {loading && (
-                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(2, 6, 23, 0.6)', borderRadius: '12px', zIndex: 10 }}>
-                    <div style={{ width: '40px', height: '40px', border: '4px solid #38bdf8', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-                  </div>
-                )}
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={data}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="date" stroke="rgba(255,255,255,0.3)" fontSize={10} />
-                    <YAxis hide={true} domain={['auto', 'auto']} />
-                    <Tooltip content={<CustomTooltip currencySymbol={getCurrencySymbol(currency)} />} />
-                    {/* Shadow band for forecast range */}
-                    <Area type="monotone" dataKey="range" stroke="none" fill="#818cf8" fillOpacity={0.3} connectNulls={true} />
-                    <Area type="monotone" dataKey="historyPrice" stroke="#38bdf8" strokeWidth={3} fillOpacity={0.1} fill="#38bdf8" />
-                    <Area type="monotone" dataKey="forecastPrice" stroke="#818cf8" strokeWidth={3} strokeDasharray="5 5" fillOpacity={0.1} fill="#818cf8" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Side Panels */}
-            <div className="side-panels" style={{ gridColumn: 'span 4', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-              <div style={{ padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Zap style={{ color: '#f59e0b' }} /> IA Insight (Rendimientos)
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {[0, 1, 2].map(id => {
-                    const item = REGIME_INFO[id];
-                    const stats = stateStatsRet.find(s => s.regime === id) || { mean: 0, std: 0 };
-                    const prob = ((probsRet[id] || 0) * 100).toFixed(1);
-                    const isCurrent = currentRegime === id;
-                    return (
-                      <div key={id} style={{ padding: '12px', borderRadius: '12px', background: isCurrent ? `${item.color}15` : 'transparent', border: isCurrent ? `1px solid ${item.color}40` : '1px solid transparent' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                          <span style={{ fontSize: '14px', fontWeight: 600, color: item.color }}>{item.label} ({prob}%)</span>
-                          {isCurrent && <span style={{ fontSize: '10px', background: item.color, padding: '2px 6px', borderRadius: '4px' }}>ACTUAL</span>}
-                        </div>
-                        <div style={{ display: 'flex', gap: '12px', fontSize: '11px', color: '#94a3b8' }}>
-                          <span>μ: {(stats.mean || 0).toFixed(3)}%</span>
-                          <span>σ: {(stats.std || 0).toFixed(3)}%</span>
-                          <span style={{ color: (stats.ratio_rr > 0) ? '#34d399' : '#f87171' }}>R/R: {(stats.ratio_rr || 0).toFixed(2)}</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div style={{ padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 600, marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <BarChart3 style={{ color: '#818cf8' }} /> IA Insight (Diferencias)
-                </h3>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {[0, 1, 2].map(id => {
-                    const item = REGIME_INFO[id];
-                    const stats = stateStatsDiff.find(s => s.regime === id) || { mean: 0, std: 0 };
-                    const prob = ((probsDiff[id] || 0) * 100).toFixed(1);
-                    const isCurrent = currentRegimeDiff === id;
-                    return (
-                      <div key={id} style={{ padding: '12px', borderRadius: '12px', background: isCurrent ? `${item.color}15` : 'transparent', border: isCurrent ? `1px solid ${item.color}40` : '1px solid transparent' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                          <span style={{ fontSize: '14px', fontWeight: 600, color: item.color }}>{item.label} ({prob}%)</span>
-                          {isCurrent && <span style={{ fontSize: '10px', background: item.color, padding: '2px 6px', borderRadius: '4px' }}>ACTUAL</span>}
-                        </div>
-                        <div style={{ display: 'flex', gap: '12px', fontSize: '11px', color: '#94a3b8' }}>
-                          <span style={{ color: (stats.mean > 0) ? '#38bdf8' : '#f87171' }}>Impulso (μ): {(stats.mean || 0).toFixed(3)}%</span>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
+          <StockDashboard
+            ticker={ticker}
+            data={data}
+            metrics={metrics}
+            loading={loading}
+          />
+        ) : activeTab === 'portfolio' ? (
           /* Portfolio Section */
           <div className="main-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
-            <div className="portfolio-sidebar" style={{ gridColumn: 'span 4' }}>
+            <div className="portfolio-sidebar" style={{ gridColumn: 'span 3' }}>
               <div style={{ padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)', height: 'fit-content' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
                   <Briefcase style={{ color: '#38bdf8' }} />
@@ -601,7 +120,7 @@ const App = () => {
                 </div>
 
                 <button
-                  onClick={fetchPortfolio}
+                  onClick={analyzePortfolio}
                   disabled={portfolioLoading || portfolioTickers.length === 0}
                   style={{ width: '100%', padding: '16px', borderRadius: '14px', background: '#38bdf8', color: '#020617', fontWeight: 800, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px' }}
                 >
@@ -611,7 +130,7 @@ const App = () => {
               </div>
             </div>
 
-            <div className="portfolio-content" style={{ gridColumn: 'span 8' }}>
+            <div className="portfolio-content" style={{ gridColumn: 'span 9' }}>
               <div style={{ padding: '32px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.4)', border: '1px solid rgba(255,255,255,0.05)', minHeight: '500px' }}>
                 {!portfolioData && !portfolioLoading && (
                   <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', opacity: 0.6 }}>
@@ -646,31 +165,132 @@ const App = () => {
                     </div>
 
                     <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '20px', color: '#94a3b8' }}>DESGLOSE TÉCNICO POR ACTIVO</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
-                      {portfolioData.assets.map(asset => (
-                        <div key={asset.ticker} style={{ padding: '20px', borderRadius: '18px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                            <div>
-                              <div style={{ fontWeight: 900, fontSize: '1.2rem' }}>{asset.ticker}</div>
-                              <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{getCurrencySymbol(asset.currency)}{asset.current_price.toFixed(2)}</div>
-                            </div>
-                            <div style={{ padding: '4px 10px', borderRadius: '6px', background: asset.recommendation.color + '20', color: asset.recommendation.color, fontSize: '0.7rem', fontWeight: 800 }}>
-                              {asset.recommendation.verdict}
-                            </div>
-                          </div>
-                          <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-                            <span style={{ fontSize: '0.7rem', padding: '4px 8px', borderRadius: '6px', background: getRegime(asset.current_regime_ret).color + '20', color: getRegime(asset.current_regime_ret).color, fontWeight: 700 }}>
-                              HMM: {getRegime(asset.current_regime_ret).label}
-                            </span>
-                            <span style={{ fontSize: '0.7rem', padding: '4px 8px', borderRadius: '6px', background: 'rgba(255,255,255,0.1)', color: '#cbd5e1', fontWeight: 700 }}>
-                              IMP: {getRegime(asset.current_regime_diff).label}
-                            </span>
-                          </div>
-                          <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.5, minHeight: '4.5em', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                            {asset.recommendation.reason}
-                          </p>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                      {[...portfolioData.assets]
+                        .sort((a, b) => {
+                          const rank = {
+                            'COMPRA FUERTE': 5,
+                            'COMPRA': 4,
+                            'MANTENER': 3,
+                            'VENTA': 2,
+                            'VENTA FUERTE': 1
+                          };
+                          const scoreA = rank[a.recommendation.verdict] || 0;
+                          const scoreB = rank[b.recommendation.verdict] || 0;
+
+                          if (scoreA !== scoreB) {
+                            return scoreB - scoreA;
+                          }
+
+                          const meanA = a.state_stats_ret?.find(s => s.regime === a.current_regime_ret)?.mean || 0;
+                          const meanB = b.state_stats_ret?.find(s => s.regime === b.current_regime_ret)?.mean || 0;
+                          return meanB - meanA;
+                        })
+                        .map(asset => (
+                          <AssetCard key={asset.ticker} asset={asset} />
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Indices Constituents Section */
+          <div className="main-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
+            {/* Indices Selector Sidebar */}
+            <div className="indices-sidebar" style={{ gridColumn: 'span 3' }}>
+              <div style={{ padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)', height: 'fit-content' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                  <Globe style={{ color: '#38bdf8' }} />
+                  <h3 style={{ fontSize: '1.2rem', fontWeight: 600, margin: 0 }}>Seleccionar Índice</h3>
+                </div>
+
+                <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '24px' }}>
+                  Analice los componentes de los principales índices mundiales.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {Object.keys(INDICES_CONSTITUENTS).map(indexName => (
+                    <button
+                      key={indexName}
+                      onClick={() => handleIndexSelect(indexName)}
+                      disabled={indicesLoading}
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: currentIndex === indexName ? '1px solid #38bdf8' : '1px solid rgba(255,255,255,0.05)',
+                        background: currentIndex === indexName ? 'rgba(56, 189, 248, 0.1)' : 'rgba(255,255,255,0.03)',
+                        color: currentIndex === indexName ? '#38bdf8' : '#cbd5e1',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        fontWeight: 600,
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {indexName}
+                      <ChevronRight style={{ width: '16px', opacity: currentIndex === indexName ? 1 : 0.5 }} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Indices Results Content */}
+            <div className="indices-content" style={{ gridColumn: 'span 9' }}>
+              <div style={{ padding: '32px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.4)', border: '1px solid rgba(255,255,255,0.05)', minHeight: '500px' }}>
+
+                {!indicesData && !indicesLoading && (
+                  <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', opacity: 0.6 }}>
+                    <Globe style={{ width: '80px', height: '80px', marginBottom: '24px', color: '#64748b' }} />
+                    <h4 style={{ fontSize: '1.4rem', fontWeight: 600, margin: '0 0 12px' }}>Seleccione un Índice</h4>
+                    <p style={{ maxWidth: '400px', lineHeight: 1.6 }}>
+                      Elija un índice del menú lateral para analizar todos sus componentes y detectar oportunidades de <strong>COMPRA FUERTE</strong>.
+                    </p>
+                  </div>
+                )}
+
+                {indicesLoading && (
+                  <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                    <div style={{ width: '64px', height: '64px', border: '4px solid #38bdf8', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite', marginBottom: '24px' }}></div>
+                    <h4 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Analizando {currentIndex}...</h4>
+                    <p style={{ color: '#94a3b8' }}>Procesando modelos HMM para todos los componentes.</p>
+                  </div>
+                )}
+
+                {indicesData && !indicesLoading && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                      <div>
+                        <h2 style={{ fontSize: '1.8rem', fontWeight: 800, margin: 0 }}>Oportunidades en {currentIndex}</h2>
+                        <p style={{ color: '#94a3b8', margin: '4px 0 0' }}>Filtrando por <strong>COMPRA FUERTE</strong></p>
+                      </div>
+                      <div style={{ padding: '8px 20px', borderRadius: '20px', background: '#38bdf820', border: '1px solid #38bdf840', color: '#38bdf8', fontWeight: 800, fontSize: '0.9rem' }}>
+                        {indicesData.assets.filter(a => a.recommendation.verdict === 'COMPRA FUERTE').length} OPORTUNIDADES
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                      {indicesData.assets
+                        .filter(a => a.recommendation.verdict === 'COMPRA FUERTE')
+                        .sort((a, b) => { // Sort by HMM Mean Descending
+                          const meanA = a.state_stats_ret?.find(s => s.regime === a.current_regime_ret)?.mean || 0;
+                          const meanB = b.state_stats_ret?.find(s => s.regime === b.current_regime_ret)?.mean || 0;
+                          return meanB - meanA;
+                        })
+                        .map(asset => (
+                          <AssetCard key={asset.ticker} asset={asset} />
+                        ))}
+
+                      {indicesData.assets.filter(a => a.recommendation.verdict === 'COMPRA FUERTE').length === 0 && (
+                        <div style={{ gridColumn: 'span 3', padding: '60px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                          <p style={{ fontSize: '1.1rem', color: '#94a3b8', marginBottom: '8px' }}>No se han encontrado oportunidades claras.</p>
+                          <p style={{ fontSize: '0.9rem', color: '#64748b' }}>Ningún activo del {currentIndex} presenta actualmente una señal de <strong>COMPRA FUERTE</strong>.</p>
                         </div>
-                      ))}
+                      )}
                     </div>
                   </div>
                 )}
@@ -696,7 +316,7 @@ const App = () => {
           .nav-search { width: 100% !important; order: 3; }
           .nav-right { order: 2; width: auto; }
           .main-grid { grid-template-columns: 1fr !important; }
-          .chart-panel, .side-panels, .portfolio-sidebar, .portfolio-content { grid-column: span 12 !important; }
+          .chart-panel, .side-panels, .portfolio-sidebar, .portfolio-content, .indices-sidebar, .indices-content { grid-column: span 12 !important; }
         }
 
         @media (max-width: 640px) {

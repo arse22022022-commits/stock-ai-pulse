@@ -75,4 +75,17 @@ Cuando el sistema detecta una anomalía, añade una nota entre paréntesis. Aqu�
     *   *Ejemplo*: Si HMM Rep es "Alcista" pero HMM Diff es "Volátil/Bajista", el movimiento está perdiendo gasolina.
 
 ---
+
+## 5. Índices Globales y Filtrado 🌍
+
+La nueva sección de **Índices Globales** permite analizar mercados completos (IBEX 35, DAX 40, NASDAQ 100, etc.) en busca de oportunidades.
+
+### Filtrado Inteligente "Solo Oportunidades"
+
+Al seleccionar un índice, el sistema analiza **todos** sus componentes pero **solo muestra** aquellos con veredicto **🟢 COMPRA FUERTE**.
+
+*   Esto elimina el ruido y te centra únicamente en los activos con la mejor estructura técnica y momento.
+*   Si no se muestran resultados, significa que ningún activo del índice cumple los estrictos criterios de excelencia de la IA en este momento.
+
+---
 *Nota: Esta herramienta es un asistente analítico basado en matemáticas avanzadas. No constituye asesoramiento financiero directo.*
