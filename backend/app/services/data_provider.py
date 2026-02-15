@@ -12,9 +12,10 @@ class DataProvider:
     def __init__(self):
         self.executor = ThreadPoolExecutor(max_workers=5)
 
-    async def fetch_ticker_data(self, ticker: str, days: int = 365) -> pd.DataFrame:
+    async def fetch_ticker_data(self, ticker: str, days: int = 365) -> tuple[pd.DataFrame, str]:
         """
         Fetch data asynchronously using a thread pool to avoid blocking the main event loop.
+        Returns: (DataFrame, currency_string)
         """
         loop = asyncio.get_event_loop()
         end_date = datetime.now() + timedelta(days=1)
@@ -22,7 +23,7 @@ class DataProvider:
         
         try:
             # Run blocking yfinance call in a separate thread
-            data = await loop.run_in_executor(
+            data, currency = await loop.run_in_executor(
                 self.executor,
                 self._fetch_sync,
                 ticker,
@@ -32,7 +33,7 @@ class DataProvider:
             
             if data.empty:
                 logger.warning(f"No data found for {ticker}")
-                return pd.DataFrame()
+                return pd.DataFrame(), "USD"
 
             # Process data
             if isinstance(data.columns, pd.MultiIndex):
@@ -45,7 +46,7 @@ class DataProvider:
             data['Diff_Returns'] = data['Returns'].diff()
             data.dropna(inplace=True)
             
-            return data
+            return data, currency
             
         except Exception as e:
             logger.error(f"Error fetching data for {ticker}: {e}")
@@ -54,13 +55,13 @@ class DataProvider:
     def _fetch_sync(self, ticker, start, end):
         """Internal synchronous method for yfinance"""
         ticker_obj = yf.Ticker(ticker)
-        return ticker_obj.history(start=start, end=end, auto_adjust=True)
-
-    def get_currency(self, ticker: str) -> str:
+        df = ticker_obj.history(start=start, end=end, auto_adjust=True)
         try:
-            return yf.Ticker(ticker).info.get('currency', 'USD')
+            # Fast info is usually cached or quick, but safer here in thread
+            currency = ticker_obj.info.get('currency', 'USD')
         except:
-            return 'USD'
+            currency = 'USD'
+        return df, currency
 
 # Global instance
 data_provider = DataProvider()

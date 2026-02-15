@@ -1,6 +1,7 @@
 import React from 'react';
 import { StockChart } from './StockChart';
 import { RegimeBadges } from './RegimeBadges';
+import { ChatWidget } from '../Chat/ChatWidget';
 import { getRegime, getCurrencySymbol } from '../../utils/formatters';
 
 export const StockDashboard = ({ ticker, metrics, data, loading }) => {
@@ -9,8 +10,16 @@ export const StockDashboard = ({ ticker, metrics, data, loading }) => {
     const regDiff = getRegime(metrics.currentRegimeDiff);
     const recommendation = metrics.recommendation;
 
+    // Chat Context
+    const chatContext = {
+        ticker: ticker,
+        price: metrics.price,
+        hmm_state: regRet.label, // "Alcista", "Estable", etc.
+        impulse_state: regDiff.label,
+    };
+
     return (
-        <div className="main-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
+        <div className="main-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px', position: 'relative' }}>
             {/* Market Status Overview */}
             <div className="chart-panel" style={{ gridColumn: 'span 8', padding: '24px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
@@ -61,6 +70,9 @@ export const StockDashboard = ({ ticker, metrics, data, loading }) => {
                 stateStatsRet={metrics.stateStatsRet}
                 stateStatsDiff={metrics.stateStatsDiff}
             />
+
+            {/* AI Financial Chatbot */}
+            <ChatWidget context={chatContext} />
         </div>
     );
 };

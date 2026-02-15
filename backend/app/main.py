@@ -1,9 +1,18 @@
+import os
+
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 import os
 import logging
+from dotenv import load_dotenv
+
+# Load environment variables
+backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+env_path = os.path.join(backend_dir, ".env")
+load_dotenv(env_path)
+
 from .api.endpoints import router
 from .services.llm import llm_service
 
@@ -24,6 +33,8 @@ app.add_middleware(
 
 # API Router
 app.include_router(router, prefix="/api")
+
+
 
 # Static Files (Frontend)
 # Assumes 'static' folder is at the root level relative to where python is run
@@ -49,4 +60,4 @@ async def catch_all(full_path: str):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("backend.app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("backend.app.main:app", host="0.0.0.0", port=8001, reload=True)

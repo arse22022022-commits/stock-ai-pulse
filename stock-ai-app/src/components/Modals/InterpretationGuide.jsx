@@ -133,7 +133,44 @@ export const InterpretationGuide = ({ onClose }) => (
             </section>
 
             <section style={{ marginBottom: '32px' }}>
-                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>3. Diccionario de Alertas de la IA 🔍</h3>
+                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>3. Glosario de Justificaciones 🗣️</h3>
+                <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>Aquí explicamos el significado exacto de las frases que utiliza la IA para justificar su recomendación:</p>
+                <div style={{ overflowX: 'auto', marginTop: '16px' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', color: '#cbd5e1' }}>
+                        <thead>
+                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc', width: '40%' }}>Frase de la IA</th>
+                                <th style={{ padding: '8px', textAlign: 'left', color: '#f8fafc' }}>Qué significa realmente</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <td style={{ padding: '8px', color: '#34d399' }}><strong>"Eficiencia estructural óptima con fuerte inercia alcista confirmada."</strong></td>
+                                <td style={{ padding: '8px' }}><strong>El escenario ideal.</strong> El precio sube de forma limpia y acelera. Tendencia robusta.</td>
+                            </tr>
+                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <td style={{ padding: '8px', color: '#facc15' }}><strong>"Estructura positiva. El mercado muestra calidad y potencial de crecimiento."</strong></td>
+                                <td style={{ padding: '8px' }}><strong>Buen momento.</strong> Tendencia alcista y bajo riesgo, pero quizás le falta "explosividad".</td>
+                            </tr>
+                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <td style={{ padding: '8px', color: '#cbd5e1' }}><strong>"Zona de equilibrio. Los pilares muestran señales mixtas o estables."</strong></td>
+                                <td style={{ padding: '8px' }}><strong>Indecisión.</strong> Volatilidad o lateralidad. No hay ventaja estadística clara.</td>
+                            </tr>
+                            <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <td style={{ padding: '8px', color: '#fb923c' }}><strong>"Pérdida de eficiencia. Se detecta ruido o sesgo bajista en el impulso."</strong></td>
+                                <td style={{ padding: '8px' }}><strong>Precaución.</strong> La tendencia se ensucia o pierde fuerza. Riesgo de corrección.</td>
+                            </tr>
+                            <tr>
+                                <td style={{ padding: '8px', color: '#f87171' }}><strong>"Deterioro crítico. Colapso de eficiencia y aceleración negativa."</strong></td>
+                                <td style={{ padding: '8px' }}><strong>Peligro.</strong> Caída fuerte o volátil. Entorno tóxico.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section style={{ marginBottom: '32px' }}>
+                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>4. Diccionario de Alertas de la IA 🔍</h3>
                 <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>Cuando el sistema detecta una anomalía, añade una nota entre paréntesis. Aquí explicamos qué significan y qué acción tomar:</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
                     {[
@@ -153,7 +190,7 @@ export const InterpretationGuide = ({ onClose }) => (
             </section>
 
             <section style={{ marginBottom: '32px' }}>
-                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>4. Consejos de Uso Práctico</h3>
+                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>5. Consejos de Uso Práctico</h3>
                 <ul style={{ color: '#94a3b8', fontSize: '0.9rem', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <li><strong>Confirma la Inercia:</strong> Un "Impulso consolidado" (Estado HMM estable) es mucho más fiable que uno que cambia cada día.</li>
                     <li><strong>Mira las Probabilidades:</strong> Si el estado actual tiene una probabilidad cercana al <strong>90-100%</strong>, la señal es muy robusta. Si está cerca del 50-60%, el mercado está indeciso.</li>
@@ -166,7 +203,7 @@ export const InterpretationGuide = ({ onClose }) => (
             </section>
 
             <section style={{ marginBottom: '32px' }}>
-                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>5. Índices Globales y Filtrado 🌍</h3>
+                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>6. Índices Globales y Filtrado 🌍</h3>
                 <p style={{ color: '#94a3b8', lineHeight: 1.6, marginBottom: '12px' }}>La nueva sección de <strong>Índices Globales</strong> permite analizar mercados completos (IBEX 35, DAX 40, NASDAQ 100, etc.) en busca de oportunidades.</p>
                 <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
                     <h4 style={{ color: '#f8fafc', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -181,6 +218,33 @@ export const InterpretationGuide = ({ onClose }) => (
                         <li>Si no se muestran resultados, significa que ningún activo del índice cumple los estrictos criterios de excelencia de la IA en este momento.</li>
                     </ul>
                 </div>
+            </section>
+
+            <section style={{ marginBottom: '32px' }}>
+                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>7. Analyst AI (Chat Financiero) 🤖💬</h3>
+                <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>El sistema incluye un <strong>Analista Virtual</strong> basado en Google Gemini 2.0 Flash. Puedes preguntarle sobre cualquier activo analizado.</p>
+
+                <h4 style={{ color: '#f8fafc', marginTop: '16px', marginBottom: '8px', fontSize: '1rem' }}>Características Clave:</h4>
+                <ul style={{ color: '#94a3b8', fontSize: '0.9rem', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <li><strong>Contexto Automático:</strong> La IA ya "sabe" el precio, la tendencia y la volatilidad del activo que estás viendo. No necesitas explicárselo.</li>
+                    <li><strong>Interpretación Humana:</strong> Traduce los datos técnicos complejos (HMM, Impulso) a un lenguaje natural y comprensible.</li>
+                    <li><strong>Seguridad y Estabilidad:</strong>
+                        <ul style={{ marginTop: '4px', paddingLeft: '20px', listStyleType: 'circle' }}>
+                            <li>Funciona en segundo plano. Si la IA tarda en pensar, <strong>no bloquea</strong> el resto de la aplicación.</li>
+                            <li><strong>Modo "Descanso":</strong> Si usas la versión gratuita y alcanzas el límite de consultas (Error 429), la IA te avisará amablemente de que necesita una pausa de 30 segundos, sin colgar el sistema.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <section style={{ marginBottom: '32px' }}>
+                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>8. Nota sobre la Estabilidad del Sistema 🛡️</h3>
+                <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>Hemos implementado protecciones avanzadas "Anti-Crash":</p>
+                <ul style={{ color: '#94a3b8', fontSize: '0.9rem', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '8px' }}>
+                    <li><strong>Carga Perezosa (Lazy Loading):</strong> Los modelos pesados (Chronos) solo se activan cuando son necesarios, acelerando el inicio.</li>
+                    <li><strong>Predicción Asíncrona:</strong> Los cálculos matemáticos complejos se realizan en hilos paralelos para mantener la fluidez de la interfaz.</li>
+                    <li><strong>Fallback Estadístico:</strong> En el improbable caso de que el modelo de IA falle, el sistema cambiará automáticamente a un modelo estadístico robusto (Movimiento Browniano Geométrico) para garantizar que siempre tengas una proyección disponible.</li>
+                </ul>
             </section>
         </div>
     </div>

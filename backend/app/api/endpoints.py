@@ -6,6 +6,7 @@ import logging
 import asyncio
 import numpy as np
 from datetime import datetime
+from ..services.chat import generate_market_explanation, ChatRequest, ChatResponse
 import re
 
 router = APIRouter()
@@ -36,7 +37,7 @@ async def analyze_stock(ticker: str):
     
     try:
         # 1. Fetch Data (Async)
-        data = await data_provider.fetch_ticker_data(ticker)
+        data, currency = await data_provider.fetch_ticker_data(ticker)
         
         if data.empty:
             raise HTTPException(status_code=404, detail=f"Ticker '{ticker}' no encontrado o sin datos.")
@@ -55,7 +56,7 @@ async def analyze_stock(ticker: str):
         last_price = float(data[price_col].iloc[-1])
         last_date = data.index[-1]
         
-        forecast_result = llm_service.predict(
+        forecast_result = await llm_service.predict_async(
             data[price_col].values, 
             prediction_length=10, 
             last_date=last_date, 
@@ -72,7 +73,7 @@ async def analyze_stock(ticker: str):
         current_price = last_price
         previous_price = float(data[price_col].iloc[-2])
         change_pct = ((current_price - previous_price) / previous_price) * 100
-        currency = data_provider.get_currency(ticker)
+        # currency = data_provider.get_currency(ticker) # REMOVED: Blocking call
         
         mean_ret = data['Returns'].mean()
         std_ret = data['Returns'].std()
@@ -186,6 +187,8 @@ async def analyze_portfolio(tickers: list[str]):
     if warnings:
         advice_parts.append(f"OJO AVIZOR: {', '.join(warnings)} (Sube precio, baja impulso).")
 
+
+
     return {
         "assets": valid_results,
         "summary": {
@@ -204,3 +207,13 @@ async def analyze_portfolio(tickers: list[str]):
             "to_remove": to_sell
         }
     }
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat_endpoint(request: ChatRequest):
+    try:
+        response_text = await generate_market_explanation(request)
+        return ChatResponse(response=response_text)
+    except Exception as e:
+        logger.error(f"Error in chat endpoint: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+

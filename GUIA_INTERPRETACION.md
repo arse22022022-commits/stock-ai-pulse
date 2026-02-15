@@ -53,7 +53,21 @@ La suma de los puntos anteriores genera el veredicto final:
 
 ---
 
-## 3. Diccionario de Alertas de la IA 🔍
+## 3. Glosario de Justificaciones 🗣️
+
+Aquí explicamos el significado exacto de las frases que utiliza la IA para justificar su recomendación:
+
+| Frase de la IA | Qué significa realmente |
+| :--- | :--- |
+| **"Eficiencia estructural óptima con fuerte inercia alcista confirmada."** | **El escenario ideal.** El precio sube de forma limpia (sin apenas retrocesos) y además está acelerando. Es una tendencia robusta y saludable. |
+| **"Estructura positiva. El mercado muestra calidad y potencial de crecimiento."** | **Buen momento.** La tendencia es alcista y el riesgo es bajo, aunque quizás le falta un poco de "explosividad" o aceleración para ser perfecta. |
+| **"Zona de equilibrio. Los pilares muestran señales mixtas o estables."** | **Indecisión.** Puede que el precio suba pero con mucha volatilidad (ruido), o que esté lateral. No hay una ventaja estadística clara para entrar. |
+| **"Pérdida de eficiencia. Se detecta ruido o sesgo bajista en el impulso."** | **Precaución.** La tendencia se está ensuciando (muchos dientes de sierra) o está perdiendo fuerza. Aumentan las probabilidades de corrección. |
+| **"Deterioro crítico. Colapso de eficiencia y aceleración negativa."** | **Peligro.** El activo está cayendo con fuerza o con mucha volatilidad. Es un entorno tóxico para el capital. |
+
+---
+
+## 4. Diccionario de Alertas de la IA 🔍
 
 Cuando el sistema detecta una anomalía, añade una nota entre paréntesis. Aquí explicamos qué significan y qué acción tomar:
 
@@ -65,7 +79,7 @@ Cuando el sistema detecta una anomalía, añade una nota entre paréntesis. Aqu�
 
 ---
 
-## 4. Consejos de Uso Práctico
+## 5. Consejos de Uso Práctico
 
 1.  **Confirma la Inercia**: Un "Impulso consolidado" (Estado HMM estable) es mucho más fiable que uno que cambia cada día.
 2.  **Mira las Probabilidades**: En el panel lateral, si el estado actual tiene una probabilidad cercana al **90-100%**, la señal es muy robusta. Si está cerca del 50-60%, el mercado está indeciso.
@@ -76,7 +90,7 @@ Cuando el sistema detecta una anomalía, añade una nota entre paréntesis. Aqu�
 
 ---
 
-## 5. Índices Globales y Filtrado 🌍
+## 6. Índices Globales y Filtrado 🌍
 
 La nueva sección de **Índices Globales** permite analizar mercados completos (IBEX 35, DAX 40, NASDAQ 100, etc.) en busca de oportunidades.
 
@@ -86,6 +100,29 @@ Al seleccionar un índice, el sistema analiza **todos** sus componentes pero **s
 
 *   Esto elimina el ruido y te centra únicamente en los activos con la mejor estructura técnica y momento.
 *   Si no se muestran resultados, significa que ningún activo del índice cumple los estrictos criterios de excelencia de la IA en este momento.
+
+---
+
+## 7. Analyst AI (Chat Financiero) 🤖💬
+
+El sistema incluye un **Analista Virtual** basado en Google Gemini 2.0 Flash. Puedes preguntarle sobre cualquier activo analizado.
+
+### Características Clave:
+*   **Contexto Automático**: La IA ya "sabe" el precio, la tendencia y la volatilidad del activo que estás viendo. No necesitas explicárselo.
+*   **Interpretación Humana**: Traduce los datos técnicos complejos (HMM, Impulso) a un lenguaje natural y comprensible.
+*   **Seguridad y Estabilidad**:
+    *   Funciona en segundo plano. Si la IA tarda en pensar, **no bloquea** el resto de la aplicación.
+    *   **Modo "Descanso"**: Si usas la versión gratuita y alcanzas el límite de consultas (Error 429), la IA te avisará amablemente de que necesita una pausa de 30 segundos, sin colgar el sistema.
+
+---
+
+## 8. Nota sobre la Estabilidad del Sistema 🛡️
+
+Hemos implementado protecciones avanzadas "Anti-Crash":
+
+*   **Carga Perezosa (Lazy Loading)**: Los modelos pesados (Chronos) solo se activan cuando son necesarios, acelerando el inicio.
+*   **Predicción Asíncrona**: Los cálculos matemáticos complejos se realizan en hilos paralelos para mantener la fluidez de la interfaz.
+*   **Fallback Estadístico**: En el improbable caso de que el modelo de IA falle, el sistema cambiará automáticamente a un modelo estadístico robusto (Movimiento Browniano Geométrico) para garantizar que siempre tengas una proyección disponible.
 
 ---
 *Nota: Esta herramienta es un asistente analítico basado en matemáticas avanzadas. No constituye asesoramiento financiero directo.*

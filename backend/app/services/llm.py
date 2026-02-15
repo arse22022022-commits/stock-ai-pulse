@@ -1,8 +1,9 @@
 import logging
+import os
+
 import torch
 import numpy as np
 from datetime import timedelta
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +20,8 @@ class LLMService:
                 logger.info("LLM disabled via environment variable")
                 return
 
+            logger.info("Attempting to load Chronos LLM...")
+            # Lazy import to prevent import-time crashes
             from chronos import ChronosPipeline
             self.pipeline = ChronosPipeline.from_pretrained(
                 "amazon/chronos-t5-tiny",
@@ -28,8 +31,11 @@ class LLMService:
             self.enabled = True
             logger.info("Chronos LLM loaded successfully")
         except Exception as e:
-            logger.warning(f"Failed to load Chronos LLM: {e}. Forecasting will use statistical fallback.")
+            # CRITICAL: Catch ALL exceptions to prevent backend crash
+            logger.error(f"Failed to load Chronos LLM: {str(e)}", exc_info=True)
+            logger.warning("Forecasting will use statistical fallback due to LLM load failure.")
             self.enabled = False
+            self.pipeline = None
 
     def predict(self, data_series: np.ndarray, prediction_length: int = 10, last_date=None, last_price=0.0):
         """
@@ -41,6 +47,7 @@ class LLMService:
             try:
                 context = torch.tensor(data_series)
                 forecast = self.pipeline.predict(context, prediction_length)
+                logger.info("Chronos forecast generated successfully.")
                 
                 # Calculate percentiles
                 forecast_10th = np.quantile(forecast[0].numpy(), 0.1, axis=0)
@@ -80,6 +87,21 @@ class LLMService:
             })
             
         return forecast_result
+
+    async def predict_async(self, data_series: np.ndarray, prediction_length: int = 10, last_date=None, last_price=0.0):
+        """
+        Async wrapper for predict to avoid blocking the main event loop.
+        """
+        import asyncio
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            None, # Use default executor
+            self.predict,
+            data_series,
+            prediction_length,
+            last_date,
+            last_price
+        )
 
 # Global instance
 llm_service = LLMService()
