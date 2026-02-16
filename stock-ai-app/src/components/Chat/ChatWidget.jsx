@@ -10,7 +10,7 @@ export const ChatWidget = ({ context }) => {
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
 
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8001';
+    const API_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:8001');
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

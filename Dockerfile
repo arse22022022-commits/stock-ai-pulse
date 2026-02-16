@@ -22,10 +22,19 @@ COPY requirements.txt .
 # Install packages (using CPU-only torch to save space/time if possible, otherwise standard)
 # We install numpy<2 first to ensure compatibility
 RUN pip install "numpy<2.0.0" && \
+    pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu && \
     pip install --no-cache-dir -r requirements.txt
 
+# Set HF_HOME to a directory within /app so it persists
+ENV HF_HOME=/app/model_cache
+RUN mkdir -p /app/model_cache
+
+# Copy and run model downloader
+COPY backend/download_model.py .
+RUN python download_model.py
+
 # Copy backend code
-COPY server.py market_regime_analysis.py ./
+COPY backend/app ./app
 
 # Copy built frontend from Stage 1
 COPY --from=build /app/dist ./static
@@ -35,4 +44,4 @@ ENV PORT=8080
 EXPOSE 8080
 
 # Run command
-CMD uvicorn server:app --host 0.0.0.0 --port ${PORT}
+CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT}
