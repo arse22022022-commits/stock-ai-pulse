@@ -1,10 +1,8 @@
 import os
-
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
-import os
 import logging
 from dotenv import load_dotenv
 
@@ -34,32 +32,18 @@ app.add_middleware(
 # API Router
 app.include_router(router, prefix="/api")
 
-
-
 # Static Files (Frontend)
 # Assumes 'static' folder is at the root level relative to where python is run
 static_dir = os.path.join(os.getcwd(), "static")
-logger.info(f"Current working directory: {os.getcwd()}")
-logger.info(f"Static directory path: {static_dir}")
 
 if os.path.exists(static_dir):
-    logger.info(f"Static directory contents: {os.listdir(static_dir)}")
-    # Check if index.html exists specifically
-    if os.path.exists(os.path.join(static_dir, "index.html")):
-        logger.info("index.html found in static directory.")
-    else:
-        logger.error("index.html NOT found in static directory!")
-        
     app.mount("/assets", StaticFiles(directory=os.path.join(static_dir, "assets")), name="assets")
-else:
-    logger.error("Static directory DOES NOT EXIST!")
 
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "llm_enabled": llm_service.enabled}
 
-# Catch-all for React Router
-# Serve Root (SPA Entry Point)
+# Serving Root (SPA Entry Point)
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
     index_path = os.path.join(static_dir, "index.html")
