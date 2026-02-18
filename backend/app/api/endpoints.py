@@ -118,8 +118,8 @@ async def analyze_portfolio(tickers: list[str]):
     if not tickers:
         raise HTTPException(status_code=400, detail="Se requiere al menos un ticker")
     
-    if len(tickers) > 20:
-        tickers = tickers[:20] # Increased limit due to async
+    if len(tickers) > 300:
+        tickers = tickers[:300] # Limit increased for composite indices
     
     # Run analyses in parallel!
     tasks = [analyze_stock(ticker) for ticker in tickers]

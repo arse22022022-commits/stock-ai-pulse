@@ -94,9 +94,9 @@ export const ChatWidget = ({ context }) => {
             position: 'fixed',
             bottom: '24px',
             right: '24px',
-            width: '380px',
-            height: '600px',
-            maxHeight: '80vh',
+            width: '450px',
+            height: '650px',
+            maxHeight: '85vh',
             backgroundColor: '#0f172a',
             borderRadius: '16px',
             border: '1px solid rgba(56, 189, 248, 0.2)',
@@ -124,7 +124,20 @@ export const ChatWidget = ({ context }) => {
                 </div>
                 <button
                     onClick={() => setIsOpen(false)}
-                    style={{ background: 'transparent', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+                    style={{
+                        background: 'rgba(255,255,255,0.05)',
+                        border: 'none',
+                        color: '#f8fafc', // High contrast
+                        cursor: 'pointer',
+                        padding: '8px',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'background 0.2s'
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
                 >
                     <X size={20} />
                 </button>
@@ -147,8 +160,8 @@ export const ChatWidget = ({ context }) => {
                         borderRadius: '12px',
                         background: msg.role === 'user' ? '#38bdf8' : 'rgba(255,255,255,0.05)',
                         color: msg.role === 'user' ? '#0f172a' : '#e2e8f0',
-                        fontSize: '0.9rem',
-                        lineHeight: 1.5,
+                        fontSize: '0.95rem',
+                        lineHeight: 1.6,
                         borderBottomRightRadius: msg.role === 'user' ? '2px' : '12px',
                         borderBottomLeftRadius: msg.role === 'assistant' ? '2px' : '12px'
                     }}>
