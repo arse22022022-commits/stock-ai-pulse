@@ -47,10 +47,20 @@ async def health_check():
     return {"status": "healthy", "llm_enabled": llm_service.enabled}
 
 # Catch-all for React Router
+# Serve Root (SPA Entry Point)
+@app.get("/", response_class=HTMLResponse)
+async def read_root():
+    index_path = os.path.join(static_dir, "index.html")
+    if os.path.exists(index_path):
+        with open(index_path, "r", encoding="utf-8") as f:
+            return f.read()
+    return "Frontend not built or not found. Please run 'npm run build' and ensure 'static' folder exists."
+
+# Catch-all for React Router
 @app.get("/{full_path:path}", response_class=HTMLResponse)
 async def catch_all(full_path: str):
-    if full_path.startswith("api"):
-        return {"detail": "Not valid API endpoint"}
+    if full_path.startswith("api") or full_path.startswith("assets"):
+        return HTMLResponse(status_code=404, content="Not found")
         
     index_path = os.path.join(static_dir, "index.html")
     if os.path.exists(index_path):
