@@ -165,7 +165,7 @@ const App = () => {
                     </div>
 
                     <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '20px', color: '#94a3b8' }}>DESGLOSE TÉCNICO POR ACTIVO</h4>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                    <div className="asset-grid">
                       {[...portfolioData.assets]
                         .sort((a, b) => {
                           const rank = {
@@ -273,7 +273,7 @@ const App = () => {
                       </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                    <div className="asset-grid">
                       {indicesData.assets
                         .filter(a => a.recommendation.verdict === 'COMPRA FUERTE')
                         .sort((a, b) => { // Sort by HMM Mean Descending

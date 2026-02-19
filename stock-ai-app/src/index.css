@@ -94,6 +94,25 @@ input:focus {
   margin: 0 auto;
 }
 
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+@media (max-width: 1280px) {
+  .asset-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .asset-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}
+
 .col-span-full {
   grid-column: span 12;
 }
@@ -119,7 +138,8 @@ input:focus {
   }
 }
 
-html, body {
+html,
+body {
   overflow-x: hidden;
   position: relative;
   width: 100%;
