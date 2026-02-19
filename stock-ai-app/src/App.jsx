@@ -75,7 +75,7 @@ const App = () => {
       />
 
       {/* Main Content */}
-      <main style={{ maxWidth: '1600px', margin: '0 auto', padding: '32px' }}>
+      <main className="main-content" style={{ maxWidth: '1600px', margin: '0 auto' }}>
 
         {/* Error Message */}
         {errorMsg && (
@@ -327,8 +327,6 @@ const App = () => {
         }
 
         @media print {
-          body * { visibility: hidden; }
-          .guide-modal, .guide-modal * { visibility: visible; }
           .guide-modal { position: absolute; left: 0; top: 0; width: 100% !important; max-height: none !important; border: none !important; background: white !important; color: black !important; }
           .guide-modal h2, .guide-modal h3, .guide-modal h4 { color: black !important; }
           .guide-modal p, .guide-modal span { color: #333 !important; }

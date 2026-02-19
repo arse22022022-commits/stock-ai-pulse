@@ -92,18 +92,17 @@ export const ChatWidget = ({ context }) => {
     return (
         <div style={{
             position: 'fixed',
-            bottom: '24px',
-            right: '24px',
-            width: '450px',
-            height: '650px',
-            maxHeight: '85vh',
+            bottom: window.innerWidth < 640 ? '12px' : '24px',
+            right: window.innerWidth < 640 ? '12px' : '24px',
+            width: 'min(450px, calc(100vw - 24px))',
+            height: 'min(650px, 80vh)',
             backgroundColor: '#0f172a',
             borderRadius: '16px',
             border: '1px solid rgba(56, 189, 248, 0.2)',
             boxShadow: '0 10px 40px rgba(0,0,0,0.5)',
             display: 'flex',
             flexDirection: 'column',
-            zIndex: 50,
+            zIndex: 1000,
             overflow: 'hidden'
         }}>
             {/* Header */}
