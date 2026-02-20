@@ -1,5 +1,6 @@
 import logging
 import os
+import threading
 
 import torch
 import numpy as np
@@ -11,6 +12,7 @@ class LLMService:
     def __init__(self):
         self.pipeline = None
         self.enabled = False
+        self.lock = threading.Lock()
         self._load_model()
 
     def _load_model(self):
@@ -45,8 +47,12 @@ class LLMService:
         
         if self.enabled and self.pipeline:
             try:
-                context = torch.tensor(data_series)
-                forecast = self.pipeline.predict(context, prediction_length)
+                # CRITICAL: Synchronize access to the model
+                # Chronos/Torch on CPU might not be thread-safe for concurrent inference
+                with self.lock:
+                    context = torch.tensor(data_series)
+                    forecast = self.pipeline.predict(context, prediction_length)
+                
                 logger.info("Chronos forecast generated successfully.")
                 
                 # Calculate percentiles
