@@ -3,7 +3,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 import os
+import sys
+
+# CRITICAL: Set threading environment variables BEFORE any numerical imports
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["MKL_NUM_THREADS"] = "1"
+os.environ["OPENBLAS_NUM_THREADS"] = "1"
+os.environ["VECLIB_MAXIMUM_THREADS"] = "1"
+os.environ["NUMEXPR_NUM_THREADS"] = "1"
 os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
+
 import yfinance as yf
 import pandas as pd
 import numpy as np
@@ -13,7 +22,11 @@ import re
 import logging
 from concurrent.futures import ThreadPoolExecutor
 import time
-
+import asyncio
+import torch
+torch.set_num_threads(1)
+if torch.get_num_interop_threads() > 1:
+    torch.set_num_interop_threads(1)
 # Configure structured logging
 logging.basicConfig(
     level=logging.INFO,
@@ -21,24 +34,35 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Inicializar pipeline como None globalmente
-pipeline = None
-torch_lib = None
+from dotenv import load_dotenv
 
-try:
-    import torch as torch_lib
-    from chronos import ChronosPipeline
-    pipeline = ChronosPipeline.from_pretrained(
-        "amazon/chronos-t5-tiny",
-        device_map="cpu",
-        torch_dtype=torch_lib.float32,
-    )
-    logger.info("Modelo Chronos (LLM) cargado con éxito")
-except Exception as e:
-    logger.warning(f"El modelo LLM (Chronos) no está disponible: {e}. Usando modo estadística simple")
+# Load environment variables from .env file
+# We check both the root and the backend/ folder for the .env file
+if os.path.exists(".env"):
+    load_dotenv(".env")
+    logger.info("Cargando .env desde el directorio raíz")
+elif os.path.exists("backend/.env"):
+    load_dotenv("backend/.env")
+    logger.info("Cargando .env desde el directorio /backend")
+else:
+    logger.warning("No se encontró ningún archivo .env")
+
+# specialized executors for different task types
+# Specialized executors for different task types
+# io_executor: Network/Disk bound (yfinance, Gemini fallback)
+io_executor = ThreadPoolExecutor(max_workers=30)
+# cpu_executor: Computationally intensive (HMM, Chronos)
+# Strictly 1 worker on Windows to prevent any possibility of library deadlocks
+cpu_executor = ThreadPoolExecutor(max_workers=1)
+
+from backend.app.services.chronos import chronos_service
+
+# Redundant Local Chronos loading removed in favor of chronos_service
+pipeline = chronos_service.pipeline
+logger.info("Sistema de predicción Chronos vinculado desde servicios centrales")
 
 # ... (rest of imports)
-VERSION = "v1.2.0-triple-pillar"
+VERSION = "v1.3.1-fix-prediction"
 
 app = FastAPI()
 logger.info(f"Starting StockAI Pulse Backend - {VERSION}")
@@ -136,7 +160,7 @@ def save_to_cache(cache_key: str, data: dict):
 def train_hmm_returns(data: pd.DataFrame):
     """Train HMM on Returns data"""
     returns_data = data[['Returns']].values
-    model_ret = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=1000, random_state=42)
+    model_ret = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=300, random_state=42)
     model_ret.fit(returns_data)
     raw_regimes_ret = model_ret.predict(returns_data)
     raw_probs_ret = model_ret.predict_proba(returns_data)
@@ -175,7 +199,7 @@ def train_hmm_returns(data: pd.DataFrame):
 def train_hmm_diff(data: pd.DataFrame):
     """Train HMM on Diff_Returns data"""
     diff_data = data[['Diff_Returns']].values
-    model_diff = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=1000, random_state=42)
+    model_diff = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=300, random_state=42)
     model_diff.fit(diff_data)
     raw_regimes_diff = model_diff.predict(diff_data)
     raw_probs_diff = model_diff.predict_proba(diff_data)
@@ -209,6 +233,13 @@ def train_hmm_diff(data: pd.DataFrame):
             final_diff_stats.append({"regime": i, "mean": 0.0, "std": 0.0})
     
     return regimes_diff, probs_diff, final_diff_stats
+
+def train_hmms_combined(data: pd.DataFrame):
+    """Run both HMM trainings in a single synchronous block to save thread overhead"""
+    logger.debug("Iniciando entrenamiento combinado de HMMs")
+    r_reg, r_prob, r_stats = train_hmm_returns(data)
+    d_reg, d_prob, d_stats = train_hmm_diff(data)
+    return r_reg, r_prob, r_stats, d_reg, d_prob, d_stats
 
 # Health check endpoint
 @app.get("/health")
@@ -248,11 +279,22 @@ async def analyze_stock(ticker: str, request: Request):
         end_date = datetime.now() + timedelta(days=1)
         start_date = datetime.now() - timedelta(days=365)
         
-        # Obtener datos
+        # Obtener datos de forma asíncrona para no bloquear el loop
         logger.debug(f"Descargando datos para {ticker} desde {start_date.date()} hasta {end_date.date()}")
         ticker_obj = yf.Ticker(ticker)
-        data = ticker_obj.history(start=start_date, end=end_date, auto_adjust=True)
-        currency = ticker_obj.info.get('currency', 'USD')
+        
+        loop = asyncio.get_running_loop()
+        # Fetch history and info concurrently in the executor to save time
+        def fetch_data():
+            hist = ticker_obj.history(start=start_date, end=end_date, auto_adjust=True)
+            info = ticker_obj.info
+            return hist, info
+            
+        data, info = await asyncio.wait_for(
+            loop.run_in_executor(io_executor, fetch_data),
+            timeout=25.0
+        )
+        currency = info.get('currency', 'USD')
         
         if data.empty:
             logger.error(f"No se encontraron datos para el ticker: {ticker}")
@@ -275,13 +317,19 @@ async def analyze_stock(ticker: str, request: Request):
         
         logger.info(f"Datos cargados: {len(data)} días para {ticker}")
         
-        # HMM training (sequential execution for thread safety)
+        # HMM training (CPU Bound)
         logger.debug("Iniciando entrenamiento de HMMs")
         hmm_start = time.time()
         
-        # Train both HMMs sequentially (pandas DataFrames are not thread-safe)
-        regimes_ret, probs_ret, final_ret_stats = train_hmm_returns(data)
-        regimes_diff, probs_diff, final_diff_stats = train_hmm_diff(data)
+        # We use a combined function to ensure each asset uses exactly ONE worker
+        # and doesn't compete for threads within itself.
+        loop = asyncio.get_running_loop()
+        
+        # Add a safety timeout (25s) for the combined HMM training
+        regimes_ret, probs_ret, final_ret_stats, regimes_diff, probs_diff, final_diff_stats = await asyncio.wait_for(
+            loop.run_in_executor(cpu_executor, train_hmms_combined, data),
+            timeout=25.0
+        )
         
         hmm_duration = time.time() - hmm_start
         logger.debug(f"HMM completado en {hmm_duration:.2f}s")
@@ -292,25 +340,26 @@ async def analyze_stock(ticker: str, request: Request):
         forecast_result = []
         last_date = data.index[-1]
         
-        if pipeline:
+        if chronos_service.enabled:
             try:
-                context = torch_lib.tensor(data[price_col].values)
-                forecast = pipeline.predict(context, prediction_length)
+                # Use unified chronos_service prediction logic
+                forecast_data = await asyncio.wait_for(
+                    loop.run_in_executor(cpu_executor, lambda: chronos_service.predict(data[price_col].values, prediction_length)),
+                    timeout=15.0
+                )
                 
-                # Calculate percentiles for confidence bands
-                forecast_10th = np.quantile(forecast[0].numpy(), 0.1, axis=0)
-                forecast_median = np.median(forecast[0].numpy(), axis=0)
-                forecast_90th = np.quantile(forecast[0].numpy(), 0.9, axis=0)
-                
-                for i in range(prediction_length):
-                    forecast_result.append({
-                        "date": (last_date + timedelta(days=i+1)).strftime("%Y-%m-%d"),
-                        "price": float(forecast_median[i]),
-                        "price_low": float(forecast_10th[i]),
-                        "price_high": float(forecast_90th[i]),
-                        "type": "forecast"
-                    })
-                logger.debug("Predicción Chronos completada con éxito (con bandas de confianza)")
+                if forecast_data:
+                    for i in range(prediction_length):
+                        forecast_result.append({
+                            "date": (last_date + timedelta(days=i+1)).strftime("%Y-%m-%d"),
+                            "price": forecast_data["prices"][i],
+                            "price_low": forecast_data["lows"][i],
+                            "price_high": forecast_data["highs"][i],
+                            "type": "forecast"
+                        })
+                    logger.debug("Predicción Chronos completada con éxito")
+                else:
+                    raise ValueError("Chronos service returned empty data")
             except Exception as e:
                 logger.warning(f"Error en predicción Chronos: {e}. Usando fallback estadístico")
                 lp, ar, vol = float(data[price_col].iloc[-1]), data['Returns'].mean(), data['Returns'].std()
@@ -499,11 +548,11 @@ async def analyze_portfolio(tickers: list[str], request: Request):
         logger.warning(f"Portfolio limitado a {limit} activos para optimizar rendimiento.")
 
     results = []
-    # We use the raw analyze_stock logic (internally) to avoid redundant HTTP overhead
-    # In a real app we'd refactor the core logic into a separate shared function
+    # ULTIMATE STABILITY: Sequential processing for portfolio on Windows
+    # Instead of parallel, we process each asset one by one.
+    # This prevents CPU saturation and ensures the event loop remains responsive.
     for ticker in tickers:
         try:
-            # We call the existing analyze_stock endpoint logic
             res = await analyze_stock(ticker, request)
             results.append(res)
         except Exception as e:
@@ -590,6 +639,19 @@ async def analyze_portfolio(tickers: list[str], request: Request):
     # Map back to old variable names for return compatibility
     alerts = warnings
     to_remove = to_sell
+    
+    # 4. Integrate Gemini AI Analyst
+    portfolio_stats = {
+        "total_assets": total,
+        "bullish_count": bullish_count,
+        "bullish_ratio": bullish_ratio,
+        "volatile_count": volatile_count,
+        "risk_ratio": risk_ratio,
+        "stable_count": stable_count
+    }
+    
+    from backend.app.services.llm import llm_service
+    ai_insight = await llm_service.evaluate_portfolio_async(portfolio_stats)
 
     return {
         "assets": results,
@@ -606,7 +668,8 @@ async def analyze_portfolio(tickers: list[str], request: Request):
             "risk_ratio": risk_ratio,
             "leaders": leaders,
             "alerts": alerts,
-            "to_remove": to_remove
+            "to_remove": to_remove,
+            "ai_insight": ai_insight
         }
     }
 
