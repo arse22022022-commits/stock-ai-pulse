@@ -32,8 +32,8 @@ class LLMService:
                 return
 
             self.client = genai.Client(api_key=api_key)
-            # Default to Gemini 1.5 Flash to ensure 1,500 requests per day (2.5 restricted to 20/day limit on free)
-            self.model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+            # Default to gemini-2.5-flash-lite-preview-09-2025 to bypass the 20/day limit on standard 2.5 & the 404 on 1.5 
+            self.model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite-preview-09-2025")
             self.enabled = True
             logger.info(f"{self.model_name} initialized successfully via GenAI SDK")
         except Exception as e:
