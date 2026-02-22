@@ -20,6 +20,7 @@ class LLMService:
         self.model_name = None
         self.enabled = False
         self.lock = threading.Lock()
+        self._portfolio_cache = {}
         self._load_model()
 
     def _load_model(self):
@@ -106,6 +107,15 @@ class LLMService:
         if not self.enabled or not self.client:
             return fallback_response
 
+        # Build deterministic cache key
+        import hashlib
+        stats_str = json.dumps(portfolio_stats, sort_keys=True)
+        cache_key = hashlib.md5(stats_str.encode('utf-8')).hexdigest()
+        
+        if cache_key in self._portfolio_cache:
+            logger.info("Retrieved Portfolio Gemini analysis from deterministic MD5 Cache.")
+            return self._portfolio_cache[cache_key]
+
         # Build prompt using the stats
         prompt = f"""
         Actúa como un gestor de fondos de alto nivel. Analiza el siguiente resumen cuantitativo de una cartera de activos e ignora que eres una IA:
@@ -145,12 +155,19 @@ class LLMService:
             res_dict = json.loads(response.text)
             
             # Type casting to ensure rigid contract
-            return {
+            final_result = {
                 "verdict": str(res_dict.get("verdict", "ANÁLISIS COMPLETADO")),
                 "reason": str(res_dict.get("reason", "Se ha analizado la cartera con éxito.")),
                 "color": str(res_dict.get("color", "#3b82f6")), # Default blue
                 "score": float(res_dict.get("score", 50.0))
             }
+            
+            # Save to Cache with LRU logic
+            if len(self._portfolio_cache) > 200:
+                self._portfolio_cache.pop(next(iter(self._portfolio_cache)))
+            self._portfolio_cache[cache_key] = final_result
+            
+            return final_result
             
         except Exception as e:
             logger.error(f"Failed to generate Gemini Portfolio Analysis: {e}", exc_info=True)

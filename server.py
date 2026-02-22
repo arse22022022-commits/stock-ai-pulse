@@ -615,22 +615,22 @@ async def analyze_portfolio(tickers: list[str], request: Request):
     # B. Acción Específica (Ventas/Limpieza)
     to_sell = buckets["VENTA"] + buckets["VENTA_FUERTE"]
     if to_sell:
-        advice_parts.append(f"ACCIÓN PRIORITARIA: Se detecta debilidad crítica en {', '.join(to_sell)}. Considerar rotación inmediata para proteger capital.")
+        advice_parts.append(f"ACCIÓN PRIORITARIA: Se detecta debilidad crítica en {', '.join(sorted(to_sell))}. Considerar rotación inmediata para proteger capital.")
     else:
         # Si NO hay ventas, dar consejo de optimización
         if buckets["MANTENER"]:
-            advice_parts.append(f"OPTIMIZACIÓN: {', '.join(buckets['MANTENER'])} están en fase lateral; vigilar para acumular si rompen al alza.")
+            advice_parts.append(f"OPTIMIZACIÓN: {', '.join(sorted(buckets['MANTENER']))} están en fase lateral; vigilar para acumular si rompen al alza.")
         else:
             advice_parts.append("MANTENIMIENTO: Todos los activos contribuyen positivamente. No se requieren ventas.")
 
     # C. Oportunidades (Compras)
     strong_opportunities = buckets["STRONG_BUY"]
     if strong_opportunities:
-        advice_parts.append(f"LÍDERES: {', '.join(strong_opportunities)} muestran el mejor momentum para sobre-ponderar.")
+        advice_parts.append(f"LÍDERES: {', '.join(sorted(strong_opportunities))} muestran el mejor momentum para sobre-ponderar.")
         
     # D. Notas Técnicas (Divergencias)
     if warnings:
-        advice_parts.append(f"OJO AVIZOR: {', '.join(warnings)} suben de precio pero con calidad interna (impulso) deteriorada.")
+        advice_parts.append(f"OJO AVIZOR: {', '.join(sorted(warnings))} suben de precio pero con calidad interna (impulso) deteriorada.")
 
     full_advice = " ".join(advice_parts)
     
