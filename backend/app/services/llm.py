@@ -4,7 +4,11 @@ import threading
 import json
 import asyncio
 import numpy as np
-import google.generativeai as genai
+
+# Nuevo SDK v2 de Google
+from google import genai
+from google.genai import types
+
 from datetime import timedelta
 from .chronos import chronos_service
 
@@ -12,7 +16,8 @@ logger = logging.getLogger(__name__)
 
 class LLMService:
     def __init__(self):
-        self.model = None
+        self.client = None
+        self.model_name = None
         self.enabled = False
         self.lock = threading.Lock()
         self._load_model()
@@ -25,14 +30,13 @@ class LLMService:
                 self.enabled = False
                 return
 
-            genai.configure(api_key=api_key)
-            # Fetch model from env, fallback to gemini-1.5-pro
-            model_name = os.getenv("GEMINI_MODEL", "gemini-1.5-pro")
-            self.model = genai.GenerativeModel(model_name)
+            self.client = genai.Client(api_key=api_key)
+            # Default to Gemini 2.5 Flash as it is universally available on the new tier
+            self.model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
             self.enabled = True
-            logger.info(f"{model_name} initialized successfully")
+            logger.info(f"{self.model_name} initialized successfully via GenAI SDK")
         except Exception as e:
-            logger.error(f"Failed to initialize Gemini 1.5 Pro: {str(e)}", exc_info=True)
+            logger.error(f"Failed to initialize GenAI Client: {str(e)}", exc_info=True)
             self.enabled = False
 
     async def predict(self, data_series: np.ndarray, prediction_length: int = 10, last_date=None, last_price=0.0):
@@ -40,7 +44,7 @@ class LLMService:
         Generate forecast. If Gemini is active, use it for intelligent forecasting.
         Otherwise, use statistical fallback (GBM).
         """
-        if self.enabled and self.model:
+        if self.enabled and self.client:
             try:
                 # Prepare data for prompt
                 # We send the last 60 days of closing prices to give context
@@ -65,17 +69,15 @@ class LLMService:
                 Return ONLY the JSON array.
                 """
 
-                # Call Gemini with advanced reasoning config
-                # thinking_level="MEDIUM" is a new feature for Gemini 3.1 Pro
-                # Call Gemini with advanced reasoning config
-                # thinking_level="MEDIUM" is a new feature for Gemini 3.1 Pro
+                # Call Gemini async v2 via aio
                 response = await asyncio.wait_for(
-                    self.model.generate_content_async(
-                        prompt,
-                        generation_config={
-                            "response_mime_type": "application/json",
-                            "temperature": 0.0
-                        }
+                    self.client.aio.models.generate_content(
+                        model=self.model_name,
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                            temperature=0.0
+                        )
                     ),
                     timeout=30.0
                 )
@@ -96,8 +98,6 @@ class LLMService:
             except Exception as e:
                 logger.error(f"Gemini prediction failed: {e}. Falling back to statistical model.")
                 # Fall through to fallback
-        
-                # Fall through to Chronos fallback
         
         # Fallback 1: Chronos (Local Transformer-based Time Series Model)
         if chronos_service.enabled:
@@ -141,14 +141,13 @@ class LLMService:
 
     async def predict_async(self, data_series: np.ndarray, prediction_length: int = 10, last_date=None, last_price=0.0):
         """
-        Since generate_content_async is natively supported, we no longer need the run_in_executor wrapper here
+        Wrapper as we still use this natively
         """
         return await self.predict(data_series, prediction_length, last_date, last_price)
 
     async def evaluate_portfolio_async(self, portfolio_stats: dict) -> dict:
         """
-        Use Gemini 1.5 Pro to evaluate a portfolio's overall health and diversification using aggregated metrics.
-        The returned dictionary matches the properties expected by the frontend.
+        Use new GenAI SDK to evaluate a portfolio's overall health and diversification using aggregated metrics.
         """
         # Fallback dictionary if LLM is disabled or fails
         fallback_response = {
@@ -158,7 +157,7 @@ class LLMService:
             "score": 0.0
         }
 
-        if not self.enabled or not self.model:
+        if not self.enabled or not self.client:
             return fallback_response
 
         # Build prompt using the stats
@@ -180,17 +179,15 @@ class LLMService:
         """
 
         try:
-            # We don't necessarily need "MEDIUM" thinking here as it's a fast summarization task,
-            # but we use standard parameters to ensure a fast JSON response.
-            # We don't necessarily need "MEDIUM" thinking here as it's a fast summarization task,
-            # but we use standard parameters to ensure a fast JSON response.
+            # New async genai client format
             response = await asyncio.wait_for(
-                self.model.generate_content_async(
-                    prompt,
-                    generation_config={
-                        "response_mime_type": "application/json",
-                        "temperature": 0.0
-                    }
+                self.client.aio.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        temperature=0.0
+                    )
                 ),
                 timeout=25.0
             )
@@ -213,4 +210,5 @@ class LLMService:
 
 # Global instance
 llm_service = LLMService()
+
 
