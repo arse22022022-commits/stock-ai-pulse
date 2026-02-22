@@ -325,10 +325,10 @@ async def analyze_stock(ticker: str, request: Request):
         # and doesn't compete for threads within itself.
         loop = asyncio.get_running_loop()
         
-        # Add a safety timeout (25s) for the combined HMM training
+        # Add a safety timeout (60s) for the combined HMM training to allow queue waiting
         regimes_ret, probs_ret, final_ret_stats, regimes_diff, probs_diff, final_diff_stats = await asyncio.wait_for(
             loop.run_in_executor(cpu_executor, train_hmms_combined, data),
-            timeout=25.0
+            timeout=60.0
         )
         
         hmm_duration = time.time() - hmm_start
@@ -345,7 +345,7 @@ async def analyze_stock(ticker: str, request: Request):
                 # Use unified chronos_service prediction logic
                 forecast_data = await asyncio.wait_for(
                     loop.run_in_executor(cpu_executor, lambda: chronos_service.predict(data[price_col].values, prediction_length)),
-                    timeout=15.0
+                    timeout=60.0
                 )
                 
                 if forecast_data:
@@ -546,6 +546,10 @@ async def analyze_portfolio(tickers: list[str], request: Request):
     # Instead of parallel, we process each asset one by one.
     # This prevents CPU saturation and ensures the event loop remains responsive.
     for ticker in tickers:
+        if await request.is_disconnected():
+            logger.warning(f"El cliente se ha desconectado. Abortando el análisis de la cartera en el ticker {ticker}.")
+            break
+            
         try:
             res = await analyze_stock(ticker, request)
             results.append(res)
