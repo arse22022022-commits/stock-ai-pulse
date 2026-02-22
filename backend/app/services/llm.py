@@ -74,8 +74,7 @@ class LLMService:
                         prompt,
                         generation_config={
                             "response_mime_type": "application/json",
-                            "temperature": 0.0,
-                            "thinking_level": "MEDIUM"
+                            "temperature": 0.0
                         }
                     ),
                     timeout=30.0
