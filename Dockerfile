@@ -25,6 +25,10 @@ RUN pip install uv && \
     uv pip install --system --no-cache torch==2.3.1 --index-url https://download.pytorch.org/whl/cpu && \
     uv pip install --system --no-cache -r requirements.txt
 
+# Pre-download Chronos model into the image cache during build time.
+# Overcomes Hugging Face IP rate-limiting for Cloud Run instances.
+RUN python -c "from chronos import ChronosPipeline; ChronosPipeline.from_pretrained('amazon/chronos-t5-tiny')"
+
 # Copy application files
 COPY server.py .
 COPY backend/ ./backend/
