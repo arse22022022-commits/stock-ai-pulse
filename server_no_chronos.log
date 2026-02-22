@@ -1,0 +1,7 @@
+2026-02-21 21:59:01,507 - __main__ - INFO - Cargando .env desde el directorio /backend
+Traceback (most recent call last):
+  File "C:\Users\34636\Antigravity Pruebas\server.py", line 49, in <module>
+    from backend.app.services.chronos import chronos_service
+  File "C:\Users\34636\Antigravity Pruebas\backend\app\services\chronos.py", line 27
+    def predict(self, data_series: np.ndarray, prediction_length: int = 10):
+IndentationError: expected an indented block after 'try' statement on line 24

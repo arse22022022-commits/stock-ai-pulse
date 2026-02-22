@@ -1,0 +1,39 @@
+2026-02-21 17:18:51.365570: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
+2026-02-21 17:18:51.366487: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:275: FutureWarning: You are using a Python version (3.10.10) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+2026-02-21 17:18:52,830 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 17:18:52,831 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 17:18:52,832 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 17:18:52,863 - root - WARNING - Limited tf.summary API due to missing TensorBoard installation.
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-02-21 17:18:53,527 - __main__ - INFO - Modelo Chronos (LLM) cargado con éxito
+2026-02-21 17:18:53,527 - __main__ - INFO - Starting StockAI Pulse Backend - v1.3.1-fix-prediction
+2026-02-21 17:18:53,557 - __main__ - INFO - Rate limiting habilitado
+INFO:     Started server process [37092]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-02-21 17:20:06,558 - __main__ - INFO - Análisis solicitado para: LDO.MI
+2026-02-21 17:20:06,563 - __main__ - INFO - Análisis solicitado para: EOAN.DE
+2026-02-21 17:20:06,564 - __main__ - INFO - Análisis solicitado para: AIR.DE
+2026-02-21 17:20:07,432 - __main__ - INFO - Datos cargados: 251 días para EOAN.DE
+2026-02-21 17:20:07,441 - __main__ - INFO - Datos cargados: 251 días para AIR.DE
+2026-02-21 17:20:07,509 - __main__ - INFO - Datos cargados: 250 días para LDO.MI
+2026-02-21 17:20:08,833 - hmmlearn.base - WARNING - Model is not converging.  Current: 733.2695485655461 is not greater than 733.6021804188156. Delta is -0.33263185326950406
+2026-02-21 17:20:08,854 - hmmlearn.base - WARNING - Model is not converging.  Current: 658.8642555955879 is not greater than 658.9702729697038. Delta is -0.10601737411593604
+2026-02-21 17:20:11,001 - __main__ - INFO - Análisis completado exitosamente para AIR.DE en 4.44s (Precio: EUR 189.70, Cambio: +1.41%)
+2026-02-21 17:20:11,025 - __main__ - INFO - Análisis completado exitosamente para EOAN.DE en 4.46s (Precio: EUR 18.63, Cambio: +0.16%)
+2026-02-21 17:20:11,088 - __main__ - INFO - Análisis completado exitosamente para LDO.MI en 4.53s (Precio: EUR 58.92, Cambio: -0.47%)
+C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py:6: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+2026-02-21 17:20:12,308 - backend.app.services.chronos - INFO - Chronos (Local LLM) initialized successfully on cpu
+2026-02-21 17:20:12,308 - backend.app.services.llm - WARNING - GOOGLE_API_KEY not found in environment. LLM will use statistical fallback.
+INFO:     127.0.0.1:54889 - "POST /api/portfolio HTTP/1.1" 200 OK

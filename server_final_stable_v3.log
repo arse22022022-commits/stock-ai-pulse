@@ -1,0 +1,155 @@
+2026-02-21 22:27:07,759 - __main__ - INFO - Cargando .env desde el directorio /backend
+2026-02-21 22:27:09.858098: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
+2026-02-21 22:27:09.858959: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:275: FutureWarning: You are using a Python version (3.10.10) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+2026-02-21 22:27:11,435 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 22:27:11,435 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 22:27:11,437 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 22:27:11,466 - root - WARNING - Limited tf.summary API due to missing TensorBoard installation.
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-02-21 22:27:12,193 - backend.app.services.chronos - INFO - Chronos (Local LLM) initialized successfully on cpu (threads limited to 1)
+2026-02-21 22:27:12,193 - __main__ - INFO - Sistema de predicción Chronos vinculado desde servicios centrales
+2026-02-21 22:27:12,193 - __main__ - INFO - Starting StockAI Pulse Backend - v1.3.1-fix-prediction
+2026-02-21 22:27:12,222 - __main__ - INFO - Rate limiting habilitado
+INFO:     Started server process [7092]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-02-21 22:27:13,970 - __main__ - INFO - Análisis solicitado para: AAPL
+2026-02-21 22:27:14,656 - __main__ - INFO - Datos cargados: 248 días para AAPL
+2026-02-21 22:27:14,713 - hmmlearn.base - WARNING - Model is not converging.  Current: 655.6915575791802 is not greater than 655.8182387307467. Delta is -0.12668115156645854
+2026-02-21 22:27:14,722 - hmmlearn.base - WARNING - Model is not converging.  Current: 592.837812064263 is not greater than 593.0621458990277. Delta is -0.2243338347647068
+2026-02-21 22:27:14,908 - __main__ - INFO - Análisis completado exitosamente para AAPL en 0.94s (Precio: USD 264.58, Cambio: +1.54%)
+2026-02-21 22:27:14,912 - __main__ - INFO - Análisis solicitado para: NVDA
+2026-02-21 22:27:15,321 - __main__ - INFO - Datos cargados: 248 días para NVDA
+2026-02-21 22:27:15,560 - __main__ - INFO - Análisis completado exitosamente para NVDA en 0.65s (Precio: USD 189.82, Cambio: +1.02%)
+C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py:7: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+2026-02-21 22:27:15,796 - backend.app.services.llm - INFO - gemini-flash-latest initialized successfully
+2026-02-21 22:27:22,131 - backend.app.services.llm - INFO - Portfolio Gemini analysis generated successfully.
+INFO:     127.0.0.1:58181 - "POST /api/portfolio HTTP/1.1" 200 OK
+2026-02-21 22:31:45,856 - __main__ - INFO - Análisis solicitado para: NVDA
+2026-02-21 22:31:45,856 - __main__ - INFO - Cache HIT for NVDA_2026-02-21
+INFO:     127.0.0.1:57800 - "GET /api/analyze/NVDA HTTP/1.1" 200 OK
+2026-02-21 22:31:45,860 - __main__ - INFO - Análisis solicitado para: NVDA
+2026-02-21 22:31:45,860 - __main__ - INFO - Cache HIT for NVDA_2026-02-21
+INFO:     127.0.0.1:57800 - "GET /api/analyze/NVDA HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52897 - "OPTIONS /api/portfolio HTTP/1.1" 200 OK
+2026-02-21 22:31:57,748 - __main__ - INFO - Análisis solicitado para: LDO.MI
+2026-02-21 22:31:58,314 - __main__ - INFO - Datos cargados: 250 días para LDO.MI
+2026-02-21 22:31:58,531 - __main__ - INFO - Análisis completado exitosamente para LDO.MI en 0.78s (Precio: EUR 58.92, Cambio: -0.47%)
+2026-02-21 22:31:58,531 - __main__ - INFO - Análisis solicitado para: EOAN.DE
+2026-02-21 22:31:58,983 - __main__ - INFO - Datos cargados: 251 días para EOAN.DE
+2026-02-21 22:31:59,001 - hmmlearn.base - WARNING - Model is not converging.  Current: 733.2695485655461 is not greater than 733.6021804188156. Delta is -0.33263185326950406
+2026-02-21 22:31:59,010 - hmmlearn.base - WARNING - Model is not converging.  Current: 658.8642555955879 is not greater than 658.9702729697038. Delta is -0.10601737411593604
+2026-02-21 22:31:59,192 - __main__ - INFO - Análisis completado exitosamente para EOAN.DE en 0.66s (Precio: EUR 18.63, Cambio: +0.16%)
+2026-02-21 22:31:59,192 - __main__ - INFO - Análisis solicitado para: AIR.DE
+2026-02-21 22:31:59,812 - __main__ - INFO - Datos cargados: 251 días para AIR.DE
+2026-02-21 22:32:00,042 - __main__ - INFO - Análisis completado exitosamente para AIR.DE en 0.85s (Precio: EUR 189.70, Cambio: +1.41%)
+2026-02-21 22:32:08,377 - backend.app.services.llm - INFO - Portfolio Gemini analysis generated successfully.
+INFO:     127.0.0.1:54199 - "POST /api/portfolio HTTP/1.1" 200 OK
+2026-02-21 22:34:04,463 - __main__ - INFO - Análisis solicitado para: LDO.MI
+2026-02-21 22:34:04,464 - __main__ - INFO - Cache HIT for LDO.MI_2026-02-21
+2026-02-21 22:34:04,464 - __main__ - INFO - Análisis solicitado para: EOAN.DE
+2026-02-21 22:34:04,464 - __main__ - INFO - Cache HIT for EOAN.DE_2026-02-21
+2026-02-21 22:34:04,464 - __main__ - INFO - Análisis solicitado para: AIR.DE
+2026-02-21 22:34:04,464 - __main__ - INFO - Cache HIT for AIR.DE_2026-02-21
+2026-02-21 22:34:04,464 - __main__ - INFO - Análisis solicitado para: IG.MI
+2026-02-21 22:34:04,956 - __main__ - INFO - Datos cargados: 250 días para IG.MI
+2026-02-21 22:34:04,973 - hmmlearn.base - WARNING - Model is not converging.  Current: 732.793928941893 is not greater than 733.2230710177029. Delta is -0.42914207580986385
+2026-02-21 22:34:05,181 - __main__ - INFO - Análisis completado exitosamente para IG.MI en 0.72s (Precio: EUR 10.95, Cambio: +1.58%)
+2026-02-21 22:34:05,182 - __main__ - INFO - Análisis solicitado para: SPM.MI
+2026-02-21 22:34:05,642 - __main__ - INFO - Datos cargados: 250 días para SPM.MI
+2026-02-21 22:34:05,851 - __main__ - INFO - Análisis completado exitosamente para SPM.MI en 0.67s (Precio: EUR 3.42, Cambio: -2.12%)
+2026-02-21 22:34:05,851 - __main__ - INFO - Análisis solicitado para: ACS.MC
+2026-02-21 22:34:06,299 - __main__ - INFO - Datos cargados: 253 días para ACS.MC
+2026-02-21 22:34:06,516 - __main__ - INFO - Análisis completado exitosamente para ACS.MC en 0.67s (Precio: EUR 106.00, Cambio: +1.34%)
+2026-02-21 22:34:06,516 - __main__ - INFO - Análisis solicitado para: SAN.MC
+2026-02-21 22:34:06,954 - __main__ - INFO - Datos cargados: 253 días para SAN.MC
+2026-02-21 22:34:06,972 - hmmlearn.base - WARNING - Model is not converging.  Current: 653.2654747490486 is not greater than 653.265834584598. Delta is -0.0003598355493750205
+2026-02-21 22:34:07,174 - __main__ - INFO - Análisis completado exitosamente para SAN.MC en 0.66s (Precio: EUR 10.76, Cambio: +1.63%)
+2026-02-21 22:34:32,190 - backend.app.services.llm - ERROR - Failed to generate Gemini Portfolio Analysis: 
+Traceback (most recent call last):
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\generativeai\generative_models.py", line 385, in generate_content_async
+    response = await self._async_client.generate_content(
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\ai\generativelanguage_v1beta\services\generative_service\async_client.py", line 440, in generate_content
+    response = await rpc(
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\retry\retry_unary_async.py", line 231, in retry_wrapped_func
+    return await retry_target(
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\retry\retry_unary_async.py", line 158, in retry_target
+    return await target()
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\grpc_helpers_async.py", line 86, in __await__
+    response = yield from self._call.__await__()
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\grpc\aio\_interceptor.py", line 474, in __await__
+    response = yield from call.__await__()
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\grpc\aio\_call.py", line 308, in __await__
+    response = yield from self._call_response
+asyncio.exceptions.CancelledError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\asyncio\tasks.py", line 456, in wait_for
+    return fut.result()
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py", line 187, in evaluate_portfolio_async
+    response = await asyncio.wait_for(
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\asyncio\tasks.py", line 458, in wait_for
+    raise exceptions.TimeoutError() from exc
+asyncio.exceptions.TimeoutError
+INFO:     127.0.0.1:54349 - "POST /api/portfolio HTTP/1.1" 200 OK
+2026-02-21 22:35:05,499 - __main__ - INFO - Análisis solicitado para: TEF.MC
+2026-02-21 22:35:06,012 - __main__ - INFO - Datos cargados: 253 días para TEF.MC
+2026-02-21 22:35:06,222 - __main__ - INFO - Análisis completado exitosamente para TEF.MC en 0.72s (Precio: EUR 3.58, Cambio: -0.42%)
+INFO:     127.0.0.1:58258 - "GET /api/analyze/TEF.MC HTTP/1.1" 200 OK
+2026-02-21 22:35:38,859 - __main__ - WARNING - Portfolio limitado a 10 activos para optimizar rendimiento.
+2026-02-21 22:35:38,861 - __main__ - INFO - Análisis solicitado para: ANA.MC
+2026-02-21 22:35:39,325 - __main__ - INFO - Datos cargados: 253 días para ANA.MC
+2026-02-21 22:35:39,546 - __main__ - INFO - Análisis completado exitosamente para ANA.MC en 0.68s (Precio: EUR 197.50, Cambio: +0.36%)
+2026-02-21 22:35:39,546 - __main__ - INFO - Análisis solicitado para: BBVA.MC
+2026-02-21 22:35:40,142 - __main__ - INFO - Datos cargados: 253 días para BBVA.MC
+2026-02-21 22:35:40,157 - hmmlearn.base - WARNING - Model is not converging.  Current: 654.2278209247621 is not greater than 654.2992475094761. Delta is -0.0714265847140041
+2026-02-21 22:35:40,370 - __main__ - INFO - Análisis completado exitosamente para BBVA.MC en 0.82s (Precio: EUR 19.85, Cambio: +0.23%)
+2026-02-21 22:35:40,371 - __main__ - INFO - Análisis solicitado para: BKT.MC
+2026-02-21 22:35:40,808 - __main__ - INFO - Datos cargados: 253 días para BKT.MC
+2026-02-21 22:35:40,822 - hmmlearn.base - WARNING - Model is not converging.  Current: 690.1095929508257 is not greater than 690.2463696310238. Delta is -0.13677668019806788
+2026-02-21 22:35:41,025 - __main__ - INFO - Análisis completado exitosamente para BKT.MC en 0.65s (Precio: EUR 14.39, Cambio: +2.75%)
+2026-02-21 22:35:41,025 - __main__ - INFO - Análisis solicitado para: CABK.MC
+2026-02-21 22:35:41,458 - __main__ - INFO - Datos cargados: 253 días para CABK.MC
+2026-02-21 22:35:41,660 - __main__ - INFO - Análisis completado exitosamente para CABK.MC en 0.63s (Precio: EUR 10.97, Cambio: +2.48%)
+2026-02-21 22:35:41,660 - __main__ - INFO - Análisis solicitado para: CLNX.MC
+2026-02-21 22:35:42,158 - __main__ - INFO - Datos cargados: 253 días para CLNX.MC
+2026-02-21 22:35:42,175 - hmmlearn.base - WARNING - Model is not converging.  Current: 692.0184123979202 is not greater than 692.0825082754419. Delta is -0.06409587752170864
+2026-02-21 22:35:42,374 - __main__ - INFO - Análisis completado exitosamente para CLNX.MC en 0.71s (Precio: EUR 30.46, Cambio: +1.53%)
+2026-02-21 22:35:42,374 - __main__ - INFO - Análisis solicitado para: ACS.MC
+2026-02-21 22:35:42,374 - __main__ - INFO - Cache HIT for ACS.MC_2026-02-21
+2026-02-21 22:35:42,374 - __main__ - INFO - Análisis solicitado para: ELE.MC
+2026-02-21 22:35:42,808 - __main__ - INFO - Datos cargados: 253 días para ELE.MC
+2026-02-21 22:35:43,021 - __main__ - INFO - Análisis completado exitosamente para ELE.MC en 0.65s (Precio: EUR 31.47, Cambio: +0.13%)
+2026-02-21 22:35:43,022 - __main__ - INFO - Análisis solicitado para: ENG.MC
+2026-02-21 22:35:43,457 - __main__ - INFO - Datos cargados: 253 días para ENG.MC
+2026-02-21 22:35:43,472 - hmmlearn.base - WARNING - Model is not converging.  Current: 773.9389854041175 is not greater than 774.0782953597432. Delta is -0.13930995562566295
+2026-02-21 22:35:43,481 - hmmlearn.base - WARNING - Model is not converging.  Current: 708.1198255993577 is not greater than 708.1355856112618. Delta is -0.015760011904148996
+2026-02-21 22:35:43,659 - __main__ - INFO - Análisis completado exitosamente para ENG.MC en 0.64s (Precio: EUR 14.90, Cambio: +0.24%)
+2026-02-21 22:35:43,659 - __main__ - INFO - Análisis solicitado para: FER.MC
+2026-02-21 22:35:44,096 - __main__ - INFO - Datos cargados: 253 días para FER.MC
+2026-02-21 22:35:44,125 - hmmlearn.base - WARNING - Model is not converging.  Current: 685.9764621920278 is not greater than 686.1427648559143. Delta is -0.16630266388642667
+2026-02-21 22:35:44,307 - __main__ - INFO - Análisis completado exitosamente para FER.MC en 0.65s (Precio: EUR 61.72, Cambio: +1.35%)
+2026-02-21 22:35:44,307 - __main__ - INFO - Análisis solicitado para: GRF.MC
+2026-02-21 22:35:44,792 - __main__ - INFO - Datos cargados: 253 días para GRF.MC
+2026-02-21 22:35:45,001 - __main__ - INFO - Análisis completado exitosamente para GRF.MC en 0.69s (Precio: EUR 11.14, Cambio: -0.18%)
+2026-02-21 22:35:50,008 - backend.app.services.llm - INFO - Portfolio Gemini analysis generated successfully.
+INFO:     127.0.0.1:57590 - "POST /api/portfolio HTTP/1.1" 200 OK
+^C

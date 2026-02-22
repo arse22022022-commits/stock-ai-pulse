@@ -1,0 +1,20 @@
+2026-02-21 22:21:18,108 - __main__ - INFO - Cargando .env desde el directorio /backend
+2026-02-21 22:21:20.139291: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
+2026-02-21 22:21:20.140212: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:275: FutureWarning: You are using a Python version (3.10.10) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+2026-02-21 22:21:21,522 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 22:21:21,525 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 22:21:21,525 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 22:21:21,553 - root - WARNING - Limited tf.summary API due to missing TensorBoard installation.
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-02-21 22:21:22,238 - backend.app.services.chronos - INFO - Chronos (Local LLM) initialized successfully on cpu (threads limited to 1)
+2026-02-21 22:21:22,238 - __main__ - INFO - Sistema de predicción Chronos vinculado desde servicios centrales
+2026-02-21 22:21:22,239 - __main__ - INFO - Starting StockAI Pulse Backend - v1.3.1-fix-prediction
+2026-02-21 22:21:22,270 - __main__ - INFO - Rate limiting habilitado
+INFO:     Started server process [32120]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 10048] error while attempting to bind on address ('0.0.0.0', 8000): solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.

@@ -1,0 +1,28 @@
+2026-02-21 17:14:07.981030: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
+2026-02-21 17:14:07.982289: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:275: FutureWarning: You are using a Python version (3.10.10) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+2026-02-21 17:14:10,889 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 17:14:10,891 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 17:14:10,895 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 17:14:11,063 - root - WARNING - Limited tf.summary API due to missing TensorBoard installation.
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-02-21 17:14:11,816 - __main__ - INFO - Modelo Chronos (LLM) cargado con éxito
+2026-02-21 17:14:11,817 - __main__ - INFO - Starting StockAI Pulse Backend - v1.3.1-fix-prediction
+2026-02-21 17:14:11,851 - __main__ - INFO - Rate limiting habilitado
+INFO:     Started server process [5564]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-02-21 17:14:13,727 - __main__ - INFO - Análisis solicitado para: LDO.MI
+2026-02-21 17:14:14,651 - __main__ - INFO - Datos cargados: 250 días para LDO.MI
+DEBUG: Iniciando entrenamiento de HMMs
+DEBUG: Dispatching to global_executor
+DEBUG: Awaiting asyncio.gather for HMM tasks
+DEBUG: HMM tasks completed
+2026-02-21 17:14:16,904 - __main__ - INFO - Análisis completado exitosamente para LDO.MI en 3.18s (Precio: EUR 58.92, Cambio: -0.47%)
+2026-02-21 17:14:16,908 - __main__ - INFO - Análisis solicitado para: EOAN.DE
+2026-02-21 17:14:17,407 - __main__ - INFO - Datos cargados: 251 días para EOAN.DE
+DEBUG: Iniciando entrenamiento de HMMs
+DEBUG: Dispatching to global_executor
+DEBUG: Awaiting asyncio.gather for HMM tasks

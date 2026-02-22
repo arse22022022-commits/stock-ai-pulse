@@ -10,9 +10,10 @@ La recomendación final ("COMPRA", "VENTA", etc.) es el resultado de una suma po
 
 | Pilar | Peso | Qué Analiza | Métrica Clave |
 | :--- | :--- | :--- | :--- |
-| **1. Estructura** | **40%** | Eficiencia del mercado actual | **Ratio R/R** (Rentabilidad/Riesgo) del Régimen HMM actual |
-| **2. Impulso** | **30%** | Aceleración del precio | **Media** del Régimen HMM de Diferencias |
-| **3. Proyección** | **30%** | Futuro probable (10 días) | **Pendiente** de la predicción del modelo Chronos (LLM) |
+| **1. Estructura** | **40%** | Eficiencia del mercado actual | **Ratio R/R** (Rentabilidad/Riesgo) del Régimen **HMM (Hidden Markov Model)** actual |
+| **2. Impulso** | **30%** | Aceleración del precio | **Media** del Régimen **HMM** de Diferencias |
+| **3. Proyección** | **30%** | Futuro probable (10 días) | **Razonamiento Zero-Shot** de Gemini 3.1 Pro (Thinking Level: MEDIUM) |
+
 
 ### Desglose de Puntuación
 
@@ -31,11 +32,11 @@ Mide la "fuerza G" del movimiento:
 -   **0 pts**: Media <= -0.5 (Caída libre)
 
 #### C. Pilar de Proyección (Max 30 pts)
-Mira hacia el futuro con IA Generativa:
--   **100 pts**: Tendencia > +3% en 10 días
--   **70 pts**: Tendencia > 0%
+Mira hacia el futuro con la capacidad de razonamiento de Gemini 3.1 Pro:
+-   **100 pts**: Tendencia > +3% en 10 días (Confirmada por reasoning)
+-   **70 pts**: Tendencia > 0% (Inercia positiva)
 -   **20 pts**: Tendencia plana o ligeramente bajista
--   **0 pts**: Tendencia < -3% (Proyección de caída fuerte)
+-   **0 pts**: Tendencia < -3% (Proyección de caída por agotamiento estructural)
 
 ---
 
@@ -105,7 +106,7 @@ Al seleccionar un índice, el sistema analiza **todos** sus componentes pero **s
 
 ## 7. Analyst AI (Chat Financiero) 🤖💬
 
-El sistema incluye un **Analista Virtual** basado en Google Gemini 2.0 Flash. Puedes preguntarle sobre cualquier activo analizado.
+El sistema incluye un **Analista Virtual** basado en Google Gemini 1.5 Pro (con respaldo técnico de Chronos). Puedes preguntarle sobre cualquier activo analizado.
 
 ### Características Clave:
 *   **Contexto Automático**: La IA ya "sabe" el precio, la tendencia y la volatilidad del activo que estás viendo. No necesitas explicárselo.
@@ -120,9 +121,9 @@ El sistema incluye un **Analista Virtual** basado en Google Gemini 2.0 Flash. Pu
 
 Hemos implementado protecciones avanzadas "Anti-Crash":
 
-*   **Carga Perezosa (Lazy Loading)**: Los modelos pesados (Chronos) solo se activan cuando son necesarios, acelerando el inicio.
+*   **Razonamiento avanzado (Thinking Level)**: El modelo Gemini 3.1 Pro dedica tiempo extra a "pensar" antes de proyectar, lo que reduce falsos positivos en las tendencias.
 *   **Predicción Asíncrona**: Los cálculos matemáticos complejos se realizan en hilos paralelos para mantener la fluidez de la interfaz.
-*   **Fallback Estadístico**: En el improbable caso de que el modelo de IA falle, el sistema cambiará automáticamente a un modelo estadístico robusto (Movimiento Browniano Geométrico) para garantizar que siempre tengas una proyección disponible.
+*   **Fallback Estadístico**: Si la API de Google falla, el sistema cambia automáticamente a un modelo estadístico robusto (GBM) para garantizar que siempre tengas una proyección disponible.
 
 ---
 *Nota: Esta herramienta es un asistente analítico basado en matemáticas avanzadas. No constituye asesoramiento financiero directo.*

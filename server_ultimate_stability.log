@@ -1,0 +1,178 @@
+2026-02-21 22:14:42,477 - __main__ - INFO - Cargando .env desde el directorio /backend
+2026-02-21 22:14:44.561690: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
+2026-02-21 22:14:44.562523: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:275: FutureWarning: You are using a Python version (3.10.10) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+2026-02-21 22:14:46,020 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 22:14:46,020 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 22:14:46,021 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 22:14:46,050 - root - WARNING - Limited tf.summary API due to missing TensorBoard installation.
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-02-21 22:14:46,753 - backend.app.services.chronos - INFO - Chronos (Local LLM) initialized successfully on cpu (threads limited to 1)
+2026-02-21 22:14:46,753 - __main__ - INFO - Sistema de predicción Chronos vinculado desde servicios centrales
+2026-02-21 22:14:46,753 - __main__ - INFO - Starting StockAI Pulse Backend - v1.3.1-fix-prediction
+2026-02-21 22:14:46,779 - __main__ - INFO - Rate limiting habilitado
+INFO:     Started server process [18000]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-02-21 22:15:04,304 - __main__ - INFO - Análisis solicitado para: LDO.MI
+2026-02-21 22:15:05,093 - __main__ - INFO - Datos cargados: 250 días para LDO.MI
+2026-02-21 22:15:06,325 - __main__ - INFO - Análisis completado exitosamente para LDO.MI en 2.02s (Precio: EUR 58.92, Cambio: -0.47%)
+2026-02-21 22:15:06,325 - __main__ - INFO - Análisis solicitado para: EOAN.DE
+2026-02-21 22:15:06,781 - __main__ - INFO - Datos cargados: 251 días para EOAN.DE
+2026-02-21 22:15:06,789 - hmmlearn.base - WARNING - Model is not converging.  Current: 733.2695485655461 is not greater than 733.6021804188156. Delta is -0.33263185326950406
+2026-02-21 22:15:06,831 - hmmlearn.base - WARNING - Model is not converging.  Current: 658.8642555955879 is not greater than 658.9702729697038. Delta is -0.10601737411593604
+2026-02-21 22:15:07,501 - __main__ - INFO - Análisis completado exitosamente para EOAN.DE en 1.18s (Precio: EUR 18.63, Cambio: +0.16%)
+2026-02-21 22:15:07,504 - __main__ - INFO - Análisis solicitado para: AIR.DE
+2026-02-21 22:15:08,009 - __main__ - INFO - Datos cargados: 251 días para AIR.DE
+2026-02-21 22:15:08,841 - __main__ - INFO - Análisis completado exitosamente para AIR.DE en 1.34s (Precio: EUR 189.70, Cambio: +1.41%)
+C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py:6: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+2026-02-21 22:15:09,468 - backend.app.services.llm - INFO - gemini-1.5-pro initialized successfully
+2026-02-21 22:15:09,468 - backend.app.services.llm - ERROR - Failed to generate Gemini Portfolio Analysis: name 'asyncio' is not defined
+Traceback (most recent call last):
+  File "C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py", line 186, in evaluate_portfolio_async
+    response = await asyncio.wait_for(
+NameError: name 'asyncio' is not defined
+INFO:     127.0.0.1:53852 - "POST /api/portfolio HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65432 - "OPTIONS /api/portfolio HTTP/1.1" 200 OK
+2026-02-21 22:16:31,734 - __main__ - INFO - Análisis solicitado para: LDO.MI
+2026-02-21 22:16:31,734 - __main__ - INFO - Cache HIT for LDO.MI_2026-02-21
+2026-02-21 22:16:31,734 - __main__ - INFO - Análisis solicitado para: EOAN.DE
+2026-02-21 22:16:31,734 - __main__ - INFO - Cache HIT for EOAN.DE_2026-02-21
+2026-02-21 22:16:31,734 - __main__ - INFO - Análisis solicitado para: AIR.DE
+2026-02-21 22:16:31,734 - __main__ - INFO - Cache HIT for AIR.DE_2026-02-21
+2026-02-21 22:16:31,734 - backend.app.services.llm - ERROR - Failed to generate Gemini Portfolio Analysis: name 'asyncio' is not defined
+Traceback (most recent call last):
+  File "C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py", line 186, in evaluate_portfolio_async
+    response = await asyncio.wait_for(
+NameError: name 'asyncio' is not defined
+INFO:     127.0.0.1:65432 - "POST /api/portfolio HTTP/1.1" 200 OK
+2026-02-21 22:20:02,116 - __main__ - INFO - Análisis solicitado para: NVDA
+2026-02-21 22:20:02,714 - __main__ - INFO - Datos cargados: 248 días para NVDA
+2026-02-21 22:20:03,674 - __main__ - INFO - Análisis completado exitosamente para NVDA en 1.56s (Precio: USD 189.82, Cambio: +1.02%)
+INFO:     127.0.0.1:49671 - "GET /api/analyze/NVDA HTTP/1.1" 200 OK
+2026-02-21 22:20:03,683 - __main__ - INFO - Análisis solicitado para: NVDA
+2026-02-21 22:20:03,683 - __main__ - INFO - Cache HIT for NVDA_2026-02-21
+INFO:     127.0.0.1:58689 - "GET /api/analyze/NVDA HTTP/1.1" 200 OK
+2026-02-21 22:20:14,166 - __main__ - INFO - Análisis solicitado para: LDO.MI
+2026-02-21 22:20:14,506 - __main__ - INFO - Datos cargados: 250 días para LDO.MI
+2026-02-21 22:20:15,432 - __main__ - INFO - Análisis completado exitosamente para LDO.MI en 1.26s (Precio: EUR 58.92, Cambio: -0.47%)
+2026-02-21 22:20:15,439 - __main__ - INFO - Análisis solicitado para: EOAN.DE
+2026-02-21 22:20:15,768 - __main__ - INFO - Datos cargados: 251 días para EOAN.DE
+2026-02-21 22:20:15,812 - hmmlearn.base - WARNING - Model is not converging.  Current: 733.2695485655461 is not greater than 733.6021804188156. Delta is -0.33263185326950406
+2026-02-21 22:20:15,854 - hmmlearn.base - WARNING - Model is not converging.  Current: 658.8642555955879 is not greater than 658.9702729697038. Delta is -0.10601737411593604
+2026-02-21 22:20:16,613 - __main__ - INFO - Análisis completado exitosamente para EOAN.DE en 1.17s (Precio: EUR 18.63, Cambio: +0.16%)
+2026-02-21 22:20:16,615 - __main__ - INFO - Análisis solicitado para: AIR.DE
+2026-02-21 22:20:17,012 - __main__ - INFO - Datos cargados: 251 días para AIR.DE
+2026-02-21 22:20:18,002 - __main__ - INFO - Análisis completado exitosamente para AIR.DE en 1.39s (Precio: EUR 189.70, Cambio: +1.41%)
+2026-02-21 22:20:18,006 - backend.app.services.llm - ERROR - Failed to generate Gemini Portfolio Analysis: name 'asyncio' is not defined
+Traceback (most recent call last):
+  File "C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py", line 186, in evaluate_portfolio_async
+    # but we use standard parameters to ensure a fast JSON response.
+NameError: name 'asyncio' is not defined
+INFO:     127.0.0.1:52329 - "POST /api/portfolio HTTP/1.1" 200 OK
+2026-02-21 22:20:34,999 - __main__ - WARNING - Portfolio limitado a 10 activos para optimizar rendimiento.
+2026-02-21 22:20:35,001 - __main__ - INFO - Análisis solicitado para: ANA.MC
+2026-02-21 22:20:35,492 - __main__ - INFO - Datos cargados: 253 días para ANA.MC
+2026-02-21 22:20:36,394 - __main__ - INFO - Análisis completado exitosamente para ANA.MC en 1.39s (Precio: EUR 197.50, Cambio: +0.36%)
+2026-02-21 22:20:36,394 - __main__ - INFO - Análisis solicitado para: BBVA.MC
+2026-02-21 22:20:36,925 - __main__ - INFO - Datos cargados: 253 días para BBVA.MC
+2026-02-21 22:20:36,966 - hmmlearn.base - WARNING - Model is not converging.  Current: 654.2278209247621 is not greater than 654.2992475094761. Delta is -0.0714265847140041
+2026-02-21 22:20:37,881 - __main__ - INFO - Análisis completado exitosamente para BBVA.MC en 1.49s (Precio: EUR 19.85, Cambio: +0.23%)
+2026-02-21 22:20:37,884 - __main__ - INFO - Análisis solicitado para: BKT.MC
+2026-02-21 22:20:38,354 - __main__ - INFO - Datos cargados: 253 días para BKT.MC
+2026-02-21 22:20:38,395 - hmmlearn.base - WARNING - Model is not converging.  Current: 690.1095929508257 is not greater than 690.2463696310238. Delta is -0.13677668019806788
+2026-02-21 22:20:39,321 - __main__ - INFO - Análisis completado exitosamente para BKT.MC en 1.44s (Precio: EUR 14.39, Cambio: +2.75%)
+2026-02-21 22:20:39,321 - __main__ - INFO - Análisis solicitado para: CABK.MC
+2026-02-21 22:20:39,856 - __main__ - INFO - Datos cargados: 253 días para CABK.MC
+2026-02-21 22:20:40,728 - __main__ - INFO - Análisis completado exitosamente para CABK.MC en 1.41s (Precio: EUR 10.97, Cambio: +2.48%)
+2026-02-21 22:20:40,728 - __main__ - INFO - Análisis solicitado para: CLNX.MC
+2026-02-21 22:20:41,170 - __main__ - INFO - Datos cargados: 253 días para CLNX.MC
+2026-02-21 22:20:41,213 - hmmlearn.base - WARNING - Model is not converging.  Current: 692.0184123979202 is not greater than 692.0825082754419. Delta is -0.06409587752170864
+2026-02-21 22:20:42,067 - __main__ - INFO - Análisis completado exitosamente para CLNX.MC en 1.34s (Precio: EUR 30.46, Cambio: +1.53%)
+2026-02-21 22:20:42,069 - __main__ - INFO - Análisis solicitado para: ACS.MC
+2026-02-21 22:20:42,616 - __main__ - INFO - Datos cargados: 253 días para ACS.MC
+2026-02-21 22:20:43,536 - __main__ - INFO - Análisis completado exitosamente para ACS.MC en 1.47s (Precio: EUR 106.00, Cambio: +1.34%)
+2026-02-21 22:20:43,536 - __main__ - INFO - Análisis solicitado para: ELE.MC
+2026-02-21 22:20:43,989 - __main__ - INFO - Datos cargados: 253 días para ELE.MC
+2026-02-21 22:20:44,845 - __main__ - INFO - Análisis completado exitosamente para ELE.MC en 1.31s (Precio: EUR 31.47, Cambio: +0.13%)
+2026-02-21 22:20:44,845 - __main__ - INFO - Análisis solicitado para: ENG.MC
+2026-02-21 22:20:45,378 - __main__ - INFO - Datos cargados: 253 días para ENG.MC
+2026-02-21 22:20:45,418 - hmmlearn.base - WARNING - Model is not converging.  Current: 773.9389854041175 is not greater than 774.0782953597432. Delta is -0.13930995562566295
+2026-02-21 22:20:45,457 - hmmlearn.base - WARNING - Model is not converging.  Current: 708.1198255993577 is not greater than 708.1355856112618. Delta is -0.015760011904148996
+2026-02-21 22:20:46,176 - __main__ - INFO - Análisis completado exitosamente para ENG.MC en 1.33s (Precio: EUR 14.90, Cambio: +0.24%)
+2026-02-21 22:20:46,178 - __main__ - INFO - Análisis solicitado para: FER.MC
+2026-02-21 22:20:46,694 - __main__ - INFO - Datos cargados: 253 días para FER.MC
+2026-02-21 22:20:46,812 - hmmlearn.base - WARNING - Model is not converging.  Current: 685.976558874278 is not greater than 686.1428630835605. Delta is -0.16630420928254352
+2026-02-21 22:20:47,552 - __main__ - INFO - Análisis completado exitosamente para FER.MC en 1.37s (Precio: EUR 61.72, Cambio: +1.35%)
+2026-02-21 22:20:47,557 - __main__ - INFO - Análisis solicitado para: GRF.MC
+2026-02-21 22:20:48,070 - __main__ - INFO - Datos cargados: 253 días para GRF.MC
+2026-02-21 22:20:48,911 - __main__ - INFO - Análisis completado exitosamente para GRF.MC en 1.35s (Precio: EUR 11.14, Cambio: -0.18%)
+2026-02-21 22:20:48,913 - backend.app.services.llm - ERROR - Failed to generate Gemini Portfolio Analysis: name 'asyncio' is not defined
+Traceback (most recent call last):
+  File "C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py", line 186, in evaluate_portfolio_async
+    # but we use standard parameters to ensure a fast JSON response.
+NameError: name 'asyncio' is not defined
+INFO:     127.0.0.1:57128 - "POST /api/portfolio HTTP/1.1" 200 OK
+2026-02-21 22:21:05,020 - __main__ - WARNING - Portfolio limitado a 10 activos para optimizar rendimiento.
+2026-02-21 22:21:05,022 - __main__ - INFO - Análisis solicitado para: AC.PA
+2026-02-21 22:21:05,601 - __main__ - INFO - Datos cargados: 253 días para AC.PA
+2026-02-21 22:21:06,491 - __main__ - INFO - Análisis completado exitosamente para AC.PA en 1.47s (Precio: EUR 48.48, Cambio: +0.31%)
+2026-02-21 22:21:06,493 - __main__ - INFO - Análisis solicitado para: AI.PA
+2026-02-21 22:21:06,976 - __main__ - INFO - Datos cargados: 253 días para AI.PA
+2026-02-21 22:21:07,806 - __main__ - INFO - Análisis completado exitosamente para AI.PA en 1.31s (Precio: EUR 175.56, Cambio: +4.80%)
+2026-02-21 22:21:07,809 - __main__ - INFO - Análisis solicitado para: AIR.PA
+2026-02-21 22:21:08,253 - __main__ - INFO - Datos cargados: 253 días para AIR.PA
+2026-02-21 22:21:09,151 - __main__ - INFO - Análisis completado exitosamente para AIR.PA en 1.34s (Precio: EUR 189.74, Cambio: +1.41%)
+2026-02-21 22:21:09,151 - __main__ - INFO - Análisis solicitado para: ALO.PA
+2026-02-21 22:21:09,759 - __main__ - INFO - Datos cargados: 253 días para ALO.PA
+2026-02-21 22:21:10,667 - __main__ - INFO - Análisis completado exitosamente para ALO.PA en 1.52s (Precio: EUR 29.84, Cambio: +0.95%)
+2026-02-21 22:21:10,668 - __main__ - INFO - Análisis solicitado para: BNP.PA
+2026-02-21 22:21:11,127 - __main__ - INFO - Datos cargados: 253 días para BNP.PA
+2026-02-21 22:21:11,930 - __main__ - INFO - Análisis completado exitosamente para BNP.PA en 1.26s (Precio: EUR 94.73, Cambio: +0.95%)
+2026-02-21 22:21:11,934 - __main__ - INFO - Análisis solicitado para: ACA.PA
+2026-02-21 22:21:12,401 - __main__ - INFO - Datos cargados: 253 días para ACA.PA
+2026-02-21 22:21:12,491 - hmmlearn.base - WARNING - Model is not converging.  Current: 656.5247016886673 is not greater than 656.5671295810536. Delta is -0.04242789238628575
+2026-02-21 22:21:13,208 - __main__ - INFO - Análisis completado exitosamente para ACA.PA en 1.27s (Precio: EUR 18.57, Cambio: +1.70%)
+2026-02-21 22:21:13,208 - __main__ - INFO - Análisis solicitado para: CAP.PA
+2026-02-21 22:21:13,784 - __main__ - INFO - Datos cargados: 253 días para CAP.PA
+2026-02-21 22:21:14,558 - __main__ - INFO - Análisis completado exitosamente para CAP.PA en 1.35s (Precio: EUR 104.50, Cambio: +0.53%)
+2026-02-21 22:21:14,558 - __main__ - INFO - Análisis solicitado para: CS.PA
+2026-02-21 22:21:15,055 - __main__ - INFO - Datos cargados: 253 días para CS.PA
+2026-02-21 22:21:15,843 - __main__ - INFO - Análisis completado exitosamente para CS.PA en 1.28s (Precio: EUR 39.80, Cambio: +1.74%)
+2026-02-21 22:21:15,845 - __main__ - INFO - Análisis solicitado para: DG.PA
+2026-02-21 22:21:16,317 - __main__ - INFO - Datos cargados: 253 días para DG.PA
+2026-02-21 22:21:16,341 - hmmlearn.base - WARNING - Model is not converging.  Current: 741.8764624649465 is not greater than 741.9435908663918. Delta is -0.06712840144530219
+2026-02-21 22:21:17,312 - __main__ - INFO - Análisis completado exitosamente para DG.PA en 1.47s (Precio: EUR 140.10, Cambio: +0.47%)
+2026-02-21 22:21:17,314 - __main__ - INFO - Análisis solicitado para: DSY.PA
+2026-02-21 22:21:17,786 - __main__ - INFO - Datos cargados: 253 días para DSY.PA
+2026-02-21 22:21:18,601 - __main__ - INFO - Análisis completado exitosamente para DSY.PA en 1.29s (Precio: EUR 17.43, Cambio: -0.63%)
+2026-02-21 22:21:18,606 - backend.app.services.llm - ERROR - Failed to generate Gemini Portfolio Analysis: name 'asyncio' is not defined
+Traceback (most recent call last):
+  File "C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py", line 186, in evaluate_portfolio_async
+    # but we use standard parameters to ensure a fast JSON response.
+NameError: name 'asyncio' is not defined
+INFO:     127.0.0.1:62532 - "POST /api/portfolio HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62007 - "GET /health HTTP/1.1" 200 OK
+2026-02-21 22:22:40,724 - __main__ - INFO - Análisis solicitado para: AAPL
+2026-02-21 22:22:41,192 - __main__ - INFO - Datos cargados: 248 días para AAPL
+2026-02-21 22:22:41,231 - hmmlearn.base - WARNING - Model is not converging.  Current: 655.6916425314387 is not greater than 655.8183227459626. Delta is -0.12668021452395806
+2026-02-21 22:22:41,277 - hmmlearn.base - WARNING - Model is not converging.  Current: 592.837946864266 is not greater than 593.062267521531. Delta is -0.22432065726502515
+2026-02-21 22:22:41,972 - __main__ - INFO - Análisis completado exitosamente para AAPL en 1.25s (Precio: USD 264.58, Cambio: +1.54%)
+2026-02-21 22:22:41,974 - __main__ - INFO - Análisis solicitado para: NVDA
+2026-02-21 22:22:41,974 - __main__ - INFO - Cache HIT for NVDA_2026-02-21
+2026-02-21 22:22:41,974 - backend.app.services.llm - ERROR - Failed to generate Gemini Portfolio Analysis: name 'asyncio' is not defined
+Traceback (most recent call last):
+  File "C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py", line 186, in evaluate_portfolio_async
+    # but we use standard parameters to ensure a fast JSON response.
+NameError: name 'asyncio' is not defined
+INFO:     127.0.0.1:49677 - "POST /api/portfolio HTTP/1.1" 200 OK

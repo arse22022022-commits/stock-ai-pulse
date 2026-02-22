@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "C:\Users\34636\Antigravity Pruebas\server.py", line 23, in <module>
+    load_dotenv("backend/.env")
+NameError: name 'load_dotenv' is not defined

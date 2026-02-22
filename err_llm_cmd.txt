@@ -1,0 +1,68 @@
+C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:275: FutureWarning: You are using a Python version (3.10.10) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py:6: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+2026-02-21 16:57:31.640889: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
+2026-02-21 16:57:31.640917: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+Traceback (most recent call last):
+  File "C:\Users\34636\Antigravity Pruebas\test_llm.py", line 4, in <module>
+    from backend.app.services.llm import llm_service
+  File "C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py", line 8, in <module>
+    from .chronos import chronos_service
+  File "C:\Users\34636\Antigravity Pruebas\backend\app\services\chronos.py", line 4, in <module>
+    from chronos import ChronosPipeline
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\chronos\__init__.py", line 6, in <module>
+    from .chronos import (
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\chronos\chronos.py", line 12, in <module>
+    from transformers import (
+  File "<frozen importlib._bootstrap>", line 1075, in _handle_fromlist
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\utils\import_utils.py", line 2317, in __getattr__
+    module = self._get_module(self._class_to_module[name])
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\utils\import_utils.py", line 2347, in _get_module
+    raise e
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\utils\import_utils.py", line 2345, in _get_module
+    return importlib.import_module("." + module_name, self.__name__)
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\importlib\__init__.py", line 126, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\modeling_utils.py", line 70, in <module>
+    from .loss.loss_utils import LOSS_MAPPING
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\loss\loss_utils.py", line 21, in <module>
+    from .loss_d_fine import DFineForObjectDetectionLoss
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\loss\loss_d_fine.py", line 21, in <module>
+    from .loss_for_object_detection import (
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\loss\loss_for_object_detection.py", line 32, in <module>
+    from transformers.image_transforms import center_to_corners_format
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\transformers\image_transforms.py", line 48, in <module>
+    import tensorflow as tf
+  File "C:\Users\34636\AppData\Roaming\Python\Python310\site-packages\tensorflow\__init__.py", line 37, in <module>
+    from tensorflow.python.tools import module_util as _module_util
+  File "C:\Users\34636\AppData\Roaming\Python\Python310\site-packages\tensorflow\python\__init__.py", line 37, in <module>
+    from tensorflow.python.eager import context
+  File "C:\Users\34636\AppData\Roaming\Python\Python310\site-packages\tensorflow\python\eager\context.py", line 29, in <module>
+    from tensorflow.core.framework import function_pb2
+  File "C:\Users\34636\AppData\Roaming\Python\Python310\site-packages\tensorflow\core\framework\function_pb2.py", line 16, in <module>
+    from tensorflow.core.framework import attr_value_pb2 as tensorflow_dot_core_dot_framework_dot_attr__value__pb2
+  File "C:\Users\34636\AppData\Roaming\Python\Python310\site-packages\tensorflow\core\framework\attr_value_pb2.py", line 16, in <module>
+    from tensorflow.core.framework import tensor_pb2 as tensorflow_dot_core_dot_framework_dot_tensor__pb2
+  File "C:\Users\34636\AppData\Roaming\Python\Python310\site-packages\tensorflow\core\framework\tensor_pb2.py", line 16, in <module>
+    from tensorflow.core.framework import resource_handle_pb2 as tensorflow_dot_core_dot_framework_dot_resource__handle__pb2
+  File "C:\Users\34636\AppData\Roaming\Python\Python310\site-packages\tensorflow\core\framework\resource_handle_pb2.py", line 16, in <module>
+    from tensorflow.core.framework import tensor_shape_pb2 as tensorflow_dot_core_dot_framework_dot_tensor__shape__pb2
+  File "C:\Users\34636\AppData\Roaming\Python\Python310\site-packages\tensorflow\core\framework\tensor_shape_pb2.py", line 36, in <module>
+    _descriptor.FieldDescriptor(
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\protobuf\descriptor.py", line 626, in __new__
+    _message.Message._CheckCalledFromGeneratedFile()
+TypeError: Descriptors cannot be created directly.
+If this call came from a _pb2.py file, your generated code is out of date and must be regenerated with protoc >= 3.19.0.
+If you cannot immediately regenerate your protos, some other possible workarounds are:
+ 1. Downgrade the protobuf package to 3.20.x or lower.
+ 2. Set PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python (but this will use pure-Python parsing and will be much slower).
+
+More information: https://developers.google.com/protocol-buffers/docs/news/2022-05-06#python-updates

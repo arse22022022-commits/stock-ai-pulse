@@ -1,0 +1,23 @@
+2026-02-21 17:37:58,013 - __main__ - INFO - Cargando .env desde el directorio /backend
+DEBUG: OK - GOOGLE_API_KEY detectada y cargada
+2026-02-21 17:37:58,013 - __main__ - INFO - OK - GOOGLE_API_KEY detectada y cargada
+2026-02-21 17:38:04.065959: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
+2026-02-21 17:38:04.067675: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:275: FutureWarning: You are using a Python version (3.10.10) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+2026-02-21 17:38:06,832 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 17:38:06,833 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 17:38:06,834 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 17:38:06,869 - root - WARNING - Limited tf.summary API due to missing TensorBoard installation.
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-02-21 17:38:07,693 - __main__ - INFO - Modelo Chronos (LLM) cargado con éxito
+2026-02-21 17:38:07,693 - __main__ - INFO - Starting StockAI Pulse Backend - v1.3.1-fix-prediction
+2026-02-21 17:38:07,807 - __main__ - INFO - Rate limiting habilitado
+INFO:     Started server process [27472]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-02-21 17:38:20,540 - __main__ - INFO - Análisis solicitado para: LDO.MI
+2026-02-21 17:38:20,543 - __main__ - INFO - Análisis solicitado para: EOAN.DE
+2026-02-21 17:38:21,483 - __main__ - INFO - Datos cargados: 250 días para LDO.MI
+2026-02-21 17:38:21,782 - __main__ - INFO - Datos cargados: 251 días para EOAN.DE

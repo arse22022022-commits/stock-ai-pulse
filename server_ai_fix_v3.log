@@ -1,0 +1,57 @@
+2026-02-21 17:33:15,284 - __main__ - INFO - Cargando .env desde el directorio /backend
+2026-02-21 17:33:15,284 - __main__ - INFO - \u2705 GOOGLE_API_KEY detectada y cargada
+2026-02-21 17:33:18.495376: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
+2026-02-21 17:33:18.496287: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:275: FutureWarning: You are using a Python version (3.10.10) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+2026-02-21 17:33:19,979 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 17:33:19,979 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 17:33:19,980 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 17:33:20,018 - root - WARNING - Limited tf.summary API due to missing TensorBoard installation.
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-02-21 17:33:20,701 - __main__ - INFO - Modelo Chronos (LLM) cargado con éxito
+2026-02-21 17:33:20,704 - __main__ - INFO - Starting StockAI Pulse Backend - v1.3.1-fix-prediction
+2026-02-21 17:33:20,787 - __main__ - INFO - Rate limiting habilitado
+INFO:     Started server process [25372]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+2026-02-21 17:34:48,375 - __main__ - INFO - Análisis solicitado para: LDO.MI
+2026-02-21 17:34:48,375 - __main__ - INFO - Análisis solicitado para: EOAN.DE
+2026-02-21 17:34:49,181 - __main__ - INFO - Datos cargados: 251 días para EOAN.DE
+2026-02-21 17:34:49,357 - __main__ - INFO - Datos cargados: 250 días para LDO.MI
+2026-02-21 17:34:49,975 - hmmlearn.base - WARNING - Model is not converging.  Current: 658.8642555955879 is not greater than 658.9702729697038. Delta is -0.10601737411593604
+2026-02-21 17:34:49,975 - hmmlearn.base - WARNING - Model is not converging.  Current: 733.2695485655461 is not greater than 733.6021804188156. Delta is -0.33263185326950406
+2026-02-21 17:34:51,359 - __main__ - INFO - Análisis completado exitosamente para EOAN.DE en 2.98s (Precio: EUR 18.63, Cambio: +0.16%)
+2026-02-21 17:34:51,416 - __main__ - INFO - Análisis completado exitosamente para LDO.MI en 3.04s (Precio: EUR 58.92, Cambio: -0.47%)
+C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py:6: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+2026-02-21 17:34:52,720 - backend.app.services.chronos - INFO - Chronos (Local LLM) initialized successfully on cpu
+2026-02-21 17:34:52,721 - backend.app.services.llm - INFO - gemini-1.5-pro initialized successfully
+2026-02-21 17:34:52,902 - backend.app.services.llm - ERROR - Failed to generate Gemini Portfolio Analysis: 404 models/gemini-1.5-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+Traceback (most recent call last):
+  File "C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py", line 179, in evaluate_portfolio_async
+    response = await self.model.generate_content_async(
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\generativeai\generative_models.py", line 385, in generate_content_async
+    response = await self._async_client.generate_content(
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\ai\generativelanguage_v1beta\services\generative_service\async_client.py", line 440, in generate_content
+    response = await rpc(
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\retry\retry_unary_async.py", line 231, in retry_wrapped_func
+    return await retry_target(
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\retry\retry_unary_async.py", line 163, in retry_target
+    next_sleep = _retry_error_helper(
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\retry\retry_base.py", line 214, in _retry_error_helper
+    raise final_exc from source_exc
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\retry\retry_unary_async.py", line 158, in retry_target
+    return await target()
+  File "C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\grpc_helpers_async.py", line 89, in __await__
+    raise exceptions.from_grpc_error(rpc_error) from rpc_error
+google.api_core.exceptions.NotFound: 404 models/gemini-1.5-pro is not found for API version v1beta, or is not supported for generateContent. Call ListModels to see the list of available models and their supported methods.
+INFO:     127.0.0.1:54300 - "POST /api/portfolio HTTP/1.1" 200 OK

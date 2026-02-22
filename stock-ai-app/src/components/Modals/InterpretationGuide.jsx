@@ -31,7 +31,7 @@ export const InterpretationGuide = ({ onClose }) => (
                             <td style={{ padding: '8px' }}><strong>1. Estructura</strong></td>
                             <td style={{ padding: '8px' }}><strong>40%</strong></td>
                             <td style={{ padding: '8px' }}>Eficiencia del mercado actual</td>
-                            <td style={{ padding: '8px' }}><strong>Ratio R/R</strong> (Rentabilidad/Riesgo) del Régimen HMM actual</td>
+                            <td style={{ padding: '8px' }}><strong>Ratio R/R</strong> (Rentabilidad/Riesgo) del Régimen **HMM (Hidden Markov Model)** actual</td>
                         </tr>
                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                             <td style={{ padding: '8px' }}><strong>2. Impulso</strong></td>
@@ -222,7 +222,7 @@ export const InterpretationGuide = ({ onClose }) => (
 
             <section style={{ marginBottom: '32px' }}>
                 <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>7. Analyst AI (Chat Financiero) 🤖💬</h3>
-                <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>El sistema incluye un <strong>Analista Virtual</strong> basado en Google Gemini 2.0 Flash. Puedes preguntarle sobre cualquier activo analizado.</p>
+                <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>El sistema incluye un <strong>Analista Virtual</strong> basado en Google Gemini 1.5 Pro (con respaldo técnico de Chronos). Puedes preguntarle sobre cualquier activo analizado.</p>
 
                 <h4 style={{ color: '#f8fafc', marginTop: '16px', marginBottom: '8px', fontSize: '1rem' }}>Características Clave:</h4>
                 <ul style={{ color: '#94a3b8', fontSize: '0.9rem', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>

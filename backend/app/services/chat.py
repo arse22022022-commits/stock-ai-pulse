@@ -44,13 +44,13 @@ async def generate_market_explanation(request: ChatRequest) -> str:
         Estás analizando la acción **{request.ticker}** que cotiza a **{request.price}**.
         
         **Datos Técnicos del Sistema:**
-        *   **Régimen de Tendencia (HMM):** {request.hmm_state}
+        *   **Régimen de Tendencia (HMM - Hidden Markov Model):** {request.hmm_state}
         *   **Régimen de Impulso (Momentum):** {request.impulse_state}
         
         **Instrucciones:**
         1.  Responde en **Español**.
         2.  Sé directo, profesional pero accesible (como a un cliente de banca privada).
-        3.  Explica qué significan los regímenes HMM e Impulso en este contexto específico.
+        3.  Explica qué significan los regímenes HMM (Hidden Markov Model) e Impulso en este contexto específico.
         4.  Si el HMM es Alcista pero el Impulso es Volátil/Bajista, advierte del riesgo (divergencia).
         5.  No des consejos de inversión explícitos, sino interpretación analítica.
         6.  Usa emojis con moderación para destacar puntos clave.

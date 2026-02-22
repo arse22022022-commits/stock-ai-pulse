@@ -540,12 +540,6 @@ async def analyze_portfolio(tickers: list[str], request: Request):
     """Analyze multiple tickers and provide portfolio-level insights"""
     if not tickers:
         raise HTTPException(status_code=400, detail="Se requiere al menos un ticker")
-    
-    # Limit number of tickers for performance in this demo
-    limit = 10
-    if len(tickers) > limit:
-        tickers = tickers[:limit]
-        logger.warning(f"Portfolio limitado a {limit} activos para optimizar rendimiento.")
 
     results = []
     # ULTIMATE STABILITY: Sequential processing for portfolio on Windows

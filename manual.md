@@ -50,6 +50,7 @@ La recomendación final de la IA no se basa en un solo indicador, sino en un **C
 
 1. **Eficiencia Estructural (40%)**: Basada en el **Ratio R/R del Estado Actual** de rendimientos. Evalúa si el entorno actual es "de calidad" para invertir.
 2. **Momento Dinámico (30%)**: Basada en la **Media del Estado Actual de Diferencias**. Detecta si el movimiento tiene inercia o está agotado.
-3. **Proyección Predictiva (30%)**: Basada en la **Pendiente del Forecast (Chronos)** a 10 días. Aporta la visión de futuro del modelo de lenguaje profundo.
+3. **Proyección Predictiva (30%)**: Basada en el **Razonamiento de Gemini 3.1 Pro** a 10 días. Aporta una visión de futuro basada en patrones estructurales y "Thinking Levels".
+
 
 Este sistema de triple filtro evita señales falsas y asegura que los veredictos de "COMPRA" o "VENTA" tengan una base matemática multidisciplinar.

@@ -2,12 +2,28 @@ import numpy as np
 import pandas as pd
 from hmmlearn import hmm
 
+# --- HMM TRAINING CONFIGURATION ---
+HMM_COMPONENTS = 3
+HMM_COVARIANCE = "full"
+HMM_ITERATIONS = 1000
+HMM_RANDOM_STATE = 42
+
+# --- SCORING THRESHOLDS ---
+RR_OPTIMAL = 0.15
+RR_GOOD = 0.05
+RR_MINIMAL = 0.0
+MOMENTUM_HIGH = 0.5
+MOMENTUM_MODERATE = 0.0
+MOMENTUM_SLOWING = -0.5
+PROJECTION_BULLISH = 0.03
+PROJECTION_BEARISH = -0.03
+
 # --- HMM TRAINING LOGIC ---
 
 def train_hmm_returns(data: pd.DataFrame):
     """Train HMM on Returns data"""
     returns_data = data[['Returns']].values
-    model_ret = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=1000, random_state=42)
+    model_ret = hmm.GaussianHMM(n_components=HMM_COMPONENTS, covariance_type=HMM_COVARIANCE, n_iter=HMM_ITERATIONS, random_state=HMM_RANDOM_STATE)
     model_ret.fit(returns_data)
     raw_regimes_ret = model_ret.predict(returns_data)
     raw_probs_ret = model_ret.predict_proba(returns_data)
@@ -46,7 +62,7 @@ def train_hmm_returns(data: pd.DataFrame):
 def train_hmm_diff(data: pd.DataFrame):
     """Train HMM on Diff_Returns data"""
     diff_data = data[['Diff_Returns']].values
-    model_diff = hmm.GaussianHMM(n_components=3, covariance_type="full", n_iter=1000, random_state=42)
+    model_diff = hmm.GaussianHMM(n_components=HMM_COMPONENTS, covariance_type=HMM_COVARIANCE, n_iter=HMM_ITERATIONS, random_state=HMM_RANDOM_STATE)
     model_diff.fit(diff_data)
     raw_regimes_diff = model_diff.predict(diff_data)
     raw_probs_diff = model_diff.predict_proba(diff_data)
@@ -94,9 +110,9 @@ def generate_ai_recommendation(data, reg_ret, reg_diff, probs_ret, probs_diff, f
     rr_ratio = current_ret_stats.get("ratio_rr", 0)
     
     structure_score = 0
-    if rr_ratio > 0.15: structure_score = 100
-    elif rr_ratio > 0.05: structure_score = 70
-    elif rr_ratio >= 0: structure_score = 40
+    if rr_ratio > RR_OPTIMAL: structure_score = 100
+    elif rr_ratio > RR_GOOD: structure_score = 70
+    elif rr_ratio >= RR_MINIMAL: structure_score = 40
     else: structure_score = 10 # Penalize negative R/R
     
     # PILLAR 2: Dynamic Momentum (30%)
@@ -105,10 +121,10 @@ def generate_ai_recommendation(data, reg_ret, reg_diff, probs_ret, probs_diff, f
     impulse_mean = current_diff_stats.get("mean", 0)
     
     momentum_score = 50 # Neutral base
-    if impulse_mean > 0.5: momentum_score = 100 # High acceleration
-    elif impulse_mean > 0: momentum_score = 75  # Moderate acceleration
-    elif impulse_mean > -0.5: momentum_score = 30 # Slowing down
-    elif impulse_mean <= -0.5: momentum_score = 0 # Strong deceleration
+    if impulse_mean > MOMENTUM_HIGH: momentum_score = 100 # High acceleration
+    elif impulse_mean > MOMENTUM_MODERATE: momentum_score = 75  # Moderate acceleration
+    elif impulse_mean > MOMENTUM_SLOWING: momentum_score = 30 # Slowing down
+    elif impulse_mean <= MOMENTUM_SLOWING: momentum_score = 0 # Strong deceleration
     
     # PILLAR 3: Predictive Projection (30%)
     # Based on the 10-day forecast slope
@@ -117,9 +133,9 @@ def generate_ai_recommendation(data, reg_ret, reg_diff, probs_ret, probs_diff, f
     forecast_trend = (forecast_end / forecast_start) - 1
     
     projection_score = 50
-    if forecast_trend > 0.03: projection_score = 100
+    if forecast_trend > PROJECTION_BULLISH: projection_score = 100
     elif forecast_trend > 0: projection_score = 70
-    elif forecast_trend < -0.03: projection_score = 0
+    elif forecast_trend < PROJECTION_BEARISH: projection_score = 0
     else: projection_score = 20
     
     # FINAL CONSENSUS SCORE

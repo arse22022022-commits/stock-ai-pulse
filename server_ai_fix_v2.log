@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "C:\Users\34636\Antigravity Pruebas\server.py", line 26, in <module>
+    logger.info("Cargando .env desde el directorio /backend")
+NameError: name 'logger' is not defined

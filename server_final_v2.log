@@ -1,0 +1,65 @@
+2026-02-21 22:00:45,425 - __main__ - INFO - Cargando .env desde el directorio /backend
+2026-02-21 22:00:49.216288: W tensorflow/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'cudart64_110.dll'; dlerror: cudart64_110.dll not found
+2026-02-21 22:00:49.220157: I tensorflow/stream_executor/cuda/cudart_stub.cc:29] Ignore above cudart dlerror if you do not have a GPU set up on your machine.
+C:\Users\34636\AppData\Local\Programs\Python\Python310\lib\site-packages\google\api_core\_python_version_support.py:275: FutureWarning: You are using a Python version (3.10.10) which Google will stop supporting in new releases of google.api_core once it reaches its end of life (2026-10-04). Please upgrade to the latest Python version, or at least Python 3.11, to continue receiving updates for google.api_core past that date.
+  warnings.warn(message, FutureWarning)
+2026-02-21 22:00:51,812 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 22:00:51,813 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 22:00:51,813 - root - WARNING - Limited tf.compat.v2.summary API due to missing TensorBoard installation.
+2026-02-21 22:00:51,899 - root - WARNING - Limited tf.summary API due to missing TensorBoard installation.
+`torch_dtype` is deprecated! Use `dtype` instead!
+2026-02-21 22:00:52,689 - backend.app.services.chronos - INFO - Chronos (Local LLM) initialized successfully on cpu (threads limited to 1)
+2026-02-21 22:00:52,689 - __main__ - INFO - Sistema de predicción Chronos vinculado desde servicios centrales
+2026-02-21 22:00:52,692 - __main__ - INFO - Starting StockAI Pulse Backend - v1.3.1-fix-prediction
+2026-02-21 22:00:52,781 - __main__ - INFO - Rate limiting habilitado
+INFO:     Started server process [27188]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:49297 - "GET /health HTTP/1.1" 200 OK
+2026-02-21 22:00:59,871 - __main__ - INFO - Análisis solicitado para: AAPL
+2026-02-21 22:00:59,874 - __main__ - INFO - Análisis solicitado para: GOOGL
+2026-02-21 22:01:00,716 - __main__ - INFO - Datos cargados: 248 días para AAPL
+2026-02-21 22:01:00,816 - __main__ - INFO - Datos cargados: 248 días para GOOGL
+2026-02-21 22:01:01,590 - hmmlearn.base - WARNING - Model is not converging.  Current: 592.8378818371826 is not greater than 593.0622138262765. Delta is -0.22433198909391194
+2026-02-21 22:01:01,617 - hmmlearn.base - WARNING - Model is not converging.  Current: 655.6915840195333 is not greater than 655.8182629057761. Delta is -0.12667888624287116
+2026-02-21 22:01:02,828 - __main__ - INFO - Análisis completado exitosamente para GOOGL en 2.95s (Precio: USD 314.98, Cambio: +4.01%)
+2026-02-21 22:01:02,854 - __main__ - INFO - Análisis completado exitosamente para AAPL en 2.98s (Precio: USD 264.58, Cambio: +1.54%)
+C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py:6: FutureWarning: 
+
+All support for the `google.generativeai` package has ended. It will no longer be receiving 
+updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+See README for more details:
+
+https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+
+  import google.generativeai as genai
+2026-02-21 22:01:03,434 - backend.app.services.llm - INFO - gemini-1.5-pro initialized successfully
+2026-02-21 22:01:03,434 - backend.app.services.llm - ERROR - Failed to generate Gemini Portfolio Analysis: name 'asyncio' is not defined
+Traceback (most recent call last):
+  File "C:\Users\34636\Antigravity Pruebas\backend\app\services\llm.py", line 186, in evaluate_portfolio_async
+    response = await asyncio.wait_for(
+NameError: name 'asyncio' is not defined
+INFO:     127.0.0.1:49302 - "POST /api/portfolio HTTP/1.1" 200 OK
+2026-02-21 22:03:03,005 - __main__ - INFO - Análisis solicitado para: NVDA
+2026-02-21 22:03:03,595 - __main__ - INFO - Datos cargados: 248 días para NVDA
+2026-02-21 22:03:05,375 - __main__ - INFO - Análisis completado exitosamente para NVDA en 2.37s (Precio: USD 189.82, Cambio: +1.02%)
+INFO:     127.0.0.1:59485 - "GET /api/analyze/NVDA HTTP/1.1" 200 OK
+2026-02-21 22:03:05,389 - __main__ - INFO - Análisis solicitado para: NVDA
+2026-02-21 22:03:05,389 - __main__ - INFO - Cache HIT for NVDA_2026-02-21
+INFO:     127.0.0.1:59485 - "GET /api/analyze/NVDA HTTP/1.1" 200 OK
+2026-02-21 22:03:29,466 - __main__ - INFO - Análisis solicitado para: MTS.MC
+2026-02-21 22:03:30,142 - __main__ - INFO - Datos cargados: 253 días para MTS.MC
+2026-02-21 22:03:30,481 - hmmlearn.base - WARNING - Model is not converging.  Current: 609.4451021375179 is not greater than 609.4595544208605. Delta is -0.01445228334262083
+2026-02-21 22:03:31,802 - __main__ - INFO - Análisis completado exitosamente para MTS.MC en 2.34s (Precio: EUR 54.80, Cambio: +0.66%)
+INFO:     127.0.0.1:63426 - "GET /api/analyze/MTS.MC HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50334 - "OPTIONS /api/portfolio HTTP/1.1" 200 OK
+2026-02-21 22:03:48,513 - __main__ - INFO - Análisis solicitado para: LDO.MI
+2026-02-21 22:03:48,513 - __main__ - INFO - Análisis solicitado para: EOAN.DE
+2026-02-21 22:03:48,518 - __main__ - INFO - Análisis solicitado para: AIR.DE
+2026-02-21 22:03:48,983 - __main__ - INFO - Datos cargados: 250 días para LDO.MI
+2026-02-21 22:03:49,001 - __main__ - INFO - Datos cargados: 251 días para EOAN.DE
+2026-02-21 22:03:49,107 - __main__ - INFO - Datos cargados: 251 días para AIR.DE
+2026-02-21 22:03:49,427 - hmmlearn.base - WARNING - Model is not converging.  Current: 733.2695485655461 is not greater than 733.6021804188156. Delta is -0.33263185326950406
+2026-02-21 22:03:49,466 - hmmlearn.base - WARNING - Model is not converging.  Current: 658.8642555955879 is not greater than 658.9702729697038. Delta is -0.10601737411593604
+^C

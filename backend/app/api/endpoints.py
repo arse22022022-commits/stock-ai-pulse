@@ -45,11 +45,20 @@ async def analyze_stock(ticker: str):
         if len(data) < 60:
             raise HTTPException(status_code=400, detail=f"Datos insuficientes ({len(data)} días). Mínimo 60.")
 
-        # 2. HMM Analysis (CPU Bound - could be offloaded to process pool if needed)
-        # For now, we run it directly as it's fast enough for <1000 data points
-        # If blocking becomes an issue, use loop.run_in_executor
-        regimes_ret, probs_ret, final_ret_stats = train_hmm_returns(data)
-        regimes_diff, probs_diff, final_diff_stats = train_hmm_diff(data)
+        # 2. HMM Analysis (CPU Bound)
+        # We use ThreadPoolExecutor instead of ProcessPoolExecutor to prevent Windows multiprocess spawn crashes
+        loop = asyncio.get_running_loop()
+        from concurrent.futures import ThreadPoolExecutor
+        
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            hmm_tasks = [
+                loop.run_in_executor(executor, train_hmm_returns, data),
+                loop.run_in_executor(executor, train_hmm_diff, data)
+            ]
+            
+            hmm_results = await asyncio.gather(*hmm_tasks)
+            regimes_ret, probs_ret, final_ret_stats = hmm_results[0]
+            regimes_diff, probs_diff, final_diff_stats = hmm_results[1]
         
         # 3. Forecast
         price_col = 'Close'
