@@ -41,63 +41,9 @@ class LLMService:
 
     async def predict(self, data_series: np.ndarray, prediction_length: int = 10, last_date=None, last_price=0.0):
         """
-        Generate forecast. If Gemini is active, use it for intelligent forecasting.
-        Otherwise, use statistical fallback (GBM).
+        Generate forecast ONLY using mathematical models (Chronos) to guarantee deterministic 
+        trend slopes and Verdict Stability on UI.
         """
-        if self.enabled and self.client:
-            try:
-                # Prepare data for prompt
-                # We send the last 60 days of closing prices to give context
-                prices_str = ", ".join([f"{p:.2f}" for p in data_series[-60:]])
-                
-                prompt = f"""
-                Analyze the following historical stock price series (last 60 days):
-                [{prices_str}]
-
-                Last known price: {last_price:.2f}
-                Last known date: {last_date.strftime("%Y-%m-%d") if last_date else "N/A"}
-
-                Task:
-                Generate a {prediction_length}-day price forecast starting from the next day.
-                Provide a JSON response with a list of dictionaries. Each dictionary must have:
-                - "date": Date in YYYY-MM-DD format.
-                - "price": Predicted closing price (float).
-                - "price_low": Estimated lower bound (10th percentile, float).
-                - "price_high": Estimated upper bound (90th percentile, float).
-
-                Focus on structural efficiency and momentum based on the provided series.
-                Return ONLY the JSON array.
-                """
-
-                # Call Gemini async v2 via aio
-                response = await asyncio.wait_for(
-                    self.client.aio.models.generate_content(
-                        model=self.model_name,
-                        contents=prompt,
-                        config=types.GenerateContentConfig(
-                            response_mime_type="application/json",
-                            temperature=0.0
-                        )
-                    ),
-                    timeout=30.0
-                )
-                
-                logger.info("Gemini forecast generated successfully.")
-                
-                forecast_data = json.loads(response.text)
-                
-                # Ensure the response is in the correct format for the frontend
-                forecast_result = []
-                for entry in forecast_data:
-                    entry["type"] = "forecast"
-                    entry["source"] = "genai"
-                    forecast_result.append(entry)
-                
-                return forecast_result
-
-            except Exception as e:
-                logger.error(f"Gemini prediction failed: {e}. Falling back to statistical model.")
-                # Fall through to fallback
         
         # Fallback 1: Chronos (Local Transformer-based Time Series Model)
         if chronos_service.enabled:
@@ -186,7 +132,9 @@ class LLMService:
                     contents=prompt,
                     config=types.GenerateContentConfig(
                         response_mime_type="application/json",
-                        temperature=0.0
+                        temperature=0.0,
+                        top_p=0.1,
+                        top_k=1
                     )
                 ),
                 timeout=25.0

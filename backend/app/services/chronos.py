@@ -45,6 +45,7 @@ class ChronosService:
             # Generate forecast
             # IMPORTANT: Ensure no threading conflicts during prediction
             torch.set_num_threads(1)
+            torch.manual_seed(42) # FORCE ULTIMATE DETERMINISM in ancestral sampling
             with torch.no_grad():
                 forecast = self.pipeline.predict(context, prediction_length)
             
