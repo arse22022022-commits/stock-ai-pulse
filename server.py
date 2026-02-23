@@ -64,6 +64,18 @@ logger.info("Sistema de predicción Chronos vinculado desde servicios centrales"
 # ... (rest of imports)
 VERSION = "v1.3.1-fix-prediction"
 
+from pydantic import BaseModel
+
+class ChatRequest(BaseModel):
+    ticker: str
+    price: float
+    hmm_state: str
+    impulse_state: str
+    user_query: str
+
+class ChatResponse(BaseModel):
+    response: str
+
 app = FastAPI()
 logger.info(f"Starting StockAI Pulse Backend - {VERSION}")
 
@@ -670,6 +682,25 @@ async def analyze_portfolio(tickers: list[str], request: Request):
             "ai_insight": ai_insight
         }
     }
+
+@app.post("/api/chat", response_model=ChatResponse)
+async def chat_endpoint(request: ChatRequest):
+    try:
+        from backend.app.services.llm import llm_service
+        # Prepare context data
+        context = {
+            "ticker": request.ticker,
+            "price": request.price,
+            "hmm_state": request.hmm_state,
+            "impulse_state": request.impulse_state,
+            "user_query": request.user_query
+        }
+        
+        response_text = await llm_service.generate_market_explanation_async(context)
+        return ChatResponse(response=response_text)
+    except Exception as e:
+        logger.error(f"Error in chat endpoint: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
     import uvicorn

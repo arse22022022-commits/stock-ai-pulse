@@ -173,6 +173,59 @@ class LLMService:
             logger.error(f"Failed to generate Gemini Portfolio Analysis: {e}", exc_info=True)
             return fallback_response
 
+    async def generate_market_explanation_async(self, request_data: dict) -> str:
+        """
+        Generates a financial explanation using Gemini based on the provided market context.
+        Replaces the old Groq-based implementation.
+        """
+        if not self.enabled or not self.client:
+             return (
+                 f"🔒 **MODO DEMO** (IA Desactivada)\n\n"
+                 f"Como analista virtual, veo que {request_data.get('ticker')} está en un régimen **{request_data.get('hmm_state')}** "
+                 f"con un impulso **{request_data.get('impulse_state')}**.\n\n"
+                 f"📝 *Para obtener respuestas reales de la IA, asegúrate de configurar GOOGLE_API_KEY en el backend.*"
+             )
+
+        try:
+            prompt = f"""
+            Actúa como un **Analista Financiero Senior de Wall Street** con 20 años de experiencia.
+            Estás analizando la acción **{request_data.get('ticker')}** que cotiza a **{request_data.get('price')}**.
+            
+            **Datos Técnicos del Sistema:**
+            *   **Régimen de Tendencia (HMM - Hidden Markov Model):** {request_data.get('hmm_state')}
+            *   **Régimen de Impulso (Momentum):** {request_data.get('impulse_state')}
+            
+            **Instrucciones:**
+            1.  Responde en **Español**.
+            2.  Sé directo, profesional pero accesible (como a un cliente de banca privada).
+            3.  Explica qué significan los regímenes HMM (Hidden Markov Model) e Impulso en este contexto específico.
+            4.  Si el HMM es Alcista pero el Impulso es Volátil/Bajista, advierte del riesgo (divergencia).
+            5.  No des consejos de inversión explícitos, sino interpretación analítica.
+            6.  Usa emojis con moderación para destacar puntos clave.
+            7.  Responde directamente a la siguiente pregunta del usuario de forma concisa:
+            
+            **Pregunta del Inversor:** {request_data.get('user_query')}
+            """
+
+            response = await asyncio.wait_for(
+                self.client.aio.models.generate_content(
+                    model=self.model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        temperature=0.3, # Un poco de temperatura para respuestas naturales en el chat
+                        top_p=0.8,
+                        top_k=40
+                    )
+                ),
+                timeout=20.0
+            )
+
+            return response.text
+
+        except Exception as e:
+            logger.error(f"Failed to generate Gemini Chat explanation: {e}", exc_info=True)
+            return f"⚠️ Error al conectar con la IA de Google: {str(e)}"
+
 # Global instance
 llm_service = LLMService()
 
