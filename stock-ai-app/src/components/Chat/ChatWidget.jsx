@@ -5,11 +5,21 @@ import ReactMarkdown from 'react-markdown';
 export const ChatWidget = ({ context }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [messages, setMessages] = useState([
-        { role: 'assistant', content: '¿Hola! Soy tu asistente financiero. ¿Tienes dudas sobre este análisis?' }
+        { role: 'assistant', content: `¡Hola! Soy tu asistente financiero. ¿Tienes dudas sobre el análisis de ${context.ticker}?` }
     ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
+
+    // Reset state when ticker changes
+    useEffect(() => {
+        setIsOpen(false);
+        setMessages([
+            { role: 'assistant', content: `¡Hola! Soy tu asistente financiero. ¿Tienes dudas sobre el análisis de ${context.ticker}?` }
+        ]);
+        setInput('');
+        setIsLoading(false);
+    }, [context.ticker]);
 
     const API_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:8001');
 
