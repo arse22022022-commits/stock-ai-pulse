@@ -49,24 +49,14 @@ export const PortfolioView = ({
 
             <div className="portfolio-content" style={{ gridColumn: 'span 9' }}>
                 <div style={{ padding: '32px', borderRadius: '24px', background: 'rgba(15, 23, 42, 0.4)', border: '1px solid rgba(255,255,255,0.05)', minHeight: '500px' }}>
-                    {!portfolioData && !portfolioLoading && (
-                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', opacity: 0.6 }}>
-                            <PieChart style={{ width: '80px', height: '80px', marginBottom: '24px', color: '#64748b' }} />
-                            <h4 style={{ fontSize: '1.4rem', fontWeight: 600, margin: '0 0 12px' }}>Esperando Ejecución</h4>
-                            <p style={{ maxWidth: '400px', lineHeight: 1.6 }}>Configure sus activos a la izquierda y pulse el botón para iniciar el análisis multidimensional de su cartera.</p>
-                        </div>
-                    )}
-
-                    {portfolioLoading && (
-                        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                    {portfolioLoading ? (
+                        <div key="loading" style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
                             <div style={{ width: '64px', height: '64px', border: '4px solid #38bdf8', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite', marginBottom: '24px' }}></div>
                             <h4 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Sincronizando Modelos HMM...</h4>
                             <p style={{ color: '#94a3b8' }}>Este proceso puede tardar unos segundos dependiendo del número de activos.</p>
                         </div>
-                    )}
-
-                    {portfolioData && !portfolioLoading && (
-                        <div>
+                    ) : portfolioData ? (
+                        <div key="content">
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                                 <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>Veredicto Agregado HMM</h3>
                                 <div style={{ padding: '8px 20px', borderRadius: '20px', background: portfolioData.summary.risk_level === 'Alto' ? '#ef444420' : '#10b98120', border: '1px solid ' + (portfolioData.summary.risk_level === 'Alto' ? '#ef444440' : '#10b98140'), color: portfolioData.summary.risk_level === 'Alto' ? '#ef4444' : '#10b981', fontWeight: 800, fontSize: '0.8rem' }}>
@@ -77,7 +67,7 @@ export const PortfolioView = ({
                             <div style={{ padding: '24px', borderRadius: '20px', background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(15, 23, 42, 1) 100%)', border: '1px solid rgba(56, 189, 248, 0.2)', marginBottom: '32px' }}>
                                 <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
                                     <Activity style={{ width: '28px', color: '#38bdf8', marginTop: '4px', flexShrink: 0 }} />
-                                    <p style={{ margin: 0, fontSize: '1.1rem', lineHeight: 1.6, fontWeight: 500, whiteSpace: 'pre-wrap' }}>{portfolioData.summary.advice}</p>
+                                    <p style={{ margin: 0, fontSize: '1.1rem', lineHeight: 1.6, fontWeight: 500, whiteSpace: 'pre-wrap' }}>{portfolioData.summary.advice || 'Análisis no disponible.'}</p>
                                 </div>
                             </div>
 
@@ -90,16 +80,16 @@ export const PortfolioView = ({
                                         <BrainCircuit style={{ color: portfolioData.summary.ai_insight.color, width: '24px' }} />
                                         <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>Gestor de Fondos IA</h3>
                                         <div style={{ marginLeft: 'auto', background: `${portfolioData.summary.ai_insight.color}20`, color: portfolioData.summary.ai_insight.color, padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 800 }}>
-                                            SCORE: {portfolioData.summary.ai_insight.score}/100
+                                            SCORE: {Number(portfolioData.summary.ai_insight.score || 0).toFixed(0)}/100
                                         </div>
                                     </div>
 
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                         <div style={{ fontSize: '1.4rem', fontWeight: 800, color: portfolioData.summary.ai_insight.color, letterSpacing: '0.5px' }}>
-                                            {portfolioData.summary.ai_insight.verdict}
+                                            {portfolioData.summary.ai_insight.verdict || 'SIN RESULTADOS'}
                                         </div>
                                         <p style={{ margin: 0, fontSize: '1.05rem', color: '#cbd5e1', lineHeight: 1.6 }}>
-                                            {portfolioData.summary.ai_insight.reason}
+                                            {portfolioData.summary.ai_insight.reason || 'No hay razonamiento disponible.'}
                                         </p>
                                     </div>
                                 </div>
@@ -107,7 +97,7 @@ export const PortfolioView = ({
 
                             <h4 style={{ fontSize: '1rem', fontWeight: 700, marginBottom: '20px', color: '#94a3b8' }}>DESGLOSE TÉCNICO POR ACTIVO</h4>
                             <div className="asset-grid">
-                                {[...portfolioData.assets]
+                                {[...(portfolioData.assets || [])]
                                     .sort((a, b) => {
                                         const rank = {
                                             'COMPRA FUERTE': 5,
@@ -116,21 +106,27 @@ export const PortfolioView = ({
                                             'VENTA': 2,
                                             'VENTA FUERTE': 1
                                         };
-                                        const scoreA = a.recommendation ? (rank[a.recommendation.verdict] || 0) : 0;
-                                        const scoreB = b.recommendation ? (rank[b.recommendation.verdict] || 0) : 0;
+                                        const scoreA = a?.recommendation ? (rank[a.recommendation.verdict] || 0) : 0;
+                                        const scoreB = b?.recommendation ? (rank[b.recommendation.verdict] || 0) : 0;
 
                                         if (scoreA !== scoreB) {
                                             return scoreB - scoreA;
                                         }
 
-                                        const meanA = a.state_stats_ret?.find(s => s.regime === a.current_regime_ret)?.mean || 0;
-                                        const meanB = b.state_stats_ret?.find(s => s.regime === b.current_regime_ret)?.mean || 0;
+                                        const meanA = a?.state_stats_ret?.find(s => s.regime === a.current_regime_ret)?.mean || 0;
+                                        const meanB = b?.state_stats_ret?.find(s => s.regime === b.current_regime_ret)?.mean || 0;
                                         return meanB - meanA;
                                     })
                                     .map(asset => (
                                         <AssetCard key={asset.ticker} asset={asset} />
                                     ))}
                             </div>
+                        </div>
+                    ) : (
+                        <div key="empty" style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', opacity: 0.6 }}>
+                            <PieChart style={{ width: '80px', height: '80px', marginBottom: '24px', color: '#64748b' }} />
+                            <h4 style={{ fontSize: '1.4rem', fontWeight: 600, margin: '0 0 12px' }}>Esperando Ejecución</h4>
+                            <p style={{ maxWidth: '400px', lineHeight: 1.6 }}>Configure sus activos a la izquierda y pulse el botón para iniciar el análisis multidimensional de su cartera.</p>
                         </div>
                     )}
                 </div>
