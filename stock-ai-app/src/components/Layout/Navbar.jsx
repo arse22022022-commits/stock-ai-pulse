@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrainCircuit, BookOpen, Settings } from 'lucide-react';
+import { BrainCircuit, BookOpen, Settings, Search } from 'lucide-react';
 
 export const Navbar = ({ activeTab, setActiveTab, handleSearch, setShowGuide }) => {
     return (
@@ -32,12 +32,15 @@ export const Navbar = ({ activeTab, setActiveTab, handleSearch, setShowGuide }) 
                 </div>
             </div>
 
-            <form onSubmit={handleSearch} className="nav-search" style={{ position: 'relative', width: '300px' }}>
+            <form onSubmit={handleSearch} className="nav-search" style={{ position: 'relative', width: '300px', display: 'flex' }}>
                 <input
                     type="text"
                     placeholder={activeTab === 'one-ticker' ? "Buscar Ticker..." : "Añadir a Cartera..."}
                     style={{ width: '100%', padding: '12px 20px', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}
                 />
+                <button type="submit" style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', padding: 0, color: '#94a3b8', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                    <Search size={20} />
+                </button>
             </form>
 
             <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }} className="nav-right">

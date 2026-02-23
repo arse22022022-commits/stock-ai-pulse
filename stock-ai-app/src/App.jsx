@@ -48,13 +48,14 @@ const App = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    const symbol = e.target[0].value.trim().toUpperCase();
+    const inputEl = e.target.querySelector('input');
+    const symbol = inputEl ? inputEl.value.trim().toUpperCase() : '';
     if (symbol) {
       if (activeTab === 'one-ticker') {
         setTicker(symbol);
       } else {
         addTicker(symbol);
-        e.target[0].value = '';
+        if (inputEl) inputEl.value = '';
       }
     }
   };

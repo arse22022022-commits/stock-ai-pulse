@@ -116,8 +116,8 @@ export const PortfolioView = ({
                                             'VENTA': 2,
                                             'VENTA FUERTE': 1
                                         };
-                                        const scoreA = rank[a.recommendation.verdict] || 0;
-                                        const scoreB = rank[b.recommendation.verdict] || 0;
+                                        const scoreA = a.recommendation ? (rank[a.recommendation.verdict] || 0) : 0;
+                                        const scoreB = b.recommendation ? (rank[b.recommendation.verdict] || 0) : 0;
 
                                         if (scoreA !== scoreB) {
                                             return scoreB - scoreA;

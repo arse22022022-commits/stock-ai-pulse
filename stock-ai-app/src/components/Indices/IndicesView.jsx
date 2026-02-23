@@ -82,13 +82,13 @@ export const IndicesView = ({
                                     <p style={{ color: '#94a3b8', margin: '4px 0 0' }}>Filtrando por <strong>COMPRA FUERTE</strong></p>
                                 </div>
                                 <div style={{ padding: '8px 20px', borderRadius: '20px', background: '#38bdf820', border: '1px solid #38bdf840', color: '#38bdf8', fontWeight: 800, fontSize: '0.9rem' }}>
-                                    {indicesData.assets.filter(a => a.recommendation.verdict === 'COMPRA FUERTE').length} OPORTUNIDADES
+                                    {indicesData.assets.filter(a => a.recommendation?.verdict === 'COMPRA FUERTE').length} OPORTUNIDADES
                                 </div>
                             </div>
 
                             <div className="asset-grid">
                                 {indicesData.assets
-                                    .filter(a => a.recommendation.verdict === 'COMPRA FUERTE')
+                                    .filter(a => a.recommendation?.verdict === 'COMPRA FUERTE')
                                     .sort((a, b) => { // Sort by HMM Mean Descending
                                         const meanA = a.state_stats_ret?.find(s => s.regime === a.current_regime_ret)?.mean || 0;
                                         const meanB = b.state_stats_ret?.find(s => s.regime === b.current_regime_ret)?.mean || 0;
@@ -98,8 +98,8 @@ export const IndicesView = ({
                                         <AssetCard key={asset.ticker} asset={asset} />
                                     ))}
 
-                                {indicesData.assets.filter(a => a.recommendation.verdict === 'COMPRA FUERTE').length === 0 && (
-                                    <div style={{ gridColumn: 'span 3', padding: '60px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px dashed rgba(255,255,255,0.1)' }}>
+                                {indicesData.assets.filter(a => a.recommendation?.verdict === 'COMPRA FUERTE').length === 0 && (
+                                    <div style={{ gridColumn: '1 / -1', padding: '60px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '16px', border: '1px dashed rgba(255,255,255,0.1)' }}>
                                         <p style={{ fontSize: '1.1rem', color: '#94a3b8', marginBottom: '8px' }}>No se han encontrado oportunidades claras.</p>
                                         <p style={{ fontSize: '0.9rem', color: '#64748b' }}>Ningún activo del {currentIndex} presenta actualmente una señal de <strong>COMPRA FUERTE</strong>.</p>
                                     </div>

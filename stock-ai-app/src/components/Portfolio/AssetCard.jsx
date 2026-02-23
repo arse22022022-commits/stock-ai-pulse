@@ -9,8 +9,8 @@ export const AssetCard = ({ asset }) => {
                     <div style={{ fontWeight: 900, fontSize: '1.2rem' }}>{asset.ticker}</div>
                     <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{getCurrencySymbol(asset.currency)}{asset.current_price.toFixed(2)}</div>
                 </div>
-                <div style={{ padding: '4px 10px', borderRadius: '6px', background: asset.recommendation.color + '20', color: asset.recommendation.color, fontSize: '0.7rem', fontWeight: 800 }}>
-                    {asset.recommendation.verdict}
+                <div style={{ padding: '4px 10px', borderRadius: '6px', background: (asset.recommendation?.color || '#94a3b8') + '20', color: asset.recommendation?.color || '#94a3b8', fontSize: '0.7rem', fontWeight: 800 }}>
+                    {asset.recommendation?.verdict || 'NO DEFINIDO'}
                 </div>
             </div>
             <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
@@ -32,7 +32,7 @@ export const AssetCard = ({ asset }) => {
                 </div>
             </div>
             <p style={{ margin: 0, fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.5, minHeight: '4.5em', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                {asset.recommendation.reason}
+                {asset.recommendation?.reason || 'No hay datos suficientes o el backend no pudo generar el análisis.'}
             </p>
         </div>
     );
