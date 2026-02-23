@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 export const ChatWidget = ({ context }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -164,7 +165,20 @@ export const ChatWidget = ({ context }) => {
                         borderBottomRightRadius: msg.role === 'user' ? '2px' : '12px',
                         borderBottomLeftRadius: msg.role === 'assistant' ? '2px' : '12px'
                     }}>
-                        {msg.content}
+                        {msg.role === 'assistant' ? (
+                            <ReactMarkdown
+                                components={{
+                                    p: ({ node, ...props }) => <p style={{ margin: '0 0 8px 0' }} {...props} />,
+                                    ul: ({ node, ...props }) => <ul style={{ margin: '8px 0', paddingLeft: '20px' }} {...props} />,
+                                    ol: ({ node, ...props }) => <ol style={{ margin: '8px 0', paddingLeft: '20px' }} {...props} />,
+                                    li: ({ node, ...props }) => <li style={{ marginBottom: '4px' }} {...props} />
+                                }}
+                            >
+                                {msg.content}
+                            </ReactMarkdown>
+                        ) : (
+                            msg.content
+                        )}
                     </div>
                 ))}
 
