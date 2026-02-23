@@ -221,17 +221,17 @@ export const InterpretationGuide = ({ onClose }) => (
             </section>
 
             <section style={{ marginBottom: '32px' }}>
-                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>7. Analyst AI (Chat Financiero) 🤖💬</h3>
-                <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>El sistema incluye un <strong>Analista Virtual</strong> basado en Google Gemini 1.5 Pro (con respaldo técnico de Chronos). Puedes preguntarle sobre cualquier activo analizado.</p>
+                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>7. Ecosistema IA (Gestor y Chat) 🤖💬</h3>
+                <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>El sistema está impulsado por los modelos más avanzados de inteligencia artificial: <strong>Google Gemini 2.5 Flash</strong> (para evaluaciones masivas de carteras) y <strong>Gemini 2.5 Flash Lite</strong> (para chats ultra-rápidos en vivo). Todo en conjunto estricto con el cerebro matemático de Chronos.</p>
 
-                <h4 style={{ color: '#f8fafc', marginTop: '16px', marginBottom: '8px', fontSize: '1rem' }}>Características Clave:</h4>
+                <h4 style={{ color: '#f8fafc', marginTop: '16px', marginBottom: '8px', fontSize: '1rem' }}>Funciones Principales:</h4>
                 <ul style={{ color: '#94a3b8', fontSize: '0.9rem', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    <li><strong>Contexto Automático:</strong> La IA ya "sabe" el precio, la tendencia y la volatilidad del activo que estás viendo. No necesitas explicárselo.</li>
-                    <li><strong>Interpretación Humana:</strong> Traduce los datos técnicos complejos (HMM, Impulso) a un lenguaje natural y comprensible.</li>
-                    <li><strong>Seguridad y Estabilidad:</strong>
+                    <li><strong>Gestor de Cartera:</strong> Lee todos los componentes estadísticos a la vez, dictaminando un nivel de riesgo global estricto. Su redacción es determinista (inmutable para las mismas métricas) gracias al sellado MD5 en el backend.</li>
+                    <li><strong>Analista Virtual (Ticker):</strong> Traduce datos crudos (HMM, Impulso) a respuestas humanas al vuelo, con formato estructurado inteligente sin necesidad de explicarle el contexto.</li>
+                    <li><strong>Seguridad y Despliegue Paralelo:</strong>
                         <ul style={{ marginTop: '4px', paddingLeft: '20px', listStyleType: 'circle' }}>
-                            <li>Funciona en segundo plano. Si la IA tarda en pensar, <strong>no bloquea</strong> el resto de la aplicación.</li>
-                            <li><strong>Modo "Descanso":</strong> Si usas la versión gratuita y alcanzas el límite de consultas (Error 429), la IA te avisará amablemente de que necesita una pausa de 30 segundos, sin colgar el sistema.</li>
+                            <li>Funciona 100% en segundo plano gracias a nuestra **Arquitectura Asíncrona**. No congela la pantalla mientras piensa.</li>
+                            <li>Tolerante masivo a cuotas: Resiste caídas de red y re-enrutamientos de API automáticamente (evitando bloqueos).</li>
                         </ul>
                     </li>
                 </ul>
