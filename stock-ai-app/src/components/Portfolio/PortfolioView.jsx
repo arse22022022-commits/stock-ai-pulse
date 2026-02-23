@@ -70,7 +70,7 @@ export const PortfolioView = ({
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                                 <h3 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800 }}>Veredicto Agregado HMM</h3>
                                 <div style={{ padding: '8px 20px', borderRadius: '20px', background: portfolioData.summary.risk_level === 'Alto' ? '#ef444420' : '#10b98120', border: '1px solid ' + (portfolioData.summary.risk_level === 'Alto' ? '#ef444440' : '#10b98140'), color: portfolioData.summary.risk_level === 'Alto' ? '#ef4444' : '#10b981', fontWeight: 800, fontSize: '0.8rem' }}>
-                                    RIESGO: {portfolioData.summary.risk_level.toUpperCase()}
+                                    RIESGO: {portfolioData.summary.risk_level?.toUpperCase() || 'DESCONOCIDO'}
                                 </div>
                             </div>
 

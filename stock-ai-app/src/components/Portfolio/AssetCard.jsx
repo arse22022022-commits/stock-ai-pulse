@@ -7,7 +7,7 @@ export const AssetCard = ({ asset }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 <div>
                     <div style={{ fontWeight: 900, fontSize: '1.2rem' }}>{asset.ticker}</div>
-                    <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{getCurrencySymbol(asset.currency)}{asset.current_price.toFixed(2)}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{getCurrencySymbol(asset.currency)}{asset.current_price != null ? asset.current_price.toFixed(2) : 'N/A'}</div>
                 </div>
                 <div style={{ padding: '4px 10px', borderRadius: '6px', background: (asset.recommendation?.color || '#94a3b8') + '20', color: asset.recommendation?.color || '#94a3b8', fontSize: '0.7rem', fontWeight: 800 }}>
                     {asset.recommendation?.verdict || 'NO DEFINIDO'}
