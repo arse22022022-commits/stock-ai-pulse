@@ -76,8 +76,8 @@ export const PortfolioView = ({
 
                             <div style={{ padding: '24px', borderRadius: '20px', background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(15, 23, 42, 1) 100%)', border: '1px solid rgba(56, 189, 248, 0.2)', marginBottom: '32px' }}>
                                 <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                                    <Activity style={{ width: '28px', color: '#38bdf8', marginTop: '4px' }} />
-                                    <p style={{ margin: 0, fontSize: '1.1rem', lineHeight: 1.6, fontWeight: 500 }}>{portfolioData.summary.advice}</p>
+                                    <Activity style={{ width: '28px', color: '#38bdf8', marginTop: '4px', flexShrink: 0 }} />
+                                    <p style={{ margin: 0, fontSize: '1.1rem', lineHeight: 1.6, fontWeight: 500, whiteSpace: 'pre-wrap' }}>{portfolioData.summary.advice}</p>
                                 </div>
                             </div>
 
