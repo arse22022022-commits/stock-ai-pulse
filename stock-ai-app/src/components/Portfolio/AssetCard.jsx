@@ -7,7 +7,7 @@ export const AssetCard = ({ asset }) => {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 <div>
                     <div style={{ fontWeight: 900, fontSize: '1.2rem' }}>{asset.ticker}</div>
-                    <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{getCurrencySymbol(asset.currency)}{asset.current_price != null ? asset.current_price.toFixed(2) : 'N/A'}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#94a3b8' }}>{getCurrencySymbol(asset.currency)}{asset.current_price != null ? Number(asset.current_price).toFixed(2) : 'N/A'}</div>
                 </div>
                 <div style={{ padding: '4px 10px', borderRadius: '6px', background: (asset.recommendation?.color || '#94a3b8') + '20', color: asset.recommendation?.color || '#94a3b8', fontSize: '0.7rem', fontWeight: 800 }}>
                     {asset.recommendation?.verdict || 'NO DEFINIDO'}
@@ -19,7 +19,7 @@ export const AssetCard = ({ asset }) => {
                         HMM: {getRegime(asset.current_regime_ret).label}
                     </span>
                     <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
-                        μ: {(asset.state_stats_ret?.find(s => s.regime === asset.current_regime_ret)?.mean || 0).toFixed(3)}%
+                        μ: {Number(asset.state_stats_ret?.find(s => s.regime === asset.current_regime_ret)?.mean || 0).toFixed(3)}%
                     </span>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '6px 10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -27,7 +27,7 @@ export const AssetCard = ({ asset }) => {
                         IMP: {getRegime(asset.current_regime_diff).label}
                     </span>
                     <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
-                        μ: {(asset.state_stats_diff?.find(s => s.regime === asset.current_regime_diff)?.mean || 0).toFixed(3)}%
+                        μ: {Number(asset.state_stats_diff?.find(s => s.regime === asset.current_regime_diff)?.mean || 0).toFixed(3)}%
                     </span>
                 </div>
             </div>

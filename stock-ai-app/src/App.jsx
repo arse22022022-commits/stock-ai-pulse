@@ -9,6 +9,7 @@ import { AssetCard } from './components/Portfolio/AssetCard';
 
 import { PortfolioView } from './components/Portfolio/PortfolioView';
 import { IndicesView } from './components/Indices/IndicesView';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 // Hooks
 import { useStockData } from './hooks/useStockData';
@@ -89,28 +90,34 @@ const App = () => {
         )}
 
         {activeTab === 'one-ticker' ? (
-          <StockDashboard
-            ticker={ticker}
-            data={data}
-            metrics={metrics}
-            loading={loading}
-          />
+          <ErrorBoundary>
+            <StockDashboard
+              ticker={ticker}
+              data={data}
+              metrics={metrics}
+              loading={loading}
+            />
+          </ErrorBoundary>
         ) : activeTab === 'portfolio' ? (
-          <PortfolioView
-            portfolioTickers={portfolioTickers}
-            portfolioData={portfolioData}
-            portfolioLoading={portfolioLoading}
-            removeTicker={removeTicker}
-            analyzePortfolio={analyzePortfolio}
-          />
+          <ErrorBoundary>
+            <PortfolioView
+              portfolioTickers={portfolioTickers}
+              portfolioData={portfolioData}
+              portfolioLoading={portfolioLoading}
+              removeTicker={removeTicker}
+              analyzePortfolio={analyzePortfolio}
+            />
+          </ErrorBoundary>
         ) : (
-          <IndicesView
-            indicesData={indicesData}
-            indicesLoading={indicesLoading}
-            analyzeIndices={analyzeIndices}
-            currentIndex={currentIndex}
-            handleIndexSelect={handleIndexSelect}
-          />
+          <ErrorBoundary>
+            <IndicesView
+              indicesData={indicesData}
+              indicesLoading={indicesLoading}
+              analyzeIndices={analyzeIndices}
+              currentIndex={currentIndex}
+              handleIndexSelect={handleIndexSelect}
+            />
+          </ErrorBoundary>
         )}
 
       </main>
