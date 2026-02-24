@@ -10,33 +10,25 @@ La recomendación final ("COMPRA", "VENTA", etc.) es el resultado de una suma po
 
 | Pilar | Peso | Qué Analiza | Métrica Clave |
 | :--- | :--- | :--- | :--- |
-| **1. Estructura** | **40%** | Eficiencia del mercado actual | **Ratio R/R** (Rentabilidad/Riesgo) del Régimen **HMM (Hidden Markov Model)** actual |
-| **2. Impulso** | **30%** | Aceleración del precio | **Media** del Régimen **HMM** de Diferencias |
-| **3. Proyección** | **30%** | Futuro probable (10 días) | **Razonamiento Zero-Shot** de Gemini 3.1 Pro (Thinking Level: MEDIUM) |
+| **1. Estructura** | **60%** | Salud y eficiencia a largo plazo | **Ratio R/R** (Estructura HMM) + **Filtro Direccional** |
+| **2. Impulso** | **20%** | Aceleración del precio actual | **Media** del Régimen HMM de Diferencias |
+| **3. Proyección** | **20%** | Escenario futuro (Thinking Model) | **Razonamiento Zero-Shot** de Gemini 3.1 Pro |
 
 
 ### Desglose de Puntuación
 
-#### A. Pilar Estructural (Max 40 pts)
-Se basa en la calidad del estado actual de rendimientos:
--   **100 pts**: Ratio R/R > 0.15 (Tendencia muy limpia)
--   **70 pts**: Ratio R/R > 0.05 (Tendencia positiva estándar)
--   **40 pts**: Ratio R/R >= 0 (Mercado lateral/ruido)
--   **10 pts**: Ratio R/R < 0 (Ineficiente/Riesgoso)
+#### A. Pilar Estructural (Max 60 pts) - El "Anclaje"
+Es la base del veredicto. Mira la calidad del estado actual y lo valida con el volumen:
+-   **Anclaje Alcista**: Ratio R/R > 0.15 (Estructura limpia).
+-   **Filtro Direccional (NUEVO)**: 
+    -   Si el volumen es alto (**RVOL > 1.5**) y el precio sube -> **Confirmación de Acumulación** (+25% score).
+    -   Si el volumen es alto (**RVOL > 1.5**) y el precio cae -> **Alerta de Distribución/Pánico** (-50% score).
 
-#### B. Pilar de Impulso (Max 30 pts)
-Mide la "fuerza G" del movimiento:
--   **100 pts**: Media > 0.5 (Fuerte aceleración)
--   **75 pts**: Media > 0 (Aceleración moderada)
--   **30 pts**: Media > -0.5 (Desaceleración/Frenada)
--   **0 pts**: Media <= -0.5 (Caída libre)
+#### B. Pilar de Impulso (Max 20 pts)
+Mide la "fuerza G" del movimiento en la sesión actual.
 
-#### C. Pilar de Proyección (Max 30 pts)
-Mira hacia el futuro con la capacidad de razonamiento de Gemini 3.1 Pro:
--   **100 pts**: Tendencia > +3% en 10 días (Confirmada por reasoning)
--   **70 pts**: Tendencia > 0% (Inercia positiva)
--   **20 pts**: Tendencia plana o ligeramente bajista
--   **0 pts**: Tendencia < -3% (Proyección de caída por agotamiento estructural)
+#### C. Pilar de Proyección (Max 20 pts)
+Mira hacia el futuro con la capacidad de razonamiento de Gemini 3.1 Pro.
 
 ---
 
@@ -77,6 +69,9 @@ Cuando el sistema detecta una anomalía, añade una nota entre paréntesis. Aqu�
 | **Riesgo elevado (R/R negativo)** | El estado actual es destructivo; la volatilidad es mayor que el retorno promedio. | **Evitar nuevas entradas** hasta que cambie el régimen. |
 | **Deceleración detectada** | El precio sube, pero el impulso (segunda derivada) está bajando. Signo de agotamiento. | **Vigilar**. No perseguir el precio. Riesgo de techo de mercado. |
 | **Proyección bajista** | El modelo neuronal anticipa una caída en los próximos 10 días, contradiciendo quizás la subida actual. | **Cautela**. El modelo detecta patrones de distribución no visibles a simple vista. |
+| **Anomalía de volumen** | Entrada masiva de capital (RVOL > 2.0). Señal de fuerte interés institucional. | **Confirmación**. Valida el movimiento actual con alta convicción. |
+| **Falta de convicción** | El precio sube o rompe estructura pero con volumen muy bajo (RVOL < 0.7). | **Precaución**. Riesgo de trampa; el movimiento podría no estar respaldado por "manos fuertes". |
+| **Divergencia: Agotamiento** | El precio sube pero el volumen está cayendo de forma sostenida. | **Alerta**. El movimiento está perdiendo gasolina. Riesgo de giro inminente. |
 
 ---
 
@@ -117,13 +112,20 @@ El sistema incluye un **Analista Virtual** basado en Google Gemini 1.5 Pro (con 
 
 ---
 
-## 8. Nota sobre la Estabilidad del Sistema 🛡️
+## 8. Estabilidad y "Reflejos" 🛡️🏁
 
-Hemos implementado protecciones avanzadas "Anti-Crash":
+Hemos implementado dos sistemas críticos para garantizar que la IA sea fiable:
 
-*   **Razonamiento avanzado (Thinking Level)**: El modelo Gemini 3.1 Pro dedica tiempo extra a "pensar" antes de proyectar, lo que reduce falsos positivos en las tendencias.
-*   **Predicción Asíncrona**: Los cálculos matemáticos complejos se realizan en hilos paralelos para mantener la fluidez de la interfaz.
-*   **Fallback Estadístico**: Si la API de Google falla, el sistema cambia automáticamente a un modelo estadístico robusto (GBM) para garantizar que siempre tengas una proyección disponible.
+### A. Histéresis de Estado (Estabilidad)
+Para evitar que el color del gráfico cambie constantemente por pequeños ruidos:
+- **Puerta de Entrada**: Para entrar en "Compra", el sistema exige un score de **65**.
+- **Puerta de Salida**: Una vez dentro, no se sale de "Compra" hasta que el score baja de **50**.
+*Esto crea bloques de color sólidos y evita el parpadeo visual.*
+
+### B. Flash Correction (Respuesta Rápida)
+Aunque el sistema es estable, no es ciego. Posee **"reflejos ante el pánico"**:
+- **Crash Detection**: Si el precio cae >2.5% con volumen, el sistema activa el veredicto de **Venta/Mantener inmediatamente**, ignorando la inercia alcista previa.
+- **EMA-10 Check**: Si el precio rompe su tendencia de corto plazo (Media 10 días), se aplica una penalización del 15% al score.
 
 ---
 *Nota: Esta herramienta es un asistente analítico basado en matemáticas avanzadas. No constituye asesoramiento financiero directo.*

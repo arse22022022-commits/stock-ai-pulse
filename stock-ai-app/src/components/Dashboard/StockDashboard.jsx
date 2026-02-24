@@ -46,6 +46,11 @@ export const StockDashboard = ({ ticker, metrics, data, loading }) => {
                                 R/R Actual: {(metrics.stateStatsRet.find(s => s.regime === metrics.currentRegime)?.ratio_rr || 0).toFixed(2)}
                             </span>
                         )}
+                        {recommendation?.rvol != null && (
+                            <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: (recommendation.rvol > 1.5 ? '#10b981' : recommendation.rvol < 0.7 ? '#f87171' : '#94a3b8') + '20', color: recommendation.rvol > 1.5 ? '#10b981' : recommendation.rvol < 0.7 ? '#f87171' : '#cbd5e1', border: `1px solid ${(recommendation.rvol > 1.5 ? '#10b981' : recommendation.rvol < 0.7 ? '#f87171' : '#94a3b8')}40` }}>
+                                RVOL: {recommendation.rvol.toFixed(2)}
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -59,7 +64,7 @@ export const StockDashboard = ({ ticker, metrics, data, loading }) => {
                     </div>
                 )}
 
-                <StockChart data={data} currencySymbol={currencySymbol} loading={loading} />
+                <StockChart data={data} currencySymbol={currencySymbol} loading={loading} currentRegime={metrics.currentRegime} />
             </div>
 
             <RegimeBadges

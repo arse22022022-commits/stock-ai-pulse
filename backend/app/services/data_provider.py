@@ -39,11 +39,15 @@ class DataProvider:
             if isinstance(data.columns, pd.MultiIndex):
                 data.columns = data.columns.get_level_values(0)
             
-            # Calculate returns (CPU bound but fast enough for main thread usually, 
-            # or could also be offloaded if data is massive)
+            # Calculate returns and volume metrics
             price_col = 'Close'
             data['Returns'] = np.log(data[price_col] / data[price_col].shift(1))
             data['Diff_Returns'] = data['Returns'].diff()
+            
+            # RVOL (Relative Volume) - 20 period average
+            data['Vol_SMA'] = data['Volume'].rolling(window=20).mean()
+            data['RVOL'] = data['Volume'] / data['Vol_SMA']
+            
             data.dropna(inplace=True)
             
             return data, currency

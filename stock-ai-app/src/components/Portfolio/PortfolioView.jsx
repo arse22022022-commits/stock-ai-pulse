@@ -7,7 +7,8 @@ export const PortfolioView = ({
     portfolioData,
     portfolioLoading,
     removeTicker,
-    analyzePortfolio
+    analyzePortfolio,
+    onNavigateToTicker
 }) => {
     return (
         <div className="main-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
@@ -118,7 +119,11 @@ export const PortfolioView = ({
                                         return meanB - meanA;
                                     })
                                     .map(asset => (
-                                        <AssetCard key={asset.ticker} asset={asset} />
+                                        <AssetCard
+                                            key={asset.ticker}
+                                            asset={asset}
+                                            onClick={() => onNavigateToTicker(asset.ticker)}
+                                        />
                                     ))}
                             </div>
                         </div>

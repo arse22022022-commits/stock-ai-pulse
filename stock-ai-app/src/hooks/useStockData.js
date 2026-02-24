@@ -42,6 +42,7 @@ export const useStockData = (ticker) => {
                     ...item,
                     date: new Date(item.date).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
                     historyPrice: item.price,
+                    rvol: item.rvol || 1.0,
                     forecastPrice: null,
                     range: null,
                     price_low: null,

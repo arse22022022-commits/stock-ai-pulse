@@ -8,7 +8,8 @@ export const IndicesView = ({
     indicesLoading,
     analyzeIndices,
     currentIndex,
-    handleIndexSelect
+    handleIndexSelect,
+    onNavigateToTicker
 }) => {
     return (
         <div className="main-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: '24px' }}>
@@ -95,7 +96,11 @@ export const IndicesView = ({
                                         return meanB - meanA;
                                     })
                                     .map(asset => (
-                                        <AssetCard key={asset.ticker} asset={asset} />
+                                        <AssetCard
+                                            key={asset.ticker}
+                                            asset={asset}
+                                            onClick={() => onNavigateToTicker(asset.ticker)}
+                                        />
                                     ))}
 
                                 {indicesData.assets.filter(a => a.recommendation?.verdict === 'COMPRA FUERTE').length === 0 && (

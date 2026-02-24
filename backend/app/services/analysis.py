@@ -18,6 +18,11 @@ MOMENTUM_SLOWING = -0.5
 PROJECTION_BULLISH = 0.03
 PROJECTION_BEARISH = -0.03
 
+# --- FLASH CORRECTION CONFIG ---
+CRASH_THRESHOLD = -0.025 # -2.5% en un día
+PANIC_RVOL = 1.3         # Volumen de pánico
+SHORT_TERM_WINDOW = 10   # Ventana para tendencia rápida
+
 # --- HMM TRAINING LOGIC ---
 
 def train_hmm_returns(data: pd.DataFrame):
@@ -39,7 +44,12 @@ def train_hmm_returns(data: pd.DataFrame):
     stab_id_ret = [s['id'] for s in ret_stats_raw if s['id'] not in [bull_id_ret, vol_id_ret]][0]
     
     map_ret = {stab_id_ret: 0, bull_id_ret: 1, vol_id_ret: 2}
-    regimes_ret = np.array([map_ret[r] for r in raw_regimes_ret])
+    regimes_ret_raw = np.array([map_ret[r] for r in raw_regimes_ret])
+    
+    # POST-PROCESSING: Smoothing regimes to avoid daily noise/oscillation
+    # We use a rolling mode with window 5 to consolidate states
+    regimes_series = pd.Series(regimes_ret_raw)
+    regimes_ret = regimes_series.rolling(window=5, center=True).apply(lambda x: x.mode().iloc[0]).fillna(method='ffill').fillna(method='bfill').astype(int).values
     
     probs_ret = np.zeros_like(raw_probs_ret)
     probs_ret[:, 0] = raw_probs_ret[:, stab_id_ret]
@@ -78,7 +88,11 @@ def train_hmm_diff(data: pd.DataFrame):
     stab_id_diff = [s['id'] for s in diff_stats_raw if s['id'] not in [bull_id_diff, vol_id_diff]][0]
     
     map_diff = {stab_id_diff: 0, bull_id_diff: 1, vol_id_diff: 2}
-    regimes_diff = np.array([map_diff[r] for r in raw_regimes_diff])
+    regimes_diff_raw = np.array([map_diff[r] for r in raw_regimes_diff])
+    
+    # POST-PROCESSING: Smoothing regimes
+    reg_series_diff = pd.Series(regimes_diff_raw)
+    regimes_diff = reg_series_diff.rolling(window=5, center=True).apply(lambda x: x.mode().iloc[0]).fillna(method='ffill').fillna(method='bfill').astype(int).values
     
     probs_diff = np.zeros_like(raw_probs_diff)
     probs_diff[:, 0] = raw_probs_diff[:, stab_id_diff]
@@ -100,12 +114,14 @@ def train_hmm_diff(data: pd.DataFrame):
 
 # --- TRIPLE-PILLAR RECOMMENDATION ENGINE ---
 
-def generate_ai_recommendation(data, reg_ret, reg_diff, probs_ret, probs_diff, forecast, ret_stats, diff_stats):
-    last_reg_ret = int(reg_ret[-1])
-    last_reg_diff = int(reg_diff[-1])
+def _calculate_score(data_slice, last_reg_ret, last_reg_diff, ret_stats, diff_stats, forecast_trend=None):
+    """Helper to calculate the 0-100 consolidated score for a specific point in time"""
+    # VOLUME METRICS
+    last_rvol = float(data_slice['RVOL'].iloc[-1])
+    vol_trend = float(data_slice['RVOL'].iloc[-3:].mean() - data_slice['RVOL'].iloc[-5:-2].mean()) if len(data_slice) > 5 else 0
+    last_ret = float(data_slice['Returns'].iloc[-1])
     
-    # PILLAR 1: Structural Efficiency (40%)
-    # Based on the R/R Ratio of the current state of Returns
+    # PILLAR 1: Structural Efficiency (Anclaje)
     current_ret_stats = next((s for s in ret_stats if s['regime'] == last_reg_ret), {"ratio_rr": 0})
     rr_ratio = current_ret_stats.get("ratio_rr", 0)
     
@@ -113,60 +129,139 @@ def generate_ai_recommendation(data, reg_ret, reg_diff, probs_ret, probs_diff, f
     if rr_ratio > RR_OPTIMAL: structure_score = 100
     elif rr_ratio > RR_GOOD: structure_score = 70
     elif rr_ratio >= RR_MINIMAL: structure_score = 40
-    else: structure_score = 10 # Penalize negative R/R
+    else: structure_score = 10 
+
+    # MODULATION 1: Directional RVOL (Acumulación vs Distribución)
+    struct_multiplier = 1.0
+    if last_rvol > 1.5:
+        if last_ret > 0: struct_multiplier = 1.25 # Acumulación
+        else: struct_multiplier = 0.5            # Distribución/Pánico
+    elif last_rvol < 0.7:
+        if last_ret > 0: struct_multiplier = 0.8  # Agotamiento
+        else: struct_multiplier = 1.1            # Secado de oferta
+            
+    structure_score = min(100, structure_score * struct_multiplier)
     
     # PILLAR 2: Dynamic Momentum (30%)
-    # Based on the mean of the current state of Differences (Impulse)
     current_diff_stats = next((s for s in diff_stats if s['regime'] == last_reg_diff), {"mean": 0})
     impulse_mean = current_diff_stats.get("mean", 0)
     
-    momentum_score = 50 # Neutral base
-    if impulse_mean > MOMENTUM_HIGH: momentum_score = 100 # High acceleration
-    elif impulse_mean > MOMENTUM_MODERATE: momentum_score = 75  # Moderate acceleration
-    elif impulse_mean > MOMENTUM_SLOWING: momentum_score = 30 # Slowing down
-    elif impulse_mean <= MOMENTUM_SLOWING: momentum_score = 0 # Strong deceleration
+    momentum_score = 50 
+    if impulse_mean > MOMENTUM_HIGH: momentum_score = 100 
+    elif impulse_mean > MOMENTUM_MODERATE: momentum_score = 75  
+    elif impulse_mean > MOMENTUM_SLOWING: momentum_score = 30 
+    elif impulse_mean <= MOMENTUM_SLOWING: momentum_score = 0 
+
+    # MODULATION 2: Divergence
+    price_trend = float(data_slice['Close'].iloc[-1] / data_slice['Close'].iloc[-5] - 1) if len(data_slice) > 5 else 0
+    if price_trend > 0 and vol_trend < -0.1:
+        momentum_score *= 0.7
+    elif price_trend > 0 and vol_trend > 0.1:
+        momentum_score = min(100, momentum_score * 1.1)
     
-    # PILLAR 3: Predictive Projection (30%)
-    # Based on the 10-day forecast slope
+    # PILLAR 3: Predictive Projection (20%)
+    projection_score = 50
+    if forecast_trend is not None:
+        if forecast_trend > PROJECTION_BULLISH: projection_score = 100
+        elif forecast_trend > 0: projection_score = 70
+        elif forecast_trend < PROJECTION_BEARISH: projection_score = 0
+        else: projection_score = 20
+    
+    # --- FLASH CORRECTION (REFLEJOS) ---
+    panic_penalty = 1.0
+    
+    # 1. Detección de Caída Vertical (Crash)
+    if last_ret <= CRASH_THRESHOLD and last_rvol >= PANIC_RVOL:
+        panic_penalty *= 0.5 # Tajo del 50% al score final
+        structure_score = min(30, structure_score) # Destruye la confianza estructural
+        
+    # 2. Rotura de Tendencia de Corto Plazo (EMA 10)
+    if len(data_slice) >= SHORT_TERM_WINDOW:
+        ema_short = data_slice['Close'].ewm(span=SHORT_TERM_WINDOW).mean().iloc[-1]
+        current_price = data_slice['Close'].iloc[-1]
+        if current_price < ema_short:
+            panic_penalty *= 0.85 # Penalización por debilidad de corto plazo
+            
+    final_score = (structure_score * 0.6) + (momentum_score * 0.2) + (projection_score * 0.2)
+    final_score *= panic_penalty # Aplicar reflejos de protección
+    
+    return final_score, last_rvol, rr_ratio, impulse_mean, forecast_trend
+
+def generate_ai_recommendation(data, reg_ret, reg_diff, probs_ret, probs_diff, forecast, ret_stats, diff_stats):
     forecast_start = forecast[0]['price']
     forecast_end = forecast[-1]['price']
     forecast_trend = (forecast_end / forecast_start) - 1
     
-    projection_score = 50
-    if forecast_trend > PROJECTION_BULLISH: projection_score = 100
-    elif forecast_trend > 0: projection_score = 70
-    elif forecast_trend < PROJECTION_BEARISH: projection_score = 0
-    else: projection_score = 20
+    final_score, last_rvol, rr_ratio, impulse_mean, f_trend = _calculate_score(
+        data, int(reg_ret[-1]), int(reg_diff[-1]), ret_stats, diff_stats, forecast_trend
+    )
     
-    # FINAL CONSENSUS SCORE
-    final_score = (structure_score * 0.4) + (momentum_score * 0.3) + (projection_score * 0.3)
+def generate_ai_recommendation(data, reg_ret, reg_diff, probs_ret, probs_diff, forecast, ret_stats, diff_stats, stable_state=0, smoothed_score=50.0):
+    """Generates the final AI response supervised by the stable state from hysteresis"""
     
-    # VERDICT LOGIC
-    if final_score >= 80:
-        verdict = "COMPRA FUERTE"
-        main_reason = "Eficiencia estructural óptima con fuerte inercia alcista confirmada."
-    elif final_score >= 60:
-        verdict = "COMPRA"
-        main_reason = "Estructura positiva. El mercado muestra calidad y potencial de crecimiento."
-    elif final_score >= 40:
+    # VERDICT LOGIC BASED ON STABLE STATE (Hysteresis-driven)
+    # 0: Hold (Yellow), 1: Buy (Green), 2: Sell (Red)
+    if stable_state == 1: # COMPRA
+        verdict = "COMPRA FUERTE" if smoothed_score >= 80 else "COMPRA"
+        main_reason = "Impulso estructural alcista confirmado por el modelo de histéresis."
+    elif stable_state == 2: # VENTA
+        verdict = "VENTA FUERTE" if smoothed_score <= 20 else "VENTA"
+        main_reason = "Deterioro de eficiencia detectado. Se recomienda precaución extrema."
+    else: # MANTENER
         verdict = "MANTENER"
-        main_reason = "Zona de equilibrio. Los pilares muestran señales mixtas o estables."
-    elif final_score >= 20:
-        verdict = "VENTA"
-        main_reason = "Pérdida de eficiencia. Se detecta ruido o sesgo bajista en el impulso."
-    else:
-        verdict = "VENTA FUERTE"
-        main_reason = "Deterioro crítico. Colapso de eficiencia y aceleración negativa."
-
-    # Additional notes for context
-    notes = []
-    if rr_ratio < 0: notes.append("Riesgo elevado (R/R negativo)")
-    if impulse_mean < 0: notes.append("Deceleración detectada")
-    if forecast_trend < 0: notes.append("Proyección bajista")
-    
-    if notes:
-        main_reason += " (Alertas: " + ", ".join(notes) + ")"
+        main_reason = "Zona de equilibrio estable. Los pilares no muestran convicción direccional."
         
     colors = {"COMPRA FUERTE": "#10b981", "COMPRA": "#34d399", "MANTENER": "#fbbf24", "VENTA": "#f87171", "VENTA FUERTE": "#ef4444"}
     
-    return {"verdict": verdict, "reason": main_reason, "color": colors.get(verdict, "#94a3b8"), "score": round(final_score, 1)}
+    return {
+        "verdict": verdict, 
+        "reason": main_reason, 
+        "color": colors.get(verdict, "#94a3b8"), 
+        "score": round(float(smoothed_score), 1),
+        "breakdown": {
+            "structure": None, 
+            "momentum": None,
+            "projection": None
+        }
+    }
+
+def get_historical_verdicts(data, reg_ret, reg_diff, ret_stats, diff_stats):
+    """Calculates historical recommendation states (0-4) for matching the 5-tier AI verdicts"""
+    raw_scores = []
+    for i in range(len(data)):
+        if i < 5:
+            raw_scores.append(50.0)
+            continue
+        data_slice = data.iloc[:i+1]
+        score, _, _, _, _ = _calculate_score(
+            data_slice, int(reg_ret[i]), int(reg_diff[i]), ret_stats, diff_stats
+        )
+        raw_scores.append(score)
+    
+    # Smooth scores (3-day rolling mean) for stability while maintaining category accuracy
+    scores = pd.Series(raw_scores).rolling(window=3, center=False).mean().fillna(method='bfill').values
+    
+    # FORCE SYNC: The very last point must match the raw score to avoid contradiction with the dashboard
+    if len(scores) > 0:
+        scores[-1] = raw_scores[-1]
+    
+    # Apply Hysteresis State Machine to the smoothed scores
+    verdicts = []
+    current_state = 0 # 0: Mantener, 1: Compra, 2: Venta
+    
+    for score in scores:
+        if current_state == 1: # Previamente en COMPRA
+            if score < 50: # Salida de Compra (buffer de 15ptos)
+                if score <= 30: current_state = 2 # Salto directo a Venta
+                else: current_state = 0 # Retroceso a Mantener
+        elif current_state == 2: # Previamente en VENTA
+            if score > 45: # Salida de Venta (buffer de 15ptos)
+                if score >= 65: current_state = 1 # Salto directo a Compra
+                else: current_state = 0 # Recuperación a Mantener
+        else: # Previamente en MANTENER
+            if score >= 65: current_state = 1 # Entrada a Compra (necesita fuerza)
+            elif score <= 30: current_state = 2 # Entrada a Venta (necesita debilidad)
+            
+        verdicts.append(current_state)
+        
+    return verdicts, scores

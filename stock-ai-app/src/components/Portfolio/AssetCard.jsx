@@ -1,9 +1,21 @@
 import React from 'react';
 import { getRegime, getCurrencySymbol } from '../../utils/formatters';
 
-export const AssetCard = ({ asset }) => {
+export const AssetCard = ({ asset, onClick }) => {
     return (
-        <div style={{ padding: '20px', borderRadius: '18px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
+        <div
+            onClick={onClick}
+            style={{
+                padding: '20px',
+                borderRadius: '18px',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.05)',
+                cursor: onClick ? 'pointer' : 'default',
+                transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+            onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
+        >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                 <div>
                     <div style={{ fontWeight: 900, fontSize: '1.2rem' }}>{asset.ticker}</div>
@@ -28,6 +40,14 @@ export const AssetCard = ({ asset }) => {
                     </span>
                     <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
                         μ: {Number(asset.state_stats_diff?.find(s => s.regime === asset.current_regime_diff)?.mean || 0).toFixed(3)}%
+                    </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '6px 10px', borderRadius: '8px', background: (asset.recommendation?.rvol > 1.5 ? '#10b981' : asset.recommendation?.rvol < 0.7 ? '#f87171' : '#94a3b8') + '15', border: `1px solid ${(asset.recommendation?.rvol > 1.5 ? '#10b981' : asset.recommendation?.rvol < 0.7 ? '#f87171' : '#94a3b8')}30` }}>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: asset.recommendation?.rvol > 1.5 ? '#10b981' : asset.recommendation?.rvol < 0.7 ? '#f87171' : '#cbd5e1' }}>
+                        RVOL
+                    </span>
+                    <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
+                        VOL: {asset.recommendation?.rvol != null ? asset.recommendation.rvol.toFixed(2) : 'N/A'}
                     </span>
                 </div>
             </div>

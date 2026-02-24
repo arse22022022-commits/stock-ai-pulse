@@ -29,21 +29,21 @@ export const InterpretationGuide = ({ onClose }) => (
                     <tbody>
                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                             <td style={{ padding: '8px' }}><strong>1. Estructura</strong></td>
-                            <td style={{ padding: '8px' }}><strong>40%</strong></td>
-                            <td style={{ padding: '8px' }}>Eficiencia del mercado actual</td>
-                            <td style={{ padding: '8px' }}><strong>Ratio R/R</strong> (Rentabilidad/Riesgo) del Régimen **HMM (Hidden Markov Model)** actual</td>
+                            <td style={{ padding: '8px' }}><strong>60%</strong></td>
+                            <td style={{ padding: '8px' }}>Salud estructural y volumen</td>
+                            <td style={{ padding: '8px' }}><strong>Ratio R/R</strong> + <strong>Vector Direccional RVOL</strong></td>
                         </tr>
                         <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                             <td style={{ padding: '8px' }}><strong>2. Impulso</strong></td>
-                            <td style={{ padding: '8px' }}><strong>30%</strong></td>
+                            <td style={{ padding: '8px' }}><strong>20%</strong></td>
                             <td style={{ padding: '8px' }}>Aceleración del precio</td>
                             <td style={{ padding: '8px' }}><strong>Media</strong> del Régimen HMM de Diferencias</td>
                         </tr>
                         <tr>
                             <td style={{ padding: '8px' }}><strong>3. Proyección</strong></td>
-                            <td style={{ padding: '8px' }}><strong>30%</strong></td>
-                            <td style={{ padding: '8px' }}>Futuro probable (10 días)</td>
-                            <td style={{ padding: '8px' }}><strong>Pendiente</strong> de la predicción del modelo Chronos (LLM)</td>
+                            <td style={{ padding: '8px' }}><strong>20%</strong></td>
+                            <td style={{ padding: '8px' }}>Cerebro de Predicción (Thinking)</td>
+                            <td style={{ padding: '8px' }}><strong>Análisis Zero-Shot</strong> de Gemini 3.1 Pro</td>
                         </tr>
                     </tbody>
                 </table>
@@ -51,34 +51,20 @@ export const InterpretationGuide = ({ onClose }) => (
                 {/* ... (Rest of content remains the same, omitted for brevity in this extraction tool call to avoid huge output, but in real file I'd paste it all. I will paste the full content for correctness) ... */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '24px' }}>
                     <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>A. Pilar Estructural (Max 40 pts)</h4>
-                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>Se basa en la calidad del estado actual de rendimientos:</p>
-                        <ul style={{ fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '16px', marginTop: '8px' }}>
-                            <li><strong>100 pts</strong>: Ratio R/R &gt; 0.15 (Tendencia muy limpia)</li>
-                            <li><strong>70 pts</strong>: Ratio R/R &gt; 0.05 (Tendencia positiva estándar)</li>
-                            <li><strong>40 pts</strong>: Ratio R/R &gt;= 0 (Mercado lateral/ruido)</li>
-                            <li><strong>10 pts</strong>: Ratio R/R &lt; 0 (Ineficiente/Riesgoso)</li>
+                        <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>A. Pilar Estructural (Max 60 pts)</h4>
+                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>Anclaje histórico validado con el <strong>Vector Direccional de Volumen</strong>.</p>
+                        <ul style={{ fontSize: '0.75rem', color: '#94a3b8', paddingLeft: '16px', marginTop: '8px' }}>
+                            <li><strong>RVOL Positivo</strong>: Confirma Acumulación.</li>
+                            <li><strong>RVOL Negativo (Pánico)</strong>: Penaliza score (-50%).</li>
                         </ul>
                     </div>
                     <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>B. Pilar de Impulso (Max 30 pts)</h4>
-                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>Mide la "fuerza G" del movimiento:</p>
-                        <ul style={{ fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '16px', marginTop: '8px' }}>
-                            <li><strong>100 pts</strong>: Media &gt; 0.5 (Fuerte aceleración)</li>
-                            <li><strong>75 pts</strong>: Media &gt; 0 (Aceleración moderada)</li>
-                            <li><strong>30 pts</strong>: Media &gt; -0.5 (Desaceleración/Frenada)</li>
-                            <li><strong>0 pts</strong>: Media &lt;= -0.5 (Caída libre)</li>
-                        </ul>
+                        <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>B. Pilar de Impulso (Max 20 pts)</h4>
+                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>Monitor de aceleración g-force de corto plazo.</p>
                     </div>
                     <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
-                        <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>C. Pilar de Proyección (Max 30 pts)</h4>
-                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>Mira hacia el futuro con IA Generativa:</p>
-                        <ul style={{ fontSize: '0.8rem', color: '#94a3b8', paddingLeft: '16px', marginTop: '8px' }}>
-                            <li><strong>100 pts</strong>: Tendencia &gt; +3% en 10 días</li>
-                            <li><strong>70 pts</strong>: Tendencia &gt; 0%</li>
-                            <li><strong>20 pts</strong>: Tendencia plana o ligeramente bajista</li>
-                            <li><strong>0 pts</strong>: Tendencia &lt; -3% (Proyección de caída fuerte)</li>
-                        </ul>
+                        <h4 style={{ color: '#f8fafc', marginBottom: '8px' }}>C. Pilar de Proyección (Max 20 pts)</h4>
+                        <p style={{ fontSize: '0.8rem', color: '#94a3b8', margin: 0 }}>IA Generativa con razonamiento profundo (Thinking).</p>
                     </div>
                 </div>
             </section>
@@ -170,7 +156,7 @@ export const InterpretationGuide = ({ onClose }) => (
             </section>
 
             <section style={{ marginBottom: '32px' }}>
-                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>4. Diccionario de Alertas de la IA 🔍</h3>
+                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>6. Diccionario de Alertas de la IA 🔍</h3>
                 <p style={{ color: '#94a3b8', lineHeight: 1.6 }}>Cuando el sistema detecta una anomalía, añade una nota entre paréntesis. Aquí explicamos qué significan y qué acción tomar:</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '16px' }}>
                     {[
@@ -190,7 +176,7 @@ export const InterpretationGuide = ({ onClose }) => (
             </section>
 
             <section style={{ marginBottom: '32px' }}>
-                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>5. Consejos de Uso Práctico</h3>
+                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>7. Consejos de Uso Práctico</h3>
                 <ul style={{ color: '#94a3b8', fontSize: '0.9rem', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                     <li><strong>Confirma la Inercia:</strong> Un "Impulso consolidado" (Estado HMM estable) es mucho más fiable que uno que cambia cada día.</li>
                     <li><strong>Mira las Probabilidades:</strong> Si el estado actual tiene una probabilidad cercana al <strong>90-100%</strong>, la señal es muy robusta. Si está cerca del 50-60%, el mercado está indeciso.</li>
@@ -203,7 +189,7 @@ export const InterpretationGuide = ({ onClose }) => (
             </section>
 
             <section style={{ marginBottom: '32px' }}>
-                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>6. Índices Globales y Filtrado 🌍</h3>
+                <h3 style={{ color: '#38bdf8', marginBottom: '16px', fontSize: '1.25rem' }}>8. Índices Globales y Filtrado 🌍</h3>
                 <p style={{ color: '#94a3b8', lineHeight: 1.6, marginBottom: '12px' }}>La nueva sección de <strong>Índices Globales</strong> permite analizar mercados completos (IBEX 35, DAX 40, NASDAQ 100, etc.) en busca de oportunidades.</p>
                 <div style={{ padding: '16px', borderRadius: '16px', background: 'rgba(56, 189, 248, 0.05)', border: '1px solid rgba(56, 189, 248, 0.1)' }}>
                     <h4 style={{ color: '#f8fafc', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>

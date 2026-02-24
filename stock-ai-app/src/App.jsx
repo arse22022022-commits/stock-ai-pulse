@@ -66,6 +66,12 @@ const App = () => {
     analyzeIndices(tickers, indexName);
   };
 
+  const handleNavigateToTicker = (symbol) => {
+    setTicker(symbol);
+    setActiveTab('one-ticker');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const errorMsg = singleError || portfolioError || indicesError;
 
   return (
@@ -106,6 +112,7 @@ const App = () => {
               portfolioLoading={portfolioLoading}
               removeTicker={removeTicker}
               analyzePortfolio={analyzePortfolio}
+              onNavigateToTicker={handleNavigateToTicker}
             />
           </ErrorBoundary>
         ) : (
@@ -116,6 +123,7 @@ const App = () => {
               analyzeIndices={analyzeIndices}
               currentIndex={currentIndex}
               handleIndexSelect={handleIndexSelect}
+              onNavigateToTicker={handleNavigateToTicker}
             />
           </ErrorBoundary>
         )}
@@ -123,8 +131,13 @@ const App = () => {
       </main>
 
       <footer style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', fontSize: '0.85rem' }}>
-        <ShieldCheck style={{ width: '14px', marginRight: '8px' }} />
-        Powered by Advanced HMM & Neural Forecasting Models
+        <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+          <ShieldCheck style={{ width: '14px' }} />
+          <span>Powered by Advanced HMM & Neural Forecasting Models</span>
+        </div>
+        <p style={{ margin: 0, opacity: 0.7, fontSize: '0.75rem', fontWeight: 500 }}>
+          Creado con fines educativos. No es asesoramiento financiero
+        </p>
       </footer>
 
       <style>{`
