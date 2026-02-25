@@ -187,15 +187,7 @@ def _calculate_score(data_slice, last_reg_ret, last_reg_diff, ret_stats, diff_st
     
     return final_score, last_rvol, rr_ratio, impulse_mean, forecast_trend
 
-def generate_ai_recommendation(data, reg_ret, reg_diff, probs_ret, probs_diff, forecast, ret_stats, diff_stats):
-    forecast_start = forecast[0]['price']
-    forecast_end = forecast[-1]['price']
-    forecast_trend = (forecast_end / forecast_start) - 1
-    
-    final_score, last_rvol, rr_ratio, impulse_mean, f_trend = _calculate_score(
-        data, int(reg_ret[-1]), int(reg_diff[-1]), ret_stats, diff_stats, forecast_trend
-    )
-    
+
 def generate_ai_recommendation(data, reg_ret, reg_diff, probs_ret, probs_diff, forecast, ret_stats, diff_stats, stable_state=0, smoothed_score=50.0):
     """Generates the final AI response supervised by the stable state from hysteresis"""
     
@@ -218,6 +210,7 @@ def generate_ai_recommendation(data, reg_ret, reg_diff, probs_ret, probs_diff, f
         "reason": main_reason, 
         "color": colors.get(verdict, "#94a3b8"), 
         "score": round(float(smoothed_score), 1),
+        "rvol": float(data['RVOL'].iloc[-1]) if 'RVOL' in data.columns else 1.0,
         "breakdown": {
             "structure": None, 
             "momentum": None,

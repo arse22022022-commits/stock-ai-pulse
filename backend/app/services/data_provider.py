@@ -46,7 +46,11 @@ class DataProvider:
             
             # RVOL (Relative Volume) - 20 period average
             data['Vol_SMA'] = data['Volume'].rolling(window=20).mean()
-            data['RVOL'] = data['Volume'] / data['Vol_SMA']
+            # Avoid division by zero and handle NaN
+            data['RVOL'] = (data['Volume'] / data['Vol_SMA']).replace([np.inf, -np.inf], np.nan).fillna(1.0)
+            
+            # EMA 10 for structural break detection
+            data['EMA_10'] = data[price_col].ewm(span=10, adjust=False).mean().fillna(data[price_col].iloc[0])
             
             data.dropna(inplace=True)
             
@@ -61,8 +65,8 @@ class DataProvider:
         ticker_obj = yf.Ticker(ticker)
         df = ticker_obj.history(start=start, end=end, auto_adjust=True)
         try:
-            # Fast info is usually cached or quick, but safer here in thread
-            currency = ticker_obj.info.get('currency', 'USD')
+            # Use fast_info to avoid the slow/hanging .info call
+            currency = ticker_obj.fast_info.get('currency', 'USD')
         except:
             currency = 'USD'
         return df, currency

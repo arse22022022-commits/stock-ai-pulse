@@ -42,7 +42,7 @@ const CustomTooltip = ({ active, payload, currencySymbol }) => {
                         Rango: {currencySymbol}{data.price_low.toFixed(2)} - {currencySymbol}{data.price_high.toFixed(2)}
                     </p>
                 )}
-                {data.rvol !== undefined && (
+                {data.rvol != null && !isNaN(data.rvol) && (
                     <p style={{ margin: '4px 0 0', fontSize: '11px', color: data.rvol > 1.5 ? '#10b981' : data.rvol < 0.7 ? '#f87171' : '#94a3b8' }}>
                         Volumen: {data.rvol.toFixed(2)}x {data.rvol > 1.5 ? '(Alto)' : data.rvol < 0.7 ? '(Bajo)' : ''}
                     </p>

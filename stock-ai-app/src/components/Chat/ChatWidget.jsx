@@ -4,24 +4,58 @@ import ReactMarkdown from 'react-markdown';
 
 export const ChatWidget = ({ context }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState([
-        { role: 'assistant', content: `¡Hola! Soy tu asistente financiero. ¿Tienes dudas sobre el análisis de ${context.ticker}?` }
-    ]);
+    const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [hasFetchedInitial, setHasFetchedInitial] = useState(false);
     const messagesEndRef = useRef(null);
+
+    const API_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000');
 
     // Reset state when ticker changes
     useEffect(() => {
         setIsOpen(false);
-        setMessages([
-            { role: 'assistant', content: `¡Hola! Soy tu asistente financiero. ¿Tienes dudas sobre el análisis de ${context.ticker}?` }
-        ]);
+        setMessages([]);
         setInput('');
         setIsLoading(false);
+        setHasFetchedInitial(false);
     }, [context.ticker]);
 
-    const API_URL = import.meta.env.PROD ? '' : (import.meta.env.VITE_API_URL || 'http://localhost:8001');
+    // Fetch initial analysis when chat is opened
+    useEffect(() => {
+        if (isOpen && !hasFetchedInitial) {
+            const fetchInitialAnalysis = async () => {
+                setHasFetchedInitial(true);
+                setIsLoading(true);
+                try {
+                    const response = await fetch(`${API_URL}/api/chat`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            ticker: context.ticker,
+                            price: context.price,
+                            hmm_state: context.hmm_state,
+                            impulse_state: context.impulse_state,
+                            rvol: context.rvol || "No disponible",
+                            verdict: context.verdict || "No disponible",
+                            user_query: "El usuario acaba de abrir el asistente. Haz un resumen narrativo de tu análisis técnico para este activo usando tus datos. Escribe 2 o 3 párrafos como máximo. Comenta expresamente el estado de la tendencia, el Volumen Relativo (RVOL) actual, y el veredicto del sistema o hacia dónde apunta la predicción a corto plazo. Finaliza con una invitación amigable a hacer preguntas."
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.detail || 'Error en la respuesta');
+
+                    setMessages([{ role: 'assistant', content: data.response }]);
+                } catch (error) {
+                    console.error('Chat Error:', error);
+                    setMessages([{ role: 'assistant', content: '⚠️ Lo siento, tuve un problema al conectar con el cerebro de la IA.' }]);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+            fetchInitialAnalysis();
+        }
+    }, [isOpen, hasFetchedInitial, context, API_URL]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -46,6 +80,8 @@ export const ChatWidget = ({ context }) => {
                     price: context.price,
                     hmm_state: context.hmm_state,
                     impulse_state: context.impulse_state,
+                    rvol: context.rvol || "No disponible",
+                    verdict: context.verdict || "No disponible",
                     user_query: userMsg
                 })
             });

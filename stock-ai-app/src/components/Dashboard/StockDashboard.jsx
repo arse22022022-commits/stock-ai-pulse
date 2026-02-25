@@ -16,6 +16,8 @@ export const StockDashboard = ({ ticker, metrics, data, loading }) => {
         price: metrics.price,
         hmm_state: regRet.label, // "Alcista", "Estable", etc.
         impulse_state: regDiff.label,
+        rvol: recommendation?.rvol,
+        verdict: recommendation?.verdict,
     };
 
     return (
@@ -30,7 +32,7 @@ export const StockDashboard = ({ ticker, metrics, data, loading }) => {
                                 {currencySymbol}{metrics.price ? metrics.price.toFixed(2) : '0.00'}
                             </h2>
                             <span style={{ color: (metrics.changePct || 0) >= 0 ? '#10b981' : '#ef4444', fontWeight: 600 }}>
-                                {(metrics.changePct || 0) >= 0 ? '+' : ''}{(metrics.changePct || 0).toFixed(2)}%
+                                {(metrics.changePct || 0) >= 0 ? '+' : ''}{(metrics.changePct ?? 0).toFixed(2)}%
                             </span>
                         </div>
                     </div>
@@ -46,7 +48,7 @@ export const StockDashboard = ({ ticker, metrics, data, loading }) => {
                                 R/R Actual: {(metrics.stateStatsRet.find(s => s.regime === metrics.currentRegime)?.ratio_rr || 0).toFixed(2)}
                             </span>
                         )}
-                        {recommendation?.rvol != null && (
+                        {recommendation?.rvol != null && !isNaN(recommendation.rvol) && (
                             <span style={{ padding: '4px 12px', borderRadius: '20px', fontSize: '0.75rem', fontWeight: 600, backgroundColor: (recommendation.rvol > 1.5 ? '#10b981' : recommendation.rvol < 0.7 ? '#f87171' : '#94a3b8') + '20', color: recommendation.rvol > 1.5 ? '#10b981' : recommendation.rvol < 0.7 ? '#f87171' : '#cbd5e1', border: `1px solid ${(recommendation.rvol > 1.5 ? '#10b981' : recommendation.rvol < 0.7 ? '#f87171' : '#94a3b8')}40` }}>
                                 RVOL: {recommendation.rvol.toFixed(2)}
                             </span>

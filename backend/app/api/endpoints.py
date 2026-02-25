@@ -29,7 +29,7 @@ def sanitize_for_json(obj):
     return obj
 
 @router.get("/analyze/{ticker}")
-async def analyze_stock(ticker: str):
+async def analyze_stock(ticker: str, lite_mode: bool = False):
     if not validate_ticker(ticker):
         raise HTTPException(status_code=400, detail=f"Ticker inválido '{ticker}'.")
 
@@ -65,12 +65,15 @@ async def analyze_stock(ticker: str):
         last_price = float(data[price_col].iloc[-1])
         last_date = data.index[-1]
         
-        forecast_result = await llm_service.predict_async(
-            data[price_col].values, 
-            prediction_length=10, 
-            last_date=last_date, 
-            last_price=last_price
-        )
+        if lite_mode:
+            forecast_result = []
+        else:
+            forecast_result = await llm_service.predict_async(
+                data[price_col].values, 
+                prediction_length=10, 
+                last_date=last_date, 
+                last_price=last_price
+            )
         
         # 4. Recommendation
         ai_rec = generate_ai_recommendation(
@@ -90,12 +93,13 @@ async def analyze_stock(ticker: str):
 
         # Construct History
         history = []
-        for i in range(len(data)):
-            history.append({
-                "date": data.index[i].strftime("%Y-%m-%d"),
-                "price": float(data[price_col].iloc[i]),
-                "regime": int(regimes_ret[i])
-            })
+        if not lite_mode:
+            for i in range(len(data)):
+                history.append({
+                    "date": data.index[i].strftime("%Y-%m-%d"),
+                    "price": float(data[price_col].iloc[i]),
+                    "regime": int(regimes_ret[i])
+                })
 
         response_data = {
             "ticker": ticker,
@@ -131,7 +135,7 @@ async def analyze_portfolio(tickers: list[str]):
         tickers = tickers[:300] # Limit increased for composite indices
     
     # Run analyses in parallel!
-    tasks = [analyze_stock(ticker) for ticker in tickers]
+    tasks = [analyze_stock(ticker, lite_mode=True) for ticker in tickers]
     results = await asyncio.gather(*tasks, return_exceptions=True)
     
     valid_results = []

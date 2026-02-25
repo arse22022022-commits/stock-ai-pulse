@@ -71,6 +71,8 @@ class ChatRequest(BaseModel):
     price: float
     hmm_state: str
     impulse_state: str
+    rvol: str | float = "No disponible"
+    verdict: str = "No disponible"
     user_query: str
 
 class ChatResponse(BaseModel):
@@ -551,6 +553,8 @@ async def chat_endpoint(request: ChatRequest):
             "price": request.price,
             "hmm_state": request.hmm_state,
             "impulse_state": request.impulse_state,
+            "rvol": request.rvol,
+            "verdict": request.verdict,
             "user_query": request.user_query
         }
         

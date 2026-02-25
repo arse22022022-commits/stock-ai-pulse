@@ -194,6 +194,8 @@ class LLMService:
             **Contexto Técnico del Sistema:**
             *   **Régimen de Tendencia (HMM):** {request_data.get('hmm_state')}
             *   **Impulso (Momentum):** {request_data.get('impulse_state')}
+            *   **Volumen Relativo (RVOL):** {request_data.get('rvol')}
+            *   **Veredicto IA / Previsión:** {request_data.get('verdict')}
             
             **REGLAS ESTRICTAS DE FORMATO:**
             1.  Responde SIEMPRE estructurando visualmente tu texto.
