@@ -346,10 +346,10 @@ async def analyze_stock(ticker: str, request: Request):
             smoothed_score=smoothed_scores[-1]
         )
         
-        # Calcular Ratio Rentabilidad/Riesgo del ticker (periodo anual)
-        mean_ret = data['Returns'].mean()
-        std_ret = data['Returns'].std()
-        risk_reward_ratio = float(mean_ret / std_ret) if std_ret != 0 else 0.0
+        # Calcular Ratio Rentabilidad/Riesgo del ticker (basado en el régimen actual del Pilar 1)
+        current_regime_id = int(regimes_ret[-1])
+        current_stats = next((s for s in final_ret_stats if s['regime'] == current_regime_id), {"ratio_rr": 0.0})
+        risk_reward_ratio = float(current_stats.get("ratio_rr", 0.0))
 
         # Calculate total processing time
         total_time = time.time() - start_time

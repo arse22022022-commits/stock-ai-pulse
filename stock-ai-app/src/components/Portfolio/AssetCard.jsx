@@ -34,8 +34,8 @@ export const AssetCard = ({ asset, onClick }) => {
                         μ: {Number(asset.state_stats_ret?.find(s => s.regime === asset.current_regime_ret)?.mean || 0).toFixed(3)}%
                     </span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '6px 10px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
-                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: '#cbd5e1' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '6px 10px', borderRadius: '8px', background: (Number(asset.state_stats_diff?.find(s => s.regime === asset.current_regime_diff)?.mean || 0) < 0 ? '#f87171' : getRegime(asset.current_regime_diff).color) + '15', border: `1px solid ${(Number(asset.state_stats_diff?.find(s => s.regime === asset.current_regime_diff)?.mean || 0) < 0 ? '#f87171' : getRegime(asset.current_regime_diff).color)}30` }}>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: (Number(asset.state_stats_diff?.find(s => s.regime === asset.current_regime_diff)?.mean || 0) < 0 ? '#f87171' : getRegime(asset.current_regime_diff).color) }}>
                         IMP: {getRegime(asset.current_regime_diff).label}
                     </span>
                     <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
@@ -48,6 +48,14 @@ export const AssetCard = ({ asset, onClick }) => {
                     </span>
                     <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
                         VOL: {asset.recommendation?.rvol != null ? asset.recommendation.rvol.toFixed(2) : 'N/A'}
+                    </span>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '6px 10px', borderRadius: '8px', background: (asset.risk_reward_ratio > 1.2 ? '#10b981' : asset.risk_reward_ratio > 0.4 ? '#38bdf8' : asset.risk_reward_ratio > 0 ? '#94a3b8' : '#f87171') + '15', border: `1px solid ${(asset.risk_reward_ratio > 1.2 ? '#10b981' : asset.risk_reward_ratio > 0.4 ? '#38bdf8' : asset.risk_reward_ratio > 0 ? '#94a3b8' : '#f87171')}30` }}>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, color: (asset.risk_reward_ratio > 1.2 ? '#10b981' : asset.risk_reward_ratio > 0.4 ? '#38bdf8' : asset.risk_reward_ratio > 0 ? '#cbd5e1' : '#f87171') }}>
+                        R/R
+                    </span>
+                    <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>
+                        VAL: {asset.risk_reward_ratio != null ? asset.risk_reward_ratio.toFixed(2) : 'N/A'}
                     </span>
                 </div>
             </div>

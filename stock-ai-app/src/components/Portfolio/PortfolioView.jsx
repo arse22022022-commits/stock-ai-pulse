@@ -114,9 +114,9 @@ export const PortfolioView = ({
                                             return scoreB - scoreA;
                                         }
 
-                                        const meanA = a?.state_stats_ret?.find(s => s.regime === a.current_regime_ret)?.mean || 0;
-                                        const meanB = b?.state_stats_ret?.find(s => s.regime === b.current_regime_ret)?.mean || 0;
-                                        return meanB - meanA;
+                                        const rrA = a?.risk_reward_ratio || 0;
+                                        const rrB = b?.risk_reward_ratio || 0;
+                                        return rrB - rrA;
                                     })
                                     .map(asset => (
                                         <AssetCard

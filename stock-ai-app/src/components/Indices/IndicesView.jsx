@@ -90,10 +90,10 @@ export const IndicesView = ({
                             <div className="asset-grid">
                                 {indicesData.assets
                                     .filter(a => a.recommendation?.verdict === 'COMPRA FUERTE')
-                                    .sort((a, b) => { // Sort by HMM Mean Descending
-                                        const meanA = a.state_stats_ret?.find(s => s.regime === a.current_regime_ret)?.mean || 0;
-                                        const meanB = b.state_stats_ret?.find(s => s.regime === b.current_regime_ret)?.mean || 0;
-                                        return meanB - meanA;
+                                    .sort((a, b) => { // Sort by R/R Descending
+                                        const rrA = a.risk_reward_ratio || 0;
+                                        const rrB = b.risk_reward_ratio || 0;
+                                        return rrB - rrA;
                                     })
                                     .map(asset => (
                                         <AssetCard
