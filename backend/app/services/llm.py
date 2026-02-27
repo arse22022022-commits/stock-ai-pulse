@@ -21,24 +21,38 @@ class LLMService:
         self.enabled = False
         self.lock = threading.Lock()
         self._portfolio_cache = {}
-        self._load_model()
+        # We no longer call _load_model here to allow lazy initialization
+        # after environment variables are loaded.
 
     def _load_model(self):
-        try:
-            api_key = os.getenv("GOOGLE_API_KEY")
-            if not api_key:
-                logger.warning("GOOGLE_API_KEY not found in environment. LLM will use statistical fallback.")
-                self.enabled = False
-                return
+        """Internal method to load the Gemini client. Can be called multiple times safely."""
+        with self.lock:
+            if self.enabled and self.client:
+                return True
 
-            self.client = genai.Client(api_key=api_key)
-            # Default to gemini-2.5-flash-lite-preview-09-2025 to bypass the 20/day limit on standard 2.5 & the 404 on 1.5 
-            self.model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash-lite-preview-09-2025")
-            self.enabled = True
-            logger.info(f"{self.model_name} initialized successfully via GenAI SDK")
-        except Exception as e:
-            logger.error(f"Failed to initialize GenAI Client: {str(e)}", exc_info=True)
-            self.enabled = False
+            try:
+                api_key = os.getenv("GOOGLE_API_KEY")
+                if not api_key:
+                    logger.warning("GOOGLE_API_KEY not found in environment. LLM will use statistical fallback.")
+                    self.enabled = False
+                    return False
+
+                self.client = genai.Client(api_key=api_key)
+                # Default to gemini-2.0-flash as the most stable current option
+                self.model_name = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+                self.enabled = True
+                logger.info(f"Gemini {self.model_name} initialized successfully via GenAI SDK")
+                return True
+            except Exception as e:
+                logger.error(f"Failed to initialize GenAI Client: {str(e)}", exc_info=True)
+                self.enabled = False
+                return False
+
+    def is_active(self):
+        """Check if LLM is active, attempting to load if not yet initialized."""
+        if not self.enabled:
+            return self._load_model()
+        return True
 
     async def predict(self, data_series: np.ndarray, prediction_length: int = 10, last_date=None, last_price=0.0):
         """
@@ -104,7 +118,7 @@ class LLMService:
             "score": 0.0
         }
 
-        if not self.enabled or not self.client:
+        if not self.is_active() or not self.client:
             return fallback_response
 
         # Build deterministic cache key
@@ -178,7 +192,7 @@ class LLMService:
         Generates a financial explanation using Gemini based on the provided market context.
         Replaces the old Groq-based implementation.
         """
-        if not self.enabled or not self.client:
+        if not self.is_active() or not self.client:
              return (
                  f"🔒 **MODO DEMO** (IA Desactivada)\n\n"
                  f"Como analista virtual, veo que {request_data.get('ticker')} está en un régimen **{request_data.get('hmm_state')}** "

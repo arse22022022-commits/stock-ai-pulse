@@ -224,7 +224,16 @@ async def analyze_portfolio(tickers: list[str]):
 @router.post("/chat", response_model=ChatResponse)
 async def chat_endpoint(request: ChatRequest):
     try:
-        response_text = await generate_market_explanation(request)
+        # Prepare context data for Gemini
+        context = {
+            "ticker": request.ticker,
+            "price": request.price,
+            "hmm_state": request.hmm_state,
+            "impulse_state": request.impulse_state,
+            "user_query": request.user_query
+        }
+        
+        response_text = await llm_service.generate_market_explanation_async(context)
         return ChatResponse(response=response_text)
     except Exception as e:
         logger.error(f"Error in chat endpoint: {e}")
