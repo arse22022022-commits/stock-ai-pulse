@@ -32,7 +32,18 @@ Mira hacia el futuro con la capacidad de razonamiento de Gemini 3.1 Pro.
 
 ---
 
-## 2. Veredictos y Criterios 🎯
+## 2. La Estabilidad del Veredicto (Modelo de Histéresis) 🛡️
+
+Para evitar que el color del gráfico cambie constantemente por pequeños ruidos diarios, el sistema aplica un "Modelo de Histéresis" a la puntuación total:
+
+- **Puerta de Entrada alta**: Para que un activo cambie de estado a **COMPRA**, el sistema exige que la fuerza impulsora rompa un "techo" de seguridad (un score de **65** sobre 100).
+- **Puerta de Salida baja**: Una vez que el activo entra en el estado de "COMPRA", el modelo de histéresis lo mantiene ahí, tolerando retrocesos normales de mercado. No te sacará de "COMPRA" hasta que el score caiga por debajo de **50**.
+
+*Esto crea bloques de color sólidos en la gráfica y evita el peligroso "parpadeo visual" (entrar y salir constantemente de la acción).*
+
+---
+
+## 3. Veredictos y Criterios 🎯
 
 La suma de los puntos anteriores genera el veredicto final:
 
@@ -46,7 +57,7 @@ La suma de los puntos anteriores genera el veredicto final:
 
 ---
 
-## 3. Glosario de Justificaciones 🗣️
+## 4. Glosario de Justificaciones 🗣️
 
 Aquí explicamos el significado exacto de las frases que utiliza la IA para justificar su recomendación:
 
@@ -60,7 +71,7 @@ Aquí explicamos el significado exacto de las frases que utiliza la IA para just
 
 ---
 
-## 4. Diccionario de Alertas de la IA 🔍
+## 5. Diccionario de Alertas de la IA 🔍
 
 Cuando el sistema detecta una anomalía, añade una nota entre paréntesis. Aquí explicamos qué significan y qué acción tomar:
 
@@ -75,7 +86,7 @@ Cuando el sistema detecta una anomalía, añade una nota entre paréntesis. Aqu�
 
 ---
 
-## 5. Consejos de Uso Práctico
+## 6. Consejos de Uso Práctico
 
 1.  **Confirma la Inercia**: Un "Impulso consolidado" (Estado HMM estable) es mucho más fiable que uno que cambia cada día.
 2.  **Mira las Probabilidades**: En el panel lateral, si el estado actual tiene una probabilidad cercana al **90-100%**, la señal es muy robusta. Si está cerca del 50-60%, el mercado está indeciso.
@@ -86,7 +97,7 @@ Cuando el sistema detecta una anomalía, añade una nota entre paréntesis. Aqu�
 
 ---
 
-## 6. Índices Globales y Filtrado 🌍
+## 7. Índices Globales y Filtrado 🌍
 
 La nueva sección de **Índices Globales** permite analizar mercados completos (IBEX 35, DAX 40, NASDAQ 100, etc.) en busca de oportunidades.
 
@@ -99,7 +110,7 @@ Al seleccionar un índice, el sistema analiza **todos** sus componentes pero **s
 
 ---
 
-## 7. Analyst AI (Chat Financiero) 🤖💬
+## 8. Analyst AI (Chat Financiero) 🤖💬
 
 El sistema incluye un **Analista Virtual** basado en Google Gemini 1.5 Pro (con respaldo técnico de Chronos). Puedes preguntarle sobre cualquier activo analizado.
 
@@ -112,18 +123,9 @@ El sistema incluye un **Analista Virtual** basado en Google Gemini 1.5 Pro (con 
 
 ---
 
-## 8. Estabilidad y "Reflejos" 🛡️🏁
+## 9. Flash Correction (Reflejos Rápidos) 🏁
 
-Hemos implementado dos sistemas críticos para garantizar que la IA sea fiable:
-
-### A. Histéresis de Estado (Estabilidad)
-Para evitar que el color del gráfico cambie constantemente por pequeños ruidos:
-- **Puerta de Entrada**: Para entrar en "Compra", el sistema exige un score de **65**.
-- **Puerta de Salida**: Una vez dentro, no se sale de "Compra" hasta que el score baja de **50**.
-*Esto crea bloques de color sólidos y evita el parpadeo visual.*
-
-### B. Flash Correction (Respuesta Rápida)
-Aunque el sistema es estable, no es ciego. Posee **"reflejos ante el pánico"**:
+Aunque el sistema de histéresis es muy estable, no es ciego. Posee **"reflejos ante el pánico"**:
 - **Crash Detection**: Si el precio cae >2.5% con volumen, el sistema activa el veredicto de **Venta/Mantener inmediatamente**, ignorando la inercia alcista previa.
 - **EMA-10 Check**: Si el precio rompe su tendencia de corto plazo (Media 10 días), se aplica una penalización del 15% al score.
 
