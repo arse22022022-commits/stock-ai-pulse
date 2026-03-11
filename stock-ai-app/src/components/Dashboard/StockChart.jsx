@@ -73,11 +73,17 @@ export const StockChart = ({ data, currencySymbol, loading }) => {
 
     return (
         <div style={{ width: '100%', position: 'relative' }}>
-            {loading && (
+            {/* Only show blocking overlay if there is NO data yet (first load) */}
+            {loading && data.length === 0 && (
                 <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(2, 6, 23, 0.6)', borderRadius: '12px', zIndex: 10 }}>
                     <div style={{ width: '40px', height: '40px', border: '4px solid #38bdf8', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
                 </div>
             )}
+            {/* Subtle indicator when refreshing with existing data */}
+            {loading && data.length > 0 && (
+                <div style={{ position: 'absolute', top: '8px', right: '8px', width: '10px', height: '10px', borderRadius: '50%', background: '#38bdf8', animation: 'spin 1s linear infinite', zIndex: 10, border: '2px solid #38bdf830' }} />
+            )}
+
 
             {/* Price Chart */}
             <div style={{ height: '350px', width: '100%' }}>

@@ -1,11 +1,14 @@
 import numpy as np
 import pandas as pd
 from hmmlearn import hmm
+import logging
+
+logger = logging.getLogger(__name__)
 
 # --- HMM TRAINING CONFIGURATION ---
 HMM_COMPONENTS = 3
-HMM_COVARIANCE = "full"
-HMM_ITERATIONS = 1000
+HMM_COVARIANCE = "diag"
+HMM_ITERATIONS = 100  # 100 iterations is sufficient for convergence with 3 components
 HMM_RANDOM_STATE = 42
 
 # --- SCORING THRESHOLDS ---
@@ -27,9 +30,27 @@ SHORT_TERM_WINDOW = 10   # Ventana para tendencia rápida
 
 def train_hmm_returns(data: pd.DataFrame):
     """Train HMM on Returns data"""
-    returns_data = data[['Returns']].values
-    model_ret = hmm.GaussianHMM(n_components=HMM_COMPONENTS, covariance_type=HMM_COVARIANCE, n_iter=HMM_ITERATIONS, random_state=HMM_RANDOM_STATE)
-    model_ret.fit(returns_data)
+    returns_data = data[['Returns']].values.astype(np.float64)
+    # Emergency sanitization: enforce finiteness before HMM fit
+    if not np.isfinite(returns_data).all():
+        returns_data = np.nan_to_num(returns_data, nan=0.0, posinf=0.0, neginf=0.0)
+    
+    model_ret = hmm.GaussianHMM(
+        n_components=HMM_COMPONENTS, 
+        covariance_type=HMM_COVARIANCE, 
+        n_iter=HMM_ITERATIONS, 
+        random_state=HMM_RANDOM_STATE,
+        min_covar=1e-3
+    )
+    try:
+        model_ret.fit(returns_data)
+    except ValueError as e:
+        logger.error(f"HMM_ERROR_DEBUG: {e}")
+        logger.error(f"DATA_SAMPLES FIRST: {returns_data[:5].tolist()}")
+        logger.error(f"DATA_SAMPLES LAST: {returns_data[-5:].tolist()}")
+        logger.error(f"IS_FINITE: {np.isfinite(returns_data).all()}")
+        raise e
+    
     raw_regimes_ret = model_ret.predict(returns_data)
     raw_probs_ret = model_ret.predict_proba(returns_data)
     
@@ -62,7 +83,15 @@ def train_hmm_returns(data: pd.DataFrame):
         if not r.empty:
             m = float(r.mean() * 100)
             s = float(r.std() * 100)
-            ratio = m / s if s != 0 else 0.0
+            # Safe ratio calculation (avoid Inf/NaN)
+            if np.isnan(s) or s == 0:
+                ratio = 0.0
+                s = 0.0
+            else:
+                ratio = float(m / s)
+            
+            if np.isnan(m): m = 0.0
+            
             final_ret_stats.append({"regime": i, "mean": m, "std": s, "ratio_rr": ratio})
         else:
             final_ret_stats.append({"regime": i, "mean": 0.0, "std": 0.0, "ratio_rr": 0.0})
@@ -71,10 +100,30 @@ def train_hmm_returns(data: pd.DataFrame):
 
 def train_hmm_diff(data: pd.DataFrame):
     """Train HMM on Diff_Returns data"""
-    diff_data = data[['Diff_Returns']].values
-    model_diff = hmm.GaussianHMM(n_components=HMM_COMPONENTS, covariance_type=HMM_COVARIANCE, n_iter=HMM_ITERATIONS, random_state=HMM_RANDOM_STATE)
-    model_diff.fit(diff_data)
+    diff_data = data[['Diff_Returns']].values.astype(np.float64)
+    # Emergency sanitization: enforce finiteness before HMM fit
+    if not np.isfinite(diff_data).all():
+        diff_data = np.nan_to_num(diff_data, nan=0.0, posinf=0.0, neginf=0.0)
+
+    # Added min_covar for mathematical stability
+    model_diff = hmm.GaussianHMM(
+        n_components=HMM_COMPONENTS, 
+        covariance_type=HMM_COVARIANCE, 
+        n_iter=HMM_ITERATIONS, 
+        random_state=HMM_RANDOM_STATE,
+        min_covar=1e-3
+    )
+    try:
+        model_diff.fit(diff_data)
+    except ValueError as e:
+        logger.error(f"HMM_DIFF_ERROR_DEBUG: {e}")
+        logger.error(f"DIFF_DATA_SAMPLES FIRST: {diff_data[:5].tolist()}")
+        logger.error(f"DIFF_DATA_SAMPLES LAST: {diff_data[-5:].tolist()}")
+        logger.error(f"IS_DIFF_FINITE: {np.isfinite(diff_data).all()}")
+        raise e
+    
     raw_regimes_diff = model_diff.predict(diff_data)
+
     raw_probs_diff = model_diff.predict_proba(diff_data)
     
     diff_stats_raw = []
@@ -185,7 +234,11 @@ def _calculate_score(data_slice, last_reg_ret, last_reg_diff, ret_stats, diff_st
     final_score = (structure_score * 0.6) + (momentum_score * 0.2) + (projection_score * 0.2)
     final_score *= panic_penalty # Aplicar reflejos de protección
     
-    return final_score, last_rvol, rr_ratio, impulse_mean, forecast_trend
+    # FINAL SAFETY CHECK: Ensure score is finite
+    if not np.isfinite(final_score):
+        final_score = 50.0 # Neutral fallback
+    
+    return float(final_score), float(last_rvol), float(rr_ratio), float(impulse_mean), forecast_trend
 
 
 def generate_ai_recommendation(data, reg_ret, reg_diff, probs_ret, probs_diff, forecast, ret_stats, diff_stats, stable_state=0, smoothed_score=50.0):

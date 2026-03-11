@@ -5,9 +5,8 @@ import json
 import asyncio
 import numpy as np
 
-# Nuevo SDK v2 de Google
-from google import genai
-from google.genai import types
+# Cliente Groq
+from groq import AsyncGroq
 
 from datetime import timedelta
 from .chronos import chronos_service
@@ -31,20 +30,19 @@ class LLMService:
                 return True
 
             try:
-                api_key = os.getenv("GOOGLE_API_KEY")
+                api_key = os.getenv("GROQ_API_KEY")
                 if not api_key:
-                    logger.warning("GOOGLE_API_KEY not found in environment. LLM will use statistical fallback.")
+                    logger.warning("GROQ_API_KEY not found in environment. LLM will use statistical fallback.")
                     self.enabled = False
                     return False
 
-                self.client = genai.Client(api_key=api_key)
-                # Default to gemini-2.0-flash as the most stable current option
-                self.model_name = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+                self.client = AsyncGroq(api_key=api_key)
+                self.model_name = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
                 self.enabled = True
-                logger.info(f"Gemini {self.model_name} initialized successfully via GenAI SDK")
+                logger.info(f"Groq {self.model_name} initialized successfully.")
                 return True
             except Exception as e:
-                logger.error(f"Failed to initialize GenAI Client: {str(e)}", exc_info=True)
+                logger.error(f"Failed to initialize Groq Client: {str(e)}", exc_info=True)
                 self.enabled = False
                 return False
 
@@ -61,9 +59,20 @@ class LLMService:
         """
         
         # Fallback 1: Chronos (Local Transformer-based Time Series Model)
+        # IMPORTANT: chronos_service.predict() is SYNCHRONOUS (PyTorch CPU inference).
+        # We MUST run it in an executor to avoid blocking the asyncio event loop,
+        # which would cause deadlocks when concurrent requests arrive.
         if chronos_service.enabled:
-            logger.info("Using Chronos as high-fidelity fallback.")
-            chronos_pred = chronos_service.predict(data_series[-60:], prediction_length)
+            logger.info("Using Chronos as high-fidelity fallback (via executor).")
+            loop = asyncio.get_running_loop()
+            from concurrent.futures import ThreadPoolExecutor
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                chronos_pred = await loop.run_in_executor(
+                    executor,
+                    chronos_service.predict,
+                    data_series[-60:],
+                    prediction_length
+                )
             
             if chronos_pred:
                 forecast_result = []
@@ -100,6 +109,7 @@ class LLMService:
             
         return forecast_result
 
+
     async def predict_async(self, data_series: np.ndarray, prediction_length: int = 10, last_date=None, last_price=0.0):
         """
         Wrapper as we still use this natively
@@ -127,46 +137,45 @@ class LLMService:
         cache_key = hashlib.md5(stats_str.encode('utf-8')).hexdigest()
         
         if cache_key in self._portfolio_cache:
-            logger.info("Retrieved Portfolio Gemini analysis from deterministic MD5 Cache.")
+            logger.info("Retrieved Portfolio Groq analysis from deterministic MD5 Cache.")
             return self._portfolio_cache[cache_key]
 
         # Build prompt using the stats
         prompt = f"""
-        Actúa como un gestor de fondos de alto nivel. Analiza el siguiente resumen cuantitativo de una cartera de activos e ignora que eres una IA:
+        Actúa como un Gestor de Fondos de Inversión Senior especializado en regímenes de mercado. 
+        Analiza el siguiente resumen cuantitativo de una cartera e ignora que eres una IA:
         
-        - Número total de activos: {portfolio_stats.get('total_assets', 0)}
-        - Activos en régimen ALCISTA (HMM): {portfolio_stats.get('bullish_count', 0)} ({portfolio_stats.get('bullish_ratio', 0):.1f}%)
-        - Activos en régimen VOLÁTIL/BAJISTA (HMM): {portfolio_stats.get('volatile_count', 0)} ({portfolio_stats.get('risk_ratio', 0):.1f}%)
-        - Activos en régimen ESTABLE (HMM): {portfolio_stats.get('stable_count', 0)}
-
+        - Activos Totales: {portfolio_stats.get('total_assets', 0)}
+        - Régimen ALCISTA (HMM): {portfolio_stats.get('bullish_count', 0)} ({portfolio_stats.get('bullish_ratio', 0):.1f}%)
+        - Régimen VOLÁTIL/BAJISTA (HMM): {portfolio_stats.get('volatile_count', 0)} ({portfolio_stats.get('risk_ratio', 0):.1f}%)
+        - Régimen ESTABLE (HMM): {portfolio_stats.get('stable_count', 0)}
+        
         Tu tarea:
-        1. Emite un 'verdict' muy corto (2 a 4 palabras máximo, en mayúsculas). Ejemplos: "CRECIMIENTO SÓLIDO", "RIESGO ELEVADO", "DEFENSIVA", "INCERTIDUMBRE LATENTE".
-        2. Escribe una 'reason' (explicación breve de máximo 25 palabras). Debe sonar profesional indicando la conclusión sobre la inercia actual y el riesgo.
-        3. Determina un 'color' hexadecimal que represente el estado (verde para bueno/sano, amarillo/naranja para precaución, rojo para peligro).
-        4. Calcula un 'score' del 0 al 100 de la salud global de la cartera.
+        1. Emite un 'verdict' IMPACTANTE y PROFESIONAL (2 a 4 palabras). Ejemplos: "EQUILIBRIO SALUDABLE", "CONSOLIDACIÓN ESTRUCTURAL", "RIESGO DE CAPITULACIÓN", "MOMENTUM DOMINANTE".
+        2. Escribe una 'reason' sofisticada de aproximadamente 40-50 palabras. Analiza la inercia del conjunto, la calidad de la diversificación por regímenes y proyecta una conclusión táctica sobre el riesgo actual.
+        3. Determina un 'color' hexadecimal representativo: Verde (#10b981), Amarillo/Naranja (#f59e0b) o Rojo (#ef4444).
+        4. Calcula un 'score' (0-100) que refleje la armonía técnica de la cartera.
 
-        Debes responder ESTRICTAMENTE con un objeto JSON válido con las claves: "verdict", "reason", "color", "score" (como número). NO añadas markdown de código, asegúrate de que sea 100% parseable por json.loads.
+        Responde ESTRICTAMENTE en JSON: {{"verdict": "...", "reason": "...", "color": "...", "score": 85}}
         """
 
         try:
-            # New async genai client format
             response = await asyncio.wait_for(
-                self.client.aio.models.generate_content(
+                self.client.chat.completions.create(
                     model=self.model_name,
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        response_mime_type="application/json",
-                        temperature=0.0,
-                        top_p=0.1,
-                        top_k=1
-                    )
+                    messages=[
+                        {"role": "system", "content": "You are a helpful assistant that outputs JSON."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.0,
+                    response_format={"type": "json_object"}
                 ),
                 timeout=25.0
             )
             
-            logger.info("Portfolio Gemini analysis generated successfully.")
+            logger.info("Portfolio Groq analysis generated successfully.")
             
-            res_dict = json.loads(response.text)
+            res_dict = json.loads(response.choices[0].message.content)
             
             # Type casting to ensure rigid contract
             final_result = {
@@ -184,13 +193,13 @@ class LLMService:
             return final_result
             
         except Exception as e:
-            logger.error(f"Failed to generate Gemini Portfolio Analysis: {e}", exc_info=True)
+            logger.error(f"Failed to generate Groq Portfolio Analysis: {e}", exc_info=True)
             return fallback_response
 
     async def generate_market_explanation_async(self, request_data: dict) -> str:
         """
-        Generates a financial explanation using Gemini based on the provided market context.
-        Replaces the old Groq-based implementation.
+        Generates a financial explanation using Groq based on the provided market context.
+        Replaces the old Gemini-based implementation.
         """
         if not self.is_active() or not self.client:
              return (
@@ -201,14 +210,16 @@ class LLMService:
              )
 
         try:
+            price_fmt = f"{float(request_data.get('price', 0)):.2f}"
+            rvol_fmt = f"{float(request_data.get('rvol', 1.0)):.2f}x"
             prompt = f"""
             Actúa como un **Analista Financiero Senior de Wall Street** con 20 años de experiencia.
-            Estás analizando la acción **{request_data.get('ticker')}** que cotiza a **{request_data.get('price')}**.
+            Estás analizando la acción **{request_data.get('ticker')}** que cotiza a **{price_fmt}**.
             
             **Contexto Técnico del Sistema:**
             *   **Régimen de Tendencia (HMM):** {request_data.get('hmm_state')}
             *   **Impulso (Momentum):** {request_data.get('impulse_state')}
-            *   **Volumen Relativo (RVOL):** {request_data.get('rvol')}
+            *   **Volumen Relativo (RVOL):** {rvol_fmt}
             *   **Veredicto IA / Previsión:** {request_data.get('verdict')}
             
             **REGLAS ESTRICTAS DE FORMATO:**
@@ -224,23 +235,22 @@ class LLMService:
             """
 
             response = await asyncio.wait_for(
-                self.client.aio.models.generate_content(
+                self.client.chat.completions.create(
                     model=self.model_name,
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        temperature=0.3, # Un poco de temperatura para respuestas naturales en el chat
-                        top_p=0.8,
-                        top_k=40
-                    )
+                    messages=[
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.3,
+                    top_p=0.8
                 ),
                 timeout=20.0
             )
 
-            return response.text
+            return response.choices[0].message.content
 
         except Exception as e:
-            logger.error(f"Failed to generate Gemini Chat explanation: {e}", exc_info=True)
-            return f"⚠️ Error al conectar con la IA de Google: {str(e)}"
+            logger.error(f"Failed to generate Groq Chat explanation: {e}", exc_info=True)
+            return f"⚠️ Error al conectar con la IA de Groq: {str(e)}"
 
 # Global instance
 llm_service = LLMService()

@@ -15,6 +15,8 @@ class ChatRequest(BaseModel):
     hmm_state: str
     impulse_state: str
     user_query: str
+    rvol: float = 1.0   # frontend sends as number
+    verdict: str = "No disponible"
 
 class ChatResponse(BaseModel):
     response: str
@@ -39,6 +41,7 @@ async def generate_market_explanation(request: ChatRequest) -> str:
         client = Groq(api_key=GROQ_API_KEY)
         
         # System Prompt Engineering
+        rvol_str = f"{request.rvol:.2f}x" if isinstance(request.rvol, float) else str(request.rvol)
         system_prompt = f"""
         Actúa como un **Analista Financiero Senior de Wall Street** con 20 años de experiencia.
         Estás analizando la acción **{request.ticker}** que cotiza a **{request.price}**.
@@ -46,14 +49,17 @@ async def generate_market_explanation(request: ChatRequest) -> str:
         **Datos Técnicos del Sistema:**
         *   **Régimen de Tendencia (HMM - Hidden Markov Model):** {request.hmm_state}
         *   **Régimen de Impulso (Momentum):** {request.impulse_state}
+        *   **Volumen Relativo (RVOL):** {rvol_str}
+        *   **Veredicto IA / Previsión Chronos:** {request.verdict}
         
         **Instrucciones:**
         1.  Responde en **Español**.
         2.  Sé directo, profesional pero accesible (como a un cliente de banca privada).
-        3.  Explica qué significan los regímenes HMM (Hidden Markov Model) e Impulso en este contexto específico.
+        3.  Explica qué significan los regímenes HMM e Impulso en este contexto específico.
         4.  Si el HMM es Alcista pero el Impulso es Volátil/Bajista, advierte del riesgo (divergencia).
-        5.  No des consejos de inversión explícitos, sino interpretación analítica.
-        6.  Usa emojis con moderación para destacar puntos clave.
+        5.  Menciona expresamente el Veredicto IA y el RVOL en tu análisis.
+        6.  No des consejos de inversión explícitos, sino interpretación analítica.
+        7.  Usa emojis con moderación para destacar puntos clave.
         """
 
         # Run synchronous Groq call in thread pool to prevent blocking main loop

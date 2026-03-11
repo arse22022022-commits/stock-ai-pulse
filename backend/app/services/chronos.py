@@ -40,7 +40,9 @@ class ChronosService:
         
         try:
             # Prepare context for Chronos (needs a tensor)
-            context = torch.tensor(data_series)
+            # FORCE FINITE: extreme safety for tickers like EOAN.DE
+            clean_data = np.nan_to_num(data_series.astype(np.float32), nan=0.0, posinf=0.0, neginf=0.0)
+            context = torch.tensor(clean_data)
             
             # Generate forecast
             # IMPORTANT: Ensure no threading conflicts during prediction
@@ -49,16 +51,23 @@ class ChronosService:
             with torch.no_grad():
                 forecast = self.pipeline.predict(context, prediction_length)
             
+            logger.info(f"CHRONOSDEBUG: Forecast shape: {forecast.shape}, Requested: {prediction_length}")
+            
             # forecast shape is [num_series, prediction_length, num_samples/percentiles]
-            # amazon/chronos-t5-tiny returns 3 percentiles: 0.1, 0.5, 0.9
             median = forecast[0, :, 1].numpy()
             low = forecast[0, :, 0].numpy()
             high = forecast[0, :, 2].numpy()
             
+            # Ensure we only return the requested length exactly
+            # Some model versions or configurations might return more steps
+            res_prices = [float(p) for p in median][:prediction_length]
+            res_lows = [float(p) for p in low][:prediction_length]
+            res_highs = [float(p) for p in high][:prediction_length]
+            
             return {
-                "prices": [float(p) for p in median],
-                "lows": [float(p) for p in low],
-                "highs": [float(p) for p in high]
+                "prices": res_prices,
+                "lows": res_lows,
+                "highs": res_highs
             }
         except Exception as e:
             logger.error(f"Chronos prediction failed: {e}")

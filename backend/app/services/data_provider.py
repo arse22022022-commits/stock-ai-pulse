@@ -39,21 +39,50 @@ class DataProvider:
             if isinstance(data.columns, pd.MultiIndex):
                 data.columns = data.columns.get_level_values(0)
             
-            # Calculate returns and volume metrics
+            # 1. Clean Index: ensure it is a simple datetime index without TZs if possible
+            if data.index.tz is not None:
+                data.index = data.index.tz_localize(None)
+            
+            # 2. Basic cleaning: drop rows with all NaNs or empty
+            data = data.dropna(how='all')
+            if data.empty: return pd.DataFrame(), "USD"
+            
+            # 3. Handle Prices: ensure 'Close' exists and is numeric
             price_col = 'Close'
+            if price_col not in data.columns:
+                # Try to find it case-insensitive
+                matches = [c for c in data.columns if c.lower() == 'close']
+                if matches: price_col = matches[0]
+                else: return pd.DataFrame(), "USD"
+            
+            data[price_col] = pd.to_numeric(data[price_col], errors='coerce')
+            data = data[data[price_col] > 0.01].copy() # Ignore pennies/zero prices
+            
+            # 4. Calculate technical columns
             data['Returns'] = np.log(data[price_col] / data[price_col].shift(1))
             data['Diff_Returns'] = data['Returns'].diff()
             
-            # RVOL (Relative Volume) - 20 period average
+            # 5. Vol_SMA and RVOL
             data['Vol_SMA'] = data['Volume'].rolling(window=20).mean()
-            # Avoid division by zero and handle NaN
-            data['RVOL'] = (data['Volume'] / data['Vol_SMA']).replace([np.inf, -np.inf], np.nan).fillna(1.0)
+            # Safe RVOL calculation
+            data['RVOL'] = (data['Volume'] / data['Vol_SMA'])
             
-            # EMA 10 for structural break detection
-            data['EMA_10'] = data[price_col].ewm(span=10, adjust=False).mean().fillna(data[price_col].iloc[0])
+            # 6. EMA 10
+            data['EMA_10'] = data[price_col].ewm(span=10, adjust=False).mean()
             
-            data.dropna(inplace=True)
+            # 7. FINAL ULTRA-CLEANUP: Replace all non-finite (Inf, NaN) with a safe default or drop
+            # We target specific numeric columns that models use
+            numeric_cols = ['Close', 'Returns', 'Diff_Returns', 'Volume', 'RVOL', 'EMA_10']
+            for col in numeric_cols:
+                if col in data.columns:
+                    data[col] = data[col].replace([np.inf, -np.inf], np.nan)
             
+            data = data.dropna(subset=['Returns', 'Diff_Returns', 'RVOL']).copy()
+            
+            # Fill remaining with neutral values
+            if 'RVOL' in data.columns: data['RVOL'] = data['RVOL'].fillna(1.0)
+            
+            logger.info(f"DATADEBUG: {ticker} final shape: {data.shape}")
             return data, currency
             
         except Exception as e:
