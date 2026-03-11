@@ -41,5 +41,5 @@ ENV PORT=8080
 ENV PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 ENV OMP_NUM_THREADS=1
 
-# Run command
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8080"]
+# Run command using the new refactored entry point
+CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8080"]
