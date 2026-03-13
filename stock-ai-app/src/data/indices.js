@@ -69,13 +69,24 @@ const SP_100 = [
     'PLTR', 'UBER', 'PANW', 'BX'
 ];
 
+const EURO_STOXX_50 = [
+    'ADS.DE', 'AD.AS', 'AI.PA', 'AIR.PA', 'ALV.DE', 'ASML.AS', 'BAS.DE', 'BAYN.DE',
+    'BBVA.MC', 'BMW.DE', 'BNP.PA', 'CRH.IR', 'CS.PA', 'DG.PA', 'DTE.DE', 'ENEL.MI',
+    'ENI.MI', 'EL.PA', 'FLTR.IR', 'HER.PA', 'IBE.MC', 'ITX.MC', 'IFX.DE', 'ISP.MI',
+    'KER.PA', 'MBG.DE', 'MC.PA', 'MUV2.DE', 'OR.PA', 'PRY.MI', 'RI.PA', 'SAF.PA',
+    'SGO.PA', 'SAN.MC', 'SAP.DE', 'SIE.DE', 'STLAM.MI', 'STMPA.PA', 'TTE.PA', 'UCG.MI',
+    'UNA.AS', 'VIE.PA', 'VIV.PA', 'VOW3.DE', 'DHL.DE', 'FER.MC', 'HNR1.DE', 'LIN.DE',
+    'REE.MC', 'VNA.DE'
+];
+
 // Composite Indices (Deduped)
-const EUROPA = [...new Set([...IBEX_35, ...CAC_40, ...DAX_40, ...FTSE_MIB])];
+const EUROPA = [...new Set([...IBEX_35, ...CAC_40, ...DAX_40, ...FTSE_MIB, ...EURO_STOXX_50])];
 const USA = [...new Set([...DOW_JONES, ...NASDAQ_100, ...SP_100])];
 
 export const INDICES_CONSTITUENTS = {
     'Europa': EUROPA,
     'USA': USA,
+    'EURO STOXX 50': EURO_STOXX_50,
     'IBEX 35': IBEX_35,
     'CAC 40': CAC_40,
     'DAX 40': DAX_40,

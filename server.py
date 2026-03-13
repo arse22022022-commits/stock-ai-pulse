@@ -173,10 +173,13 @@ def train_hmms_combined(data: pd.DataFrame):
 @app.get("/health")
 async def health_check():
     """Health check endpoint to monitor server status"""
+    from backend.app.services.llm import llm_service
+    llm_active = llm_service.is_active()
     return {
         "status": "healthy",
         "chronos_loaded": pipeline is not None,
         "rate_limiting": RATE_LIMIT_ENABLED,
+        "llm_active": llm_active,
         "timestamp": datetime.now().isoformat()
     }
 

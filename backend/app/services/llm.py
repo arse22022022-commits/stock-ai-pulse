@@ -30,12 +30,20 @@ class LLMService:
                 return True
 
             try:
+                # Force reload of environment if not found
                 api_key = os.getenv("GROQ_API_KEY")
                 if not api_key:
-                    logger.warning("GROQ_API_KEY not found in environment. LLM will use statistical fallback.")
+                    # Try re-loading .env as a last resort
+                    from dotenv import load_dotenv
+                    load_dotenv()
+                    api_key = os.getenv("GROQ_API_KEY")
+
+                if not api_key:
+                    logger.warning("GROQ_API_KEY not found in environment after reload. LLM will use statistical fallback.")
                     self.enabled = False
                     return False
 
+                logger.info(f"GROQ_API_KEY found (prefix: {api_key[:6]}...). Initializing client.")
                 self.client = AsyncGroq(api_key=api_key)
                 self.model_name = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
                 self.enabled = True
