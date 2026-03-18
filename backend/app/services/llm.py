@@ -214,7 +214,7 @@ class LLMService:
                  f"🔒 **MODO DEMO** (IA Desactivada)\n\n"
                  f"Como analista virtual, veo que {request_data.get('ticker')} está en un régimen **{request_data.get('hmm_state')}** "
                  f"con un impulso **{request_data.get('impulse_state')}**.\n\n"
-                 f"📝 *Para obtener respuestas reales de la IA, asegúrate de configurar GOOGLE_API_KEY en el backend.*"
+                 f"📝 *Para obtener respuestas reales de la IA, asegúrate de configurar GROQ_API_KEY en el backend.*"
              )
 
         try:
