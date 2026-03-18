@@ -192,9 +192,11 @@ async def analyze_stock(ticker: str, lite_mode: bool = False):
         previous_price = float(data[price_col].iloc[-2])
         change_pct = ((last_price - previous_price) / previous_price) * 100
         
-        mean_ret = data['Returns'].mean()
-        std_ret = data['Returns'].std()
-        risk_reward_ratio = float(mean_ret / std_ret) if std_ret != 0 else 0.0
+        # Use the current regime's R/R ratio (consistent with server.py logic)
+        # Avoids the case where global 365-day mean is negative but the current regime is bullish
+        current_regime_id = int(regimes_ret[-1])
+        current_regime_stats = next((s for s in final_ret_stats if s['regime'] == current_regime_id), {"ratio_rr": 0.0})
+        risk_reward_ratio = float(current_regime_stats.get("ratio_rr", 0.0))
 
         history = []
         if not lite_mode:
